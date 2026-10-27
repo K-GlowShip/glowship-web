@@ -19,34 +19,38 @@ GlowShip 웹 클라이언트 저장소입니다.
 
 > 상태 관리, 라우팅, 스타일링, HTTP 클라이언트 등 세부 라이브러리는 개발환경 설정 시 결정합니다.
 
-## 예정 폴더 구조
+## 폴더 구조
+
+[FSD(Feature-Sliced Design)](https://fsd.how/kr/docs/get-started/overview/) 기반으로 구성합니다.
 
 ```
-glowship-web/
-├── .github/
-│   └── workflows/
-│       └── code-style.yml   # ESLint / Prettier 검사
-├── public/                  # 정적 파일
-├── src/
-│   ├── api/                 # 백엔드(glowship-server) API 호출 모듈
-│   ├── assets/              # 이미지, 폰트 등
-│   ├── components/          # 재사용 UI 컴포넌트
-│   ├── hooks/               # 커스텀 훅
-│   ├── pages/               # 페이지(라우트) 단위 컴포넌트
-│   ├── styles/              # 전역 스타일
-│   ├── utils/               # 공통 유틸 함수
-│   ├── App.jsx
-│   └── main.jsx
-├── .editorconfig
-├── .gitignore
-├── index.html
-├── package.json
-├── vite.config.js
-└── README.md
+src/
+├── app/            # 진입점, 라우팅, 공통 레이아웃, 전역 스타일
+├── pages/          # 화면 단위 (login, dashboard, delay-center 등)
+└── shared/
+    ├── api/        # axios 인스턴스, 백엔드 리소스별 요청 함수
+    ├── ui/         # Button, Badge, Table 등 공통 UI
+    ├── lib/        # 날짜 포맷 등 유틸
+    └── config/     # 환경변수
 ```
 
-> 위 구조는 초안이며, 개발환경 설정 시 확정합니다.
+> slice: `pages`, `features`, `entities` 아래의 화면·기능·도메인별 폴더 (예: `pages/dashboard`, `entities/delay-event`)
 
+### import 규칙
+
+- 위 layer는 아래 layer만 import합니다. (`app` → `pages` → `features` → `entities` → `shared`)
+- 같은 layer의 다른 slice는 import하지 않습니다. (`pages/dashboard`에서 `pages/delay-center` X)
+- slice는 `index.ts`를 통해서만 import합니다. (`@/entities/delay-event` O, `@/entities/delay-event/ui/DelayStatusBadge` X)
+
+### 코드 위치
+
+- 화면 코드는 해당 `pages/화면이름/`에 먼저 만듭니다.
+- 다른 화면에서도 같은 코드가 필요해지면 아래 폴더를 만들어 옮깁니다.
+  - `entities`: 도메인 데이터 표시
+  - `features`: 저장·선택·실행 같은 데이터 변경 행동
+
+코드를 어디에 만들지 헷갈리면 [폴더 구조 문서](docs/folder-structure.md)를 참고하세요.
+ 
 ## 개발환경
 
 개발환경 설정은 추후 진행 예정입니다. 설정이 완료되면 아래 내용을 채웁니다.
