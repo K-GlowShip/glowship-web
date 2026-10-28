@@ -15,9 +15,12 @@ GlowShip 웹 클라이언트 저장소입니다.
 
 - **React**: UI 라이브러리
 - **Vite**: 빌드 도구 및 개발 서버
+- **TypeScript**, **Tailwind CSS**
+- **React Router**, **axios**, **TanStack Query**
 - **ESLint / Prettier**: 코드 스타일 (GitHub Actions에서 검사)
+- **Steiger**: FSD 구조 검사
 
-> 상태 관리, 라우팅, 스타일링, HTTP 클라이언트 등 세부 라이브러리는 개발환경 설정 시 결정합니다.
+> 상태 관리(zustand), 검증(zod) 등은 필요할 때 추가합니다.
 
 ## 폴더 구조
 
@@ -53,12 +56,28 @@ src/
  
 ## 개발환경
 
-개발환경 설정은 추후 진행 예정입니다. 설정이 완료되면 아래 내용을 채웁니다.
+- Node.js 20.19 이상 (권장 22 LTS)
+- 패키지 매니저: [pnpm](https://pnpm.io/) (`package.json`의 `packageManager` 버전 사용)
 
-- Node.js 버전
-- 설치 및 실행 방법 (`npm install`, `npm run dev`)
-- 환경 변수 (`.env.example`)
-- 백엔드 API 연동 주소
+```bash
+pnpm install
+cp .env.example .env   # 환경 변수 설정
+pnpm dev
+```
+
+| 명령어 | 설명 |
+| --- | --- |
+| `pnpm dev` | 개발 서버 실행 |
+| `pnpm build` | 타입 검사 + 프로덕션 빌드 |
+| `pnpm lint` | ESLint 검사 |
+| `pnpm format` / `pnpm format:check` | Prettier 적용 / 검사 |
+| `pnpm steiger` | FSD 구조 검사 |
+
+### 환경 변수
+
+| 변수 | 설명 |
+| --- | --- |
+| `VITE_API_BASE_URL` | 백엔드 API 주소 (기본 `http://localhost:8000`) |
 
 ## 코드 스타일
 
