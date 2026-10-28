@@ -1,1 +1,28 @@
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 @import 'tailwindcss';
+
+@theme {
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+
+  --text-display: 2rem;
+  --text-display--line-height: 2.75rem;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.5rem;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 2rem;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.75rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.375rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.125rem;
+}
+
+@layer base {
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+}
