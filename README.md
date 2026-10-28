@@ -82,7 +82,6 @@ pnpm dev
 ## 코드 스타일
 
 `main`, `develop` 브랜치로의 push 및 Pull Request 시 GitHub Actions에서 ESLint와 Prettier로 검사합니다.
-`package.json`이 추가되기 전까지는 검사를 건너뜁니다.
 
 
 ## 작업 타입
