@@ -7,6 +7,51 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 
+  /* 색상: Figma GlowShip / Primitives, Semantic 기준 */
+  --color-primary-50: #f7f4fe;
+  --color-primary-100: #f1edfc;
+  --color-primary-200: #e7dfff;
+  --color-primary-300: #c9bcf3;
+  --color-primary-400: #a18de9;
+  --color-primary-500: #7562d9;
+  --color-primary-600: #5943b8;
+  --color-primary-700: #49349f;
+  --color-primary-800: #39267f;
+  --color-primary-900: #2b1c5d;
+  --color-primary: var(--color-primary-600);
+  --color-primary-foreground: #ffffff;
+
+  --color-rose-50: #fcf5f8;
+  --color-rose-100: #f6e7ef;
+  --color-rose-200: #eac7d9;
+  --color-rose-500: #b85d8a;
+  --color-rose-700: #853b61;
+
+  --color-background: #faf8fc;
+  --color-foreground: #252331;
+  --color-card: #ffffff;
+  --color-muted: #f1edfc;
+  --color-muted-foreground: #625e73;
+  --color-border: #e4dfed;
+  --color-input: #9590a4;
+  --color-disabled: #efecf3;
+  --color-disabled-foreground: #81798f;
+
+  --color-success: #176747;
+  --color-success-bg: #eaf6ef;
+  --color-warning: #8b520b;
+  --color-warning-bg: #fff4df;
+  --color-danger: #b3304b;
+  --color-danger-bg: #fdedf1;
+  --color-danger-hover: #98243d;
+  --color-danger-pressed: #791a30;
+  --color-info: #265ea8;
+  --color-info-bg: #ebf2fd;
+
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-panel: 1rem;
+
   --text-display: 2rem;
   --text-display--line-height: 2.75rem;
   --text-h1: 1.75rem;
@@ -24,7 +69,13 @@
 }
 
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
   body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-size: var(--text-b1);
     line-height: var(--text-b1--line-height);
   }

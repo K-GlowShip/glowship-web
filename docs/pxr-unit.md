@@ -61,6 +61,17 @@ Tailwind 기본 숫자 클래스(`p-4`, `w-50` 등)는 4px 단위라 값이 헷�
 
 `pxr`이 적용되지 않는 경우를 발견하면 원인을 확인하고 이 문서에 사례를 추가합니다.
 
+## `cn`(tailwind-merge)과 함께 쓸 때
+
+클래스를 합치는 `cn`은 [src/shared/lib/cn](../src/shared/lib/cn/cn.ts)를 사용합니다. `tailwind-merge`의 기본 설정은 `pxr`과 커스텀 글자 크기를 모르기 때문에, 그대로 쓰면 아래 문제가 생깁니다. (직접 확인한 결과)
+
+| 입력 | 기본 `twMerge` | 이 프로젝트의 `cn` |
+| --- | --- | --- |
+| `p-16pxr p-8pxr` | 둘 다 남음 (CSS 순서에 따라 결정) | `p-8pxr` |
+| `text-b1 text-primary` | `text-b1`이 지워짐 | 둘 다 유지 |
+
+새 글자 크기 토큰, 반경 토큰, `pxr` 범위를 추가할 때는 `cn.ts`의 `extendTailwindMerge` 설정에도 같이 추가합니다.
+
 ## 적용되는 속성
 
 | Tailwind 접두사 | CSS 속성 |
