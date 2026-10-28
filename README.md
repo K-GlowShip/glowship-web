@@ -56,7 +56,7 @@ src/
  
 ## 개발환경
 
-- Node.js 20.19 이상 (권장 22 LTS)
+- Node.js 22.23.4 이상 또는 24.22.1 이상 (2026-10 보안 릴리스 반영 버전)
 - 패키지 매니저: [pnpm](https://pnpm.io/) (`package.json`의 `packageManager` 버전 사용)
 
 ```bash
