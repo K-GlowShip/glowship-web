@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 export function AppLayout() {
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 border-r border-gray-200 p-4">
+      <aside className="w-50 shrink-0 border-r border-gray-200 p-4">
         <nav className="flex flex-col gap-2">
           {NAV_ITEMS.map(({ to, label }) => (
             <NavLink
@@ -25,7 +25,7 @@ export function AppLayout() {
           ))}
         </nav>
       </aside>
-      <main className="flex-1 p-6">
+      <main className="min-w-0 flex-1 p-7">
         <Outlet />
       </main>
     </div>
