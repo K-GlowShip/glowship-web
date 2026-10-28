@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "steiger": "steiger ./src"
+    "steiger": "steiger ./src",
+    "generate:pxr": "node scripts/generate-pxr.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.105.0",

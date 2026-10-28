@@ -10,14 +10,14 @@ const NAV_ITEMS = [
 export function AppLayout() {
   return (
     <div className="flex min-h-screen">
-      <aside className="w-50 shrink-0 border-r border-gray-200 p-4">
-        <nav className="flex flex-col gap-2">
+      <aside className="w-200pxr shrink-0 border-r border-gray-200 p-16pxr">
+        <nav className="flex flex-col gap-8pxr">
           {NAV_ITEMS.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
-                `rounded px-3 py-2 hover:bg-gray-100 ${isActive ? 'bg-gray-100 font-semibold' : ''}`
+                `rounded px-12pxr py-8pxr hover:bg-gray-100 ${isActive ? 'bg-gray-100 font-semibold' : ''}`
               }
             >
               {label}
@@ -25,7 +25,7 @@ export function AppLayout() {
           ))}
         </nav>
       </aside>
-      <main className="min-w-0 flex-1 p-7">
+      <main className="min-w-0 flex-1 p-28pxr">
         <Outlet />
       </main>
     </div>
