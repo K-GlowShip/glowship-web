@@ -11,7 +11,7 @@ src/
 ├── app/
 │   ├── entrypoint/       # main.tsx, providers.tsx
 │   ├── routes/           # router.tsx, RequireAuth.tsx
-│   ├── layouts/          # AppLayout.tsx (헤더 + 사이드바)
+│   ├── layouts/          # AppLayout.tsx, AppGnb.tsx, AppLnb.tsx
 │   └── styles/
 ├── pages/
 │   ├── login/            # SCR-001
@@ -166,9 +166,9 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 | --- | --- |
 | 앱 진입점, Provider | `app/entrypoint/` |
 | 라우트 정의, 로그인 확인 | `app/routes/` |
-| 로그인 후 공통 헤더 + 사이드바 | `app/layouts/` |
+| 로그인 후 공통 GNB(상단 바) + LNB(좌측 메뉴) | `app/layouts/` |
 | 전역 스타일 | `app/styles/` |
 
 - 특정 화면 전용 레이아웃은 그 `pages` slice, 비즈니스 맥락 없는 틀은 `shared/ui`에 둡니다. ([페이지 레이아웃](https://fsd.how/kr/docs/guides/examples/page-layout/))
-- 헤더의 알림·로그아웃은 `features`로 만들어 `app/layouts`에서 가져다 씁니다.
+- GNB의 알림·로그아웃은 `features`로 만들어 `app/layouts`에서 가져다 씁니다.
 - 진입점을 옮겼으므로 `index.html`의 스크립트 경로를 `/src/app/entrypoint/main.tsx`로 맞춥니다.
