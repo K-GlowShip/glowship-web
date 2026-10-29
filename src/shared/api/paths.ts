@@ -3,7 +3,7 @@
  * 기본 버전이 아닌 경로는 버전을 직접 적는다. (예: '/v2/admins/signup')
  * 실제 백엔드 API 명세에 있는 경로만 추가한다.
  */
-export const API_PATHS = {
+export const ENDPOINT = {
   ADMINS: {
     SIGNUP: '/admins/signup',
   },

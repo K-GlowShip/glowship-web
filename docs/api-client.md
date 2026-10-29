@@ -18,7 +18,7 @@
 | `/v2/admins/signup` | `/api/v2/admins/signup` (경로에 적은 버전을 그대로 사용) |
 
 - 기본 버전은 `DEFAULT_API_VERSION`입니다. 서버가 새 버전을 기본으로 바꾸면 이 값만 바꿉니다.
-- 일부 요청만 다른 버전을 쓰려면 경로 앞에 버전을 적습니다. (`API_PATHS`에 `'/v2/...'`로 정의)
+- 일부 요청만 다른 버전을 쓰려면 경로 앞에 버전을 적습니다. (`ENDPOINT`에 `'/v2/...'`로 정의)
 - 절대 URL(`http://...`)은 변경하지 않습니다.
 
 ## 에러 처리
@@ -38,7 +38,7 @@
 
 ```ts
 try {
-  await API.post(API_PATHS.ADMINS.SIGNUP, body)
+  await API.post(ENDPOINT.ADMINS.SIGNUP, body)
 } catch (error) {
   if (isApiError(error) && error.code === 'EMAIL_DUPLICATED') {
     // 이메일 중복 안내
@@ -56,7 +56,7 @@ try {
 
 ## 요청 경로 상수
 
-- 요청 경로는 문자열을 직접 쓰지 않고 [paths.ts](../src/shared/api/paths.ts)의 `API_PATHS`를 사용합니다. 서버 주소, `/api`, 기본 버전은 `fetcher`가 붙이므로 상수에는 포함하지 않습니다.
+- 요청 경로는 문자열을 직접 쓰지 않고 [paths.ts](../src/shared/api/paths.ts)의 `ENDPOINT`를 사용합니다. 서버 주소, `/api`, 기본 버전은 `fetcher`가 붙이므로 상수에는 포함하지 않습니다.
 - 실제 백엔드 API 명세에 있는 경로만 추가합니다.
 - 화면 경로(`/dashboard` 등)는 `shared/config`의 `ROUTES`를 사용합니다. ([routes.ts](../src/shared/config/routes.ts))
 

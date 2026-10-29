@@ -154,7 +154,7 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 | `ApiError`(에러 응답 변환) | `shared/api/error.ts` |
 | 요청 함수, 응답 타입, query 옵션 | `shared/api/endpoints/` |
 | 한 slice에서만 쓰는 요청 | 그 slice의 `api` |
-| 요청 경로 상수(`API_PATHS`) | `shared/api/paths.ts` |
+| 요청 경로 상수(`ENDPOINT`) | `shared/api/paths.ts` |
 | 환경변수를 읽고 검증하는 코드 | `shared/config/env.ts` |
 | 화면 경로 상수(`ROUTES`) | `shared/config/routes.ts` |
 
