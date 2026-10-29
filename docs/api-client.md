@@ -64,8 +64,8 @@ try {
 ```ts
 export const ENDPOINT = {
   ADMINS: {
-    SIGNUP: '/admins/signup', // 버전 없음 -> /api/v1/admins/signup
-    LOGIN: '/v2/admins/login', // v2만 직접 적음 -> /api/v2/admins/login
+    SIGNUP: '/signup', // 버전 없음 -> /api/v1/signup
+    LOGIN: '/v2/login', // v2만 직접 적음 -> /api/v2/login
   },
 } as const
 ```
