@@ -13,7 +13,13 @@ export function AppLayout() {
       <aside className="w-56 border-r border-gray-200 p-4">
         <nav className="flex flex-col gap-2">
           {NAV_ITEMS.map(({ to, label }) => (
-            <NavLink key={to} to={to} className="rounded px-3 py-2 hover:bg-gray-100">
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `rounded px-3 py-2 hover:bg-gray-100 ${isActive ? 'bg-gray-100 font-semibold' : ''}`
+              }
+            >
               {label}
             </NavLink>
           ))}
