@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.check.outputs.enabled == 'true'
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -47,3 +47,7 @@ jobs:
       - name: Prettier
         if: steps.check.outputs.enabled == 'true'
         run: pnpm format:check
+
+      - name: Type check & Build
+        if: steps.check.outputs.enabled == 'true'
+        run: pnpm build
