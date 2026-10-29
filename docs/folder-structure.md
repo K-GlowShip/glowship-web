@@ -11,7 +11,7 @@ src/
 ├── app/
 │   ├── entrypoint/       # main.tsx, providers.tsx
 │   ├── routes/           # router.tsx, RequireAuth.tsx
-│   ├── layouts/          # AppLayout.tsx (헤더 + 사이드바)
+│   ├── layouts/          # AppLayout.tsx, AppGnb.tsx, AppLnb.tsx
 │   └── styles/
 ├── pages/
 │   ├── login/            # SCR-001
@@ -154,11 +154,14 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 | `ApiError`(에러 응답 변환) | `shared/api/error.ts` |
 | 요청 함수, 응답 타입, query 옵션 | `shared/api/endpoints/` |
 | 한 slice에서만 쓰는 요청 | 그 slice의 `api` |
+| 요청 경로 상수(`ENDPOINT`) | `shared/api/paths.ts` |
 | 환경변수를 읽고 검증하는 코드 | `shared/config/env.ts` |
+| 화면 경로 상수(`ROUTES`) | `shared/config/routes.ts` |
 
 - `entities`에는 요청 함수와 백엔드 응답 타입을 두지 않습니다. ([API 요청](https://fsd.how/kr/docs/guides/examples/api-requests/))
 - 요청 파일은 백엔드 리소스(URL 첫 경로)별로 하나씩 만듭니다. (`endpoints/delay-events.ts`, `endpoints/analyses.ts`)
 - 실제 백엔드 API 명세에 있는 요청만 만듭니다.
+- 요청 함수 작성 방법은 [API 클라이언트 가이드](api-client.md)를 참고하세요.
 
 ## 7. app
 
@@ -166,9 +169,9 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 | --- | --- |
 | 앱 진입점, Provider | `app/entrypoint/` |
 | 라우트 정의, 로그인 확인 | `app/routes/` |
-| 로그인 후 공통 헤더 + 사이드바 | `app/layouts/` |
+| 로그인 후 공통 GNB(상단 바) + LNB(좌측 메뉴) | `app/layouts/` |
 | 전역 스타일 | `app/styles/` |
 
 - 특정 화면 전용 레이아웃은 그 `pages` slice, 비즈니스 맥락 없는 틀은 `shared/ui`에 둡니다. ([페이지 레이아웃](https://fsd.how/kr/docs/guides/examples/page-layout/))
-- 헤더의 알림·로그아웃은 `features`로 만들어 `app/layouts`에서 가져다 씁니다.
+- GNB의 알림·로그아웃은 `features`로 만들어 `app/layouts`에서 가져다 씁니다.
 - 진입점을 옮겼으므로 `index.html`의 스크립트 경로를 `/src/app/entrypoint/main.tsx`로 맞춥니다.

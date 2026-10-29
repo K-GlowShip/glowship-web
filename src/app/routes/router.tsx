@@ -6,18 +6,19 @@ import { DecisionHistoryPage } from '@/pages/decision-history'
 import { DelayCenterPage } from '@/pages/delay-center'
 import { LoginPage } from '@/pages/login'
 import { SyncDataPage } from '@/pages/sync-data'
+import { ROUTES } from '@/shared/config'
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <LoginPage /> },
+  { path: ROUTES.LOGIN, element: <LoginPage /> },
   {
     element: <AppLayout />,
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: '/dashboard', element: <DashboardPage /> },
-      { path: '/delay-center', element: <DelayCenterPage /> },
-      { path: '/decision-history', element: <DecisionHistoryPage /> },
-      { path: '/sync-data', element: <SyncDataPage /> },
+      { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+      { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
+      { path: ROUTES.DELAY_CENTER, element: <DelayCenterPage /> },
+      { path: ROUTES.DECISION_HISTORY, element: <DecisionHistoryPage /> },
+      { path: ROUTES.SYNC_DATA, element: <SyncDataPage /> },
     ],
   },
-  { path: '*', element: <Navigate to="/dashboard" replace /> },
+  { path: '*', element: <Navigate to={ROUTES.DASHBOARD} replace /> },
 ])

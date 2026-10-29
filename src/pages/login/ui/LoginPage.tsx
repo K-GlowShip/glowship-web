@@ -1,3 +1,3 @@
 export function LoginPage() {
-  return <h1 className="text-2xl font-bold">로그인</h1>
+  return <h1 className="text-h1 font-bold">로그인</h1>
 }
