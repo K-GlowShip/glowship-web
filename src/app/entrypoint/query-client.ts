@@ -19,5 +19,9 @@ export const queryClient = new QueryClient({
         return !isClientError && failureCount < MAX_QUERY_RETRY
       },
     },
+    mutations: {
+      // 쓰기 요청은 타임아웃 등으로 실패해도 서버에 반영됐을 수 있어, 자동 재시도하면 중복 처리될 수 있다.
+      retry: 0,
+    },
   },
 })
