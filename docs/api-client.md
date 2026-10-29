@@ -38,7 +38,7 @@
 
 ```ts
 try {
-  await API.post(ENDPOINT.ADMINS.SIGNUP, body)
+  await API.post(ENDPOINT.AUTH.SIGNUP, body)
 } catch (error) {
   if (isApiError(error) && error.code === 'EMAIL_DUPLICATED') {
     // 이메일 중복 안내

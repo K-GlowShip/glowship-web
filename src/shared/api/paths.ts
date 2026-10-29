@@ -4,7 +4,7 @@
  * 실제 백엔드 API 명세에 있는 경로만 추가한다.
  */
 export const ENDPOINT = {
-  ADMINS: {
+  AUTH: {
     SIGNUP: '/signup',
   },
 } as const
