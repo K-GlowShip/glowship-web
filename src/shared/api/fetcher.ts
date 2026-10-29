@@ -17,7 +17,9 @@ export const fetcher = axios.create({
 
 // 버전이 없는 요청 경로에는 기본 버전을 붙인다. 다른 버전은 경로에 직접 적는다. (예: '/v2/admins')
 fetcher.interceptors.request.use((config) => {
-  if (config.url) config.url = getVersionUrl(config.url)
+  if (config.url) {
+    config.url = getVersionUrl(config.url)
+  }
   return config
 })
 
