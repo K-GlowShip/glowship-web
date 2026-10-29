@@ -14,8 +14,8 @@
 
 | 요청 경로 | 실제 요청 |
 | --- | --- |
-| `/admins/signup` | `/api/v1/admins/signup` (버전이 없으면 기본 버전 `v1`) |
-| `/v2/admins/signup` | `/api/v2/admins/signup` (경로에 적은 버전을 그대로 사용) |
+| `/signup` | `/api/v1/signup` (버전이 없으면 기본 버전 `v1`) |
+| `/v2/signup` | `/api/v2/signup` (경로에 적은 버전을 그대로 사용) |
 
 - 기본 버전은 `DEFAULT_API_VERSION`입니다. 서버가 새 버전을 기본으로 바꾸면 이 값만 바꿉니다.
 - 일부 요청만 다른 버전을 쓰려면 경로 앞에 버전을 적습니다. (`ENDPOINT`에 `'/v2/...'`로 정의)
