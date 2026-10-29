@@ -154,11 +154,14 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 | `ApiError`(에러 응답 변환) | `shared/api/error.ts` |
 | 요청 함수, 응답 타입, query 옵션 | `shared/api/endpoints/` |
 | 한 slice에서만 쓰는 요청 | 그 slice의 `api` |
+| 요청 경로 상수(`API_PATHS`) | `shared/api/paths.ts` |
 | 환경변수를 읽고 검증하는 코드 | `shared/config/env.ts` |
+| 화면 경로 상수(`ROUTES`) | `shared/config/routes.ts` |
 
 - `entities`에는 요청 함수와 백엔드 응답 타입을 두지 않습니다. ([API 요청](https://fsd.how/kr/docs/guides/examples/api-requests/))
 - 요청 파일은 백엔드 리소스(URL 첫 경로)별로 하나씩 만듭니다. (`endpoints/delay-events.ts`, `endpoints/analyses.ts`)
 - 실제 백엔드 API 명세에 있는 요청만 만듭니다.
+- 요청 함수 작성 방법은 [API 클라이언트 가이드](api-client.md)를 참고하세요.
 
 ## 7. app
 

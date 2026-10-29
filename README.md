@@ -78,7 +78,7 @@ pnpm dev
 
 | 변수 | 설명 |
 | --- | --- |
-| `VITE_API_BASE_URL` | 백엔드 API 주소 (기본 `http://localhost:8000`) |
+| `VITE_API_BASE_URL` | 백엔드 서버 주소 (기본 `http://localhost:8000`) |
 
 ## 코드 스타일
 
