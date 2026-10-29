@@ -23,8 +23,7 @@ src/
     ├── api/              # fetcher.ts, error.ts, endpoints/, index.ts
     ├── ui/               # button/, badge/, table/ ...
     ├── lib/              # format-date/ ...
-    ├── config/           # env.ts
-    └── assets/
+    └── config/           # env.ts
 ```
 
 | layer | 역할 | 하위 구조 |

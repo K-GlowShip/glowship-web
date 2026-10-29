@@ -27,20 +27,27 @@ jobs:
             echo "package.json 이 없어 검사를 건너뜁니다."
           fi
 
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.enabled == 'true'
+
       - uses: actions/setup-node@v4
         if: steps.check.outputs.enabled == 'true'
         with:
-          node-version: 20
+          node-version-file: .nvmrc
+          cache: pnpm
 
       - name: Install dependencies
         if: steps.check.outputs.enabled == 'true'
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        run: pnpm install --frozen-lockfile
 
       - name: ESLint
         if: steps.check.outputs.enabled == 'true'
-        run: npx eslint .
+        run: pnpm lint
 
       - name: Prettier
         if: steps.check.outputs.enabled == 'true'
-        run: npx prettier --check .
+        run: pnpm format:check
+
+      - name: Type check & Build
+        if: steps.check.outputs.enabled == 'true'
+        run: pnpm build
