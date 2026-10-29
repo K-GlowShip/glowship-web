@@ -33,7 +33,7 @@
 | `requestId` | 서버 로그 추적용 요청 ID. 서버 응답이 없으면 `null` |
 
 - 서버의 공통 에러 응답 형식은 `{ code, message, request_id }`입니다. (glowship-server `ErrorResponse`)
-- 클라이언트 코드(`CLIENT_ERROR_CODE`)는 `NETWORK_ERROR`(연결 실패), `TIMEOUT`(시간 초과), `UNKNOWN_ERROR`(서버 공통 형식이 아닌 응답)입니다.
+- 클라이언트 에러(`CLIENT_ERROR`, 코드와 메시지를 함께 관리)는 `NETWORK_ERROR`(연결 실패), `TIMEOUT`(시간 초과), `UNKNOWN_ERROR`(서버 공통 형식이 아닌 응답)입니다.
 - `isApiError(error)`로 `ApiError`인지 구분합니다.
 
 ```ts
