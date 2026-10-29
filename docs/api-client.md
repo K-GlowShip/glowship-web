@@ -63,7 +63,7 @@ try {
 
 ```ts
 export const ENDPOINT = {
-  ADMINS: {
+  AUTH: {
     SIGNUP: '/signup', // 버전 없음 -> /api/v1/signup
     LOGIN: '/v2/login', // v2만 직접 적음 -> /api/v2/login
   },
