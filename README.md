@@ -57,6 +57,7 @@ src/
 ## 개발환경
 
 - Node.js 22.23.4 이상 또는 24.22.1 이상 (2026-10 보안 릴리스 반영 버전)
+  - 이 버전보다 낮으면 `pnpm install`이 실패합니다. `nvm use`로 `.nvmrc`의 버전(24.22.1)을 사용할 수 있습니다.
 - 패키지 매니저: [pnpm](https://pnpm.io/) (`package.json`의 `packageManager` 버전 사용)
 
 ```bash
