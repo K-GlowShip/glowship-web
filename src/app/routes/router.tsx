@@ -20,5 +20,5 @@ export const router = createBrowserRouter([
       { path: ROUTES.SYNC_DATA, element: <SyncDataPage /> },
     ],
   },
-  { path: '*', element: <Navigate to="/dashboard" replace /> },
+  { path: '*', element: <Navigate to={ROUTES.DASHBOARD} replace /> },
 ])
