@@ -58,7 +58,17 @@ try {
 
 - 요청 경로는 문자열을 직접 쓰지 않고 [paths.ts](../src/shared/api/paths.ts)의 `ENDPOINT`를 사용합니다. 서버 주소, `/api`, 기본 버전은 `fetcher`가 붙이므로 상수에는 포함하지 않습니다.
 - 실제 백엔드 API 명세에 있는 경로만 추가합니다.
+- 기본 버전(`v1`)이 아닌 요청은 `ENDPOINT` 상수에 버전을 직접 적습니다. 요청마다 버전이 다를 수 있어서, 해당 경로만 `'/v2/...'`로 적고 나머지는 그대로 둡니다. 요청 코드에서는 버전을 신경 쓰지 않고 상수만 씁니다.
 - 화면 경로(`/dashboard` 등)는 `shared/config`의 `ROUTES`를 사용합니다. ([routes.ts](../src/shared/config/routes.ts))
+
+```ts
+export const ENDPOINT = {
+  AUTH: {
+    SIGNUP: '/signup', // 버전 없음 -> /api/v1/signup
+    LOGIN: '/v2/login', // v2만 직접 적음 -> /api/v2/login
+  },
+} as const
+```
 
 ## 요청 함수 작성 예시
 

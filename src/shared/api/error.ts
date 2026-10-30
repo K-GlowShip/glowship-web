@@ -48,7 +48,9 @@ const isErrorResponse = (data: unknown): data is ErrorResponse =>
 
 /** axios 에러를 ApiError로 변환한다. 이미 ApiError면 그대로 반환한다. */
 export function toApiError(error: unknown): ApiError {
-  if (isApiError(error)) return error
+  if (isApiError(error)) {
+    return error
+  }
 
   if (isAxiosError(error)) {
     if (error.response) {

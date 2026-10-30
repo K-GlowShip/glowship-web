@@ -10,10 +10,14 @@ const ABSOLUTE_URL = /^https?:\/\//
  * - 절대 URL은 건드리지 않는다.
  */
 export const getVersionUrl = (url: string) => {
-  if (ABSOLUTE_URL.test(url)) return url
+  if (ABSOLUTE_URL.test(url)) {
+    return url
+  }
 
   const parts = url.split('/')
-  if (parts.length > 1 && VERSION_SEGMENT.test(parts[1])) return url
+  if (parts.length > 1 && VERSION_SEGMENT.test(parts[1])) {
+    return url
+  }
 
   return `/${DEFAULT_API_VERSION}${url}`
 }

@@ -175,3 +175,16 @@ export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
 - 특정 화면 전용 레이아웃은 그 `pages` slice, 비즈니스 맥락 없는 틀은 `shared/ui`에 둡니다. ([페이지 레이아웃](https://fsd.how/kr/docs/guides/examples/page-layout/))
 - GNB의 알림·로그아웃은 `features`로 만들어 `app/layouts`에서 가져다 씁니다.
 - 진입점을 옮겼으므로 `index.html`의 스크립트 경로를 `/src/app/entrypoint/main.tsx`로 맞춥니다.
+
+## 8. 파일 이름
+
+| 무엇 | 규칙 | 예 |
+| --- | --- | --- |
+| 폴더 (slice, segment, 컴포넌트 폴더) | kebab-case | `delay-center`, `shared/ui/button` |
+| 컴포넌트 파일 | PascalCase | `Button.tsx`, `LoginPage.tsx` |
+| 그 외 코드 파일 (함수, 상수, 타입, 훅, variants) | kebab-case | `validate-login.ts`, `query-client.ts`, `button-variants.ts` |
+| 이미지, 아이콘 | kebab-case | `glowship-logo.svg` |
+| 폴더의 Public API | `index.ts` | `shared/ui/button/index.ts` |
+
+- 컴포넌트가 아니면 `.tsx`가 아닌 `.ts`를 씁니다.
+- 파일 이름과 그 안의 주요 export 이름은 맞춥니다. (`Button.tsx`의 `Button`, `validate-login.ts`의 `validateLogin`)

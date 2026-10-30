@@ -84,6 +84,9 @@ pnpm dev
 
 `main`, `develop` 브랜치로의 push 및 Pull Request 시 GitHub Actions에서 ESLint와 Prettier로 검사합니다.
 
+- `if`문은 한 줄이든 여러 줄이든 항상 중괄호를 씁니다. (ESLint `curly: all`, `pnpm lint --fix`로 자동 수정)
+- 객체 모양은 `interface`로, 유니온·교차·매핑 타입은 `type`으로 선언합니다. (ESLint `consistent-type-definitions`)
+
 
 ## 작업 타입
 
