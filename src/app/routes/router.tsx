@@ -6,14 +6,12 @@ import { DecisionHistoryPage } from '@/pages/decision-history'
 import { DelayCenterPage } from '@/pages/delay-center'
 import { LoginPage } from '@/pages/login'
 import { SyncDataPage } from '@/pages/sync-data'
-import { UiPreviewPage } from '@/pages/ui-preview'
 import { ROUTES } from '@/shared/config'
 
 import { RequireAuth } from './RequireAuth'
 import { RequireGuest } from './RequireGuest'
 
 export const router = createBrowserRouter([
-  ...(import.meta.env.DEV ? [{ path: '/ui-preview', element: <UiPreviewPage /> }] : []),
   {
     element: <RequireGuest />,
     children: [{ path: ROUTES.LOGIN, element: <LoginPage /> }],
