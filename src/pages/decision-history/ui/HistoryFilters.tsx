@@ -35,8 +35,9 @@ export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersPro
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-8pxr">
-        <Label>조회 기간</Label>
+        <Label htmlFor="history-period">조회 기간</Label>
         <DateRangeInput
+          id="history-period"
           value={{ start: draft.startDate, end: draft.endDate }}
           onChange={({ start, end }) => setDraft({ ...draft, startDate: start, endDate: end })}
         />
