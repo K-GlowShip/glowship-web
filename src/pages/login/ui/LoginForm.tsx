@@ -1,18 +1,23 @@
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { type ChangeEvent, type SubmitEvent, useState } from 'react'
+import { useNavigate } from 'react-router'
 
+import { env, ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 
+import { DEMO_ACCOUNT } from '../model/demo-login'
+import { useLogin } from '../model/use-login'
 import { type LoginFormErrors, type LoginFormValues, validateLogin } from '../model/validate-login'
 
 export function LoginForm() {
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' })
   const [errors, setErrors] = useState<LoginFormErrors>({})
   const [hasSubmitted, setHasSubmitted] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+  const { mutate: submitLogin, isPending, error: loginError, reset } = useLogin()
 
   const handleChange = (field: keyof LoginFormValues) => (event: ChangeEvent<HTMLInputElement>) => {
     const next = { ...values, [field]: event.target.value }
@@ -20,11 +25,14 @@ export function LoginForm() {
     if (hasSubmitted) {
       setErrors(validateLogin(next))
     }
+    if (loginError) {
+      reset()
+    }
   }
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isSubmitting) {
+    if (isPending) {
       return
     }
 
@@ -35,13 +43,7 @@ export function LoginForm() {
       return
     }
 
-    setIsSubmitting(true)
-    try {
-      // TODO(GLOW-76): 서버 로그인 API 확정 후 요청 연결 (비밀번호는 btoa()로 Base64 인코딩해서 전송)
-      console.log('login submit')
-    } finally {
-      setIsSubmitting(false)
-    }
+    submitLogin(values, { onSuccess: () => navigate(ROUTES.DASHBOARD, { replace: true }) })
   }
 
   return (
@@ -102,9 +104,17 @@ export function LoginForm() {
         {errors.password && <FieldError id="login-password-error">{errors.password}</FieldError>}
       </div>
 
-      <Button type="submit" size="lg" loading={isSubmitting} className="mt-16pxr w-full">
+      {loginError && <FieldError id="login-error">{loginError.message}</FieldError>}
+
+      <Button type="submit" size="lg" loading={isPending} className="mt-16pxr w-full">
         로그인
       </Button>
+
+      {env.isDemoLogin && (
+        <p className="text-center text-caption text-muted-foreground">
+          데모 계정 · {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
+        </p>
+      )}
     </form>
   )
 }

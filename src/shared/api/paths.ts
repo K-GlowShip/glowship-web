@@ -5,6 +5,7 @@
  */
 export const ENDPOINT = {
   AUTH: {
-    SIGNUP: '/signup',
+    SIGNUP: '/auth/signup',
+    LOGIN: '/auth/login',
   },
 } as const

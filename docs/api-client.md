@@ -46,6 +46,15 @@ try {
 }
 ```
 
+## 데모 로그인
+
+서버 없이 화면만 확인하는 배포 환경을 위해, `VITE_DEMO_LOGIN=true`이면 데모 계정으로 요청 없이 로그인합니다.
+
+- 데모 계정(`admin` / `password`)은 [demo-login.ts](../src/pages/login/model/demo-login.ts)에 있고, 로그인 화면 아래에 안내가 표시됩니다.
+- 데모 계정의 아이디는 이메일 형식이 아니라서, 데모 로그인이 켜진 경우, 데모 계정에 대해 이메일 형식 검증([validate-login.ts](../src/pages/login/model/validate-login.ts))을 건너뜁니다.
+- 환경변수가 없거나 `true`가 아니면(로컬, 운영) 항상 로그인 API를 호출합니다. 운영 배포에는 이 변수를 설정하지 않습니다.
+- 데모 계정은 서버에 존재하지 않는 계정이며, 로그인 보호 기능이 생기면 함께 처리해야 합니다.
+
 ## TanStack Query
 
 [query-client.ts](../src/app/entrypoint/query-client.ts)에서 기본 옵션을 설정합니다.

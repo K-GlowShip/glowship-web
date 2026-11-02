@@ -12,4 +12,6 @@ function getEnv(key: keyof ImportMetaEnv) {
 
 export const env = {
   apiBaseUrl: getEnv('VITE_API_BASE_URL'),
+  /** 서버 없이 데모 계정으로 로그인할 수 있게 한다. 기획자 확인용 배포에서만 켠다. */
+  isDemoLogin: import.meta.env.VITE_DEMO_LOGIN === 'true',
 }
