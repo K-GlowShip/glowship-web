@@ -1,5 +1,3 @@
-import { Database } from 'lucide-react'
-
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
@@ -13,22 +11,21 @@ export function SyncSourceCard({ source }: { source: SyncSource }) {
 
   return (
     <Card className={cn(isError && 'border-danger')}>
-      <CardContent className="flex flex-col gap-16pxr">
-        <div className="flex items-start gap-12pxr">
-          <span className="flex size-40pxr shrink-0 items-center justify-center rounded-control bg-primary-100 text-primary">
-            <Database className="size-20pxr" aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
+      <CardContent className="flex flex-col gap-20pxr">
+        <div className="flex items-start justify-between gap-12pxr">
+          <div className="min-w-0">
             <h2 className="text-h3 font-bold">{source.name}</h2>
             <p className="text-b2 text-muted-foreground">{source.system}</p>
           </div>
           <Badge variant={isError ? 'danger' : 'success'}>{SYNC_STATUS_LABEL[source.status]}</Badge>
         </div>
-        <p className="text-b1 text-muted-foreground">
-          마지막 수집 · {formatYYYYMMDDHHmm(source.lastCollectedAt)} KST
-        </p>
-        <div className="flex items-center justify-between gap-8pxr">
-          <span className="text-caption text-muted-foreground">{source.interval}</span>
+        <div className="flex items-end justify-between gap-12pxr">
+          <div>
+            <p className="text-caption text-muted-foreground">마지막 수집</p>
+            <p className={cn('text-b1 font-bold', isError && 'text-danger')}>
+              {formatYYYYMMDDHHmm(source.lastCollectedAt)} KST
+            </p>
+          </div>
           {/* TODO: 동기화 API 확정 후 요청 연결 */}
           <Button variant="secondary" size="sm">
             {isError ? '다시 수집' : '동기화'}

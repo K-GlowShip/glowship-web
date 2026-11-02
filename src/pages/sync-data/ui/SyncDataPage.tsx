@@ -1,4 +1,4 @@
-import { SYNC_SOURCES } from '../model/sync-sources'
+import { SYNC_INTERVAL_LABEL, SYNC_SOURCES } from '../model/sync-sources'
 import { ProductPanel } from './ProductPanel'
 import { SyncSourceCard } from './SyncSourceCard'
 
@@ -10,10 +10,13 @@ export function SyncDataPage() {
         <p className="text-b1 text-muted-foreground">연동한 데이터를 조회해보세요</p>
       </header>
 
-      <section className="grid gap-24pxr md:grid-cols-3" aria-label="데이터 수집 현황">
-        {SYNC_SOURCES.map((source) => (
-          <SyncSourceCard key={source.id} source={source} />
-        ))}
+      <section className="flex flex-col gap-12pxr" aria-label="데이터 수집 현황">
+        <p className="pr-12pxr text-right text-b2 text-muted-foreground">{SYNC_INTERVAL_LABEL}</p>
+        <div className="grid gap-24pxr md:grid-cols-3">
+          {SYNC_SOURCES.map((source) => (
+            <SyncSourceCard key={source.id} source={source} />
+          ))}
+        </div>
       </section>
 
       <ProductPanel />
