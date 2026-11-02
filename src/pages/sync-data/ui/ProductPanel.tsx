@@ -1,6 +1,7 @@
-import { CircleAlert, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useState } from 'react'
 
+import { useDetailDialog } from '@/shared/lib/use-detail-dialog'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { Input } from '@/shared/ui/input'
@@ -11,10 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import {
   filterProducts,
   isProductError,
-  PRODUCT_ERROR_NOTICE,
   PRODUCT_PAGE_SIZE,
   PRODUCTS,
+  type Product,
 } from '../model/products'
+import { ProductErrorDialog } from './ProductErrorDialog'
 import { ProductTable } from './ProductTable'
 
 const PRODUCT_ERROR_COUNT = PRODUCTS.filter(isProductError).length
@@ -30,6 +32,7 @@ export function ProductPanel() {
   const [query, setQuery] = useState('')
   const [onlyErrors, setOnlyErrors] = useState(false)
   const [page, setPage] = useState(1)
+  const errorDialog = useDetailDialog<Product>()
 
   const filtered = filterProducts(PRODUCTS, { query, onlyErrors })
   const pageCount = Math.max(1, Math.ceil(filtered.length / PRODUCT_PAGE_SIZE))
@@ -105,24 +108,17 @@ export function ProductPanel() {
                 </>
               }
             >
-              <ProductTable products={pageProducts} />
+              <ProductTable products={pageProducts} onSelectError={errorDialog.show} />
             </TableTemplate>
-
-            {PRODUCT_ERROR_COUNT > 0 && (
-              <div
-                role="alert"
-                className="flex items-start gap-12pxr rounded-card bg-danger-bg p-20pxr text-danger"
-              >
-                <CircleAlert className="mt-2pxr size-20pxr shrink-0" aria-hidden="true" />
-                <div>
-                  <p className="text-b1 font-bold">{PRODUCT_ERROR_NOTICE.title}</p>
-                  <p className="text-b2">{PRODUCT_ERROR_NOTICE.impact}</p>
-                </div>
-              </div>
-            )}
           </TabsContent>
         </Tabs>
       </CardContent>
+
+      <ProductErrorDialog
+        product={errorDialog.selected}
+        open={errorDialog.open}
+        onOpenChange={errorDialog.onOpenChange}
+      />
     </Card>
   )
 }
