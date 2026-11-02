@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useDetailDialog } from '@/shared/lib/use-detail-dialog'
 import { Card, CardContent } from '@/shared/ui/card'
 import { TableTemplate } from '@/shared/ui/table-template'
 
@@ -20,9 +21,7 @@ const SELECTORS = [...new Set(HISTORY_RECORDS.map((record) => record.selector))]
 export function DecisionHistoryPage() {
   const [filter, setFilter] = useState<HistoryFilter>(DEFAULT_HISTORY_FILTER)
   const [page, setPage] = useState(1)
-  // 닫힘 애니메이션 동안 내용이 사라지지 않도록 선택한 이력과 열림 상태를 따로 둔다
-  const [selected, setSelected] = useState<HistoryRecord | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const detail = useDetailDialog<HistoryRecord>()
 
   const filtered = filterHistory(HISTORY_RECORDS, filter)
   const pageCount = Math.max(1, Math.ceil(filtered.length / HISTORY_PAGE_SIZE))
@@ -35,11 +34,6 @@ export function DecisionHistoryPage() {
   const handleSearch = (next: HistoryFilter) => {
     setFilter(next)
     setPage(1)
-  }
-
-  const handleSelect = (record: HistoryRecord) => {
-    setSelected(record)
-    setIsDrawerOpen(true)
   }
 
   return (
@@ -60,14 +54,18 @@ export function DecisionHistoryPage() {
           >
             <HistoryTable
               records={pageRecords}
-              selectedId={isDrawerOpen ? (selected?.id ?? null) : null}
-              onSelect={handleSelect}
+              selectedId={detail.open ? (detail.selected?.id ?? null) : null}
+              onSelect={detail.show}
             />
           </TableTemplate>
         </CardContent>
       </Card>
 
-      <HistoryDetailDrawer record={selected} open={isDrawerOpen} onOpenChange={setIsDrawerOpen} />
+      <HistoryDetailDrawer
+        record={detail.selected}
+        open={detail.open}
+        onOpenChange={detail.onOpenChange}
+      />
     </div>
   )
 }
