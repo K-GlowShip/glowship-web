@@ -50,7 +50,7 @@ export function HistoryTable({ records, selectedId, onSelect }: HistoryTableProp
           <TableRow
             key={record.id}
             className={cn(
-              'cursor-pointer hover:bg-primary-50',
+              'cursor-pointer hover:bg-background',
               record.id === selectedId && 'bg-muted',
             )}
             onClick={() => onSelect(record)}
@@ -58,7 +58,7 @@ export function HistoryTable({ records, selectedId, onSelect }: HistoryTableProp
             <TableCell>
               <button
                 type="button"
-                className="cursor-pointer font-bold text-primary outline-none hover:underline focus-visible:underline"
+                className="cursor-pointer outline-none focus-visible:underline"
                 aria-label={`${formatSelectedAt(record.selectedAt)} 상세 보기`}
               >
                 {formatSelectedAt(record.selectedAt)}

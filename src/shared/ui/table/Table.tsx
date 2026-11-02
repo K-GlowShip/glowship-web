@@ -44,7 +44,7 @@ export function TableHead({ className, ...props }: ComponentProps<'th'>) {
 }
 
 export function TableCell({ className, ...props }: ComponentProps<'td'>) {
-  return <td data-slot="table-cell" className={cn('px-24pxr py-18pxr', className)} {...props} />
+  return <td data-slot="table-cell" className={cn('px-24pxr py-12pxr', className)} {...props} />
 }
 
 /** 조건에 맞는 행이 없을 때 표 안에 보여 주는 안내 행. colSpan은 표의 열 개수. */
