@@ -9,17 +9,9 @@ import { Label } from '@/shared/ui/label'
 import { TableTemplate } from '@/shared/ui/table-template'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
-import {
-  filterProducts,
-  isProductError,
-  PRODUCT_PAGE_SIZE,
-  PRODUCTS,
-  type Product,
-} from '../model/products'
+import { filterProducts, PRODUCT_PAGE_SIZE, PRODUCTS, type Product } from '../model/products'
 import { ProductErrorDialog } from './ProductErrorDialog'
 import { ProductTable } from './ProductTable'
-
-const PRODUCT_ERROR_COUNT = PRODUCTS.filter(isProductError).length
 
 // TODO: 주문·재고·선적 탭 디자인 확정 후 구현
 const TABS = [
@@ -52,10 +44,7 @@ export function ProductPanel() {
                 {tab.label}
               </TabsTrigger>
             ))}
-            <TabsTrigger value="product">
-              상품
-              {PRODUCT_ERROR_COUNT > 0 && <span>{PRODUCT_ERROR_COUNT}</span>}
-            </TabsTrigger>
+            <TabsTrigger value="product">상품</TabsTrigger>
           </TabsList>
 
           {TABS.map((tab) => (
