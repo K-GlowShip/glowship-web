@@ -132,18 +132,18 @@ query 키와 query 옵션은 `shared/api`에 두고, 훅은 쓰는 화면의 `mo
 slot 예:
 
 ```tsx
-export function DelayInfoCard({ actions }: { actions?: ReactNode }) {
+export function DelayInfoCard({ Actions }: { Actions?: ReactNode }) {
   return (
     <div>
       <h3>지연 정보</h3>
-      {actions}
+      {Actions}
     </div>
   )
 }
 ```
 
 ```tsx
-<DelayInfoCard actions={<RerunAnalysisButton delayEventId={id} />} />
+<DelayInfoCard Actions={<RerunAnalysisButton delayEventId={id} />} />
 ```
 
 ## 6. API와 환경변수

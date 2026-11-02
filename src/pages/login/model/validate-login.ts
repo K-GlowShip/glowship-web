@@ -13,6 +13,7 @@ export type LoginFormErrors = Partial<Record<keyof LoginFormValues, string>>
 export function validateLogin({ email, password }: LoginFormValues): LoginFormErrors {
   const errors: LoginFormErrors = {}
   const trimmedEmail = email.trim()
+  // 데모 로그인이 켜진 배포에서는 데모 계정의 아이디(이메일 형식 아님)를 허용한다
   const isDemoId = env.isDemoLogin && isDemoEmail(trimmedEmail)
 
   if (!trimmedEmail) {
