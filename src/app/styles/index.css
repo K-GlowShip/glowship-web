@@ -93,6 +93,23 @@
       transform: translateX(100%);
     }
   }
+
+  /* Popover: 닫힘 애니메이션이 끝날 때까지 Radix가 언마운트를 기다린다 */
+  --animate-popover-in: popover-in 150ms ease-out;
+  --animate-popover-out: popover-out 100ms ease-in forwards;
+
+  @keyframes popover-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes popover-out {
+    to {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
 }
 
 @layer base {
