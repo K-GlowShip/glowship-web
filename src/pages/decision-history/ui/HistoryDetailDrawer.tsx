@@ -39,7 +39,7 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
       <DrawerHeader>
         <div className="flex flex-wrap items-center gap-12pxr">
           <DrawerTitle>
-            {HISTORY_STATUS_LABEL[record.status]} · {record.option}
+            {HISTORY_STATUS_LABEL[record.status]}: {record.option}
           </DrawerTitle>
           {record.approval && <Badge variant="success">{record.approval}</Badge>}
         </div>

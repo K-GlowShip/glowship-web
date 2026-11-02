@@ -23,7 +23,7 @@ export const PRODUCT_STATUS_LABEL: Record<ProductStatus, string> = {
 export const PRODUCT_PAGE_SIZE = 11
 
 export const PRODUCT_ERROR_NOTICE = {
-  title: '검증 오류 · NJ 창고 코드가 누락되었습니다',
+  title: '검증 오류: NJ 창고 코드가 누락되었습니다',
   impact:
     '영향: GS-1024 재고 전환 분석 보류. ERP 상품 정보를 보완한 뒤 다시 수집하면 자동 재분석합니다.',
 }
