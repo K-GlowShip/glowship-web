@@ -8,17 +8,28 @@ import { LoginPage } from '@/pages/login'
 import { SyncDataPage } from '@/pages/sync-data'
 import { ROUTES } from '@/shared/config'
 
+import { RequireAuth } from './RequireAuth'
+import { RequireGuest } from './RequireGuest'
+
 export const router = createBrowserRouter([
-  { path: ROUTES.LOGIN, element: <LoginPage /> },
   {
-    element: <AppLayout />,
+    element: <RequireGuest />,
+    children: [{ path: ROUTES.LOGIN, element: <LoginPage /> }],
+  },
+  {
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
-      { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
-      { path: ROUTES.DELAY_CENTER, element: <DelayCenterPage /> },
-      { path: ROUTES.DECISION_HISTORY, element: <DecisionHistoryPage /> },
-      { path: ROUTES.SYNC_DATA, element: <SyncDataPage /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+          { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
+          { path: ROUTES.DELAY_CENTER, element: <DelayCenterPage /> },
+          { path: ROUTES.DECISION_HISTORY, element: <DecisionHistoryPage /> },
+          { path: ROUTES.SYNC_DATA, element: <SyncDataPage /> },
+        ],
+      },
     ],
   },
-  { path: '*', element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+  { path: '*', element: <Navigate to={ROUTES.LOGIN} replace /> },
 ])

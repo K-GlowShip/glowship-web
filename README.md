@@ -79,6 +79,7 @@ pnpm dev
 | 변수 | 설명 |
 | --- | --- |
 | `VITE_API_BASE_URL` | 백엔드 서버 주소 (기본 `http://localhost:8000`) |
+| `VITE_DEMO_LOGIN` | `true`이면 서버 없이 데모 계정으로 로그인 (테스트 배포 환경에서만 사용. [로그인 문서](docs/api-client.md#데모-로그인) 참고) |
 
 ## 코드 스타일
 
