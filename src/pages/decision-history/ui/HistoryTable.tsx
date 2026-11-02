@@ -1,6 +1,14 @@
 import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableEmptyRow,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/shared/ui/table'
 
 import {
   formatSelectedAt,
@@ -23,24 +31,20 @@ interface HistoryTableProps {
 
 export function HistoryTable({ records, selectedId, onSelect }: HistoryTableProps) {
   return (
-    <Table>
+    <Table className="min-w-900pxr">
       <TableHeader>
         <TableRow>
-          <TableHead>선택 일시</TableHead>
+          <TableHead className="w-180pxr">선택 일시</TableHead>
           <TableHead>선적 / 상품</TableHead>
           <TableHead>선택한 대응안</TableHead>
-          <TableHead>선택자</TableHead>
-          <TableHead>실행 ID</TableHead>
-          <TableHead>상태</TableHead>
+          <TableHead className="w-120pxr">선택자</TableHead>
+          <TableHead className="w-160pxr">실행 ID</TableHead>
+          <TableHead className="w-140pxr">상태</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {records.length === 0 && (
-          <TableRow>
-            <TableCell colSpan={6} className="py-48pxr text-center text-muted-foreground">
-              조건에 맞는 이력이 없습니다.
-            </TableCell>
-          </TableRow>
+          <TableEmptyRow colSpan={6}>조건에 맞는 이력이 없습니다.</TableEmptyRow>
         )}
         {records.map((record) => (
           <TableRow
@@ -60,10 +64,12 @@ export function HistoryTable({ records, selectedId, onSelect }: HistoryTableProp
                 {formatSelectedAt(record.selectedAt)}
               </button>
             </TableCell>
-            <TableCell>
+            <TableCell className="wrap-break-word">
               {record.shipmentCode} / {record.productName}
             </TableCell>
-            <TableCell>{record.option}</TableCell>
+            <TableCell className="truncate" title={record.option}>
+              {record.option}
+            </TableCell>
             <TableCell>{record.selector}</TableCell>
             <TableCell>{record.executionId ?? '—'}</TableCell>
             <TableCell>

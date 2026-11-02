@@ -2,8 +2,14 @@ import type { ComponentProps } from 'react'
 
 import { cn } from '@/shared/lib/cn'
 
+/**
+ * 열 너비를 내용이 아닌 헤더(TableHead)에 지정한 값으로 정한다(table-fixed).
+ * 검색 결과에 따라 행 내용이 달라져도 열 너비가 흔들리지 않는다. 너비를 안 준 열은 남는 폭을 나눠 갖는다.
+ */
 export function Table({ className, ...props }: ComponentProps<'table'>) {
-  return <table data-slot="table" className={cn('w-full text-b1', className)} {...props} />
+  return (
+    <table data-slot="table" className={cn('w-full table-fixed text-b1', className)} {...props} />
+  )
 }
 
 export function TableHeader({ className, ...props }: ComponentProps<'thead'>) {
@@ -39,4 +45,21 @@ export function TableHead({ className, ...props }: ComponentProps<'th'>) {
 
 export function TableCell({ className, ...props }: ComponentProps<'td'>) {
   return <td data-slot="table-cell" className={cn('px-24pxr py-18pxr', className)} {...props} />
+}
+
+/** 조건에 맞는 행이 없을 때 표 안에 보여 주는 안내 행. colSpan은 표의 열 개수. */
+export function TableEmptyRow({
+  colSpan,
+  className,
+  ...props
+}: Omit<ComponentProps<'td'>, 'colSpan'> & { colSpan: number }) {
+  return (
+    <TableRow>
+      <TableCell
+        colSpan={colSpan}
+        className={cn('py-48pxr text-center text-muted-foreground', className)}
+        {...props}
+      />
+    </TableRow>
+  )
 }

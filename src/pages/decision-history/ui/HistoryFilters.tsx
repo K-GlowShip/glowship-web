@@ -3,9 +3,9 @@ import { type FormEvent, useState } from 'react'
 
 import { Button } from '@/shared/ui/button'
 import { DateRangeInput } from '@/shared/ui/date-range-input'
+import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
-import { Select } from '@/shared/ui/select'
 
 import {
   HISTORY_STATUS_LABEL,
@@ -13,6 +13,14 @@ import {
   type HistoryFilter,
   type HistoryStatus,
 } from '../model/history'
+
+const STATUS_OPTIONS: DropdownOption[] = [
+  { value: '', label: '전체 상태' },
+  ...HISTORY_STATUS_OPTIONS.map((status) => ({
+    value: status,
+    label: HISTORY_STATUS_LABEL[status],
+  })),
+]
 
 interface HistoryFiltersProps {
   value: HistoryFilter
@@ -22,6 +30,10 @@ interface HistoryFiltersProps {
 
 export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersProps) {
   const [draft, setDraft] = useState(value)
+  const selectorOptions: DropdownOption[] = [
+    { value: '', label: '전체 팀원' },
+    ...selectors.map((selector) => ({ value: selector, label: selector })),
+  ]
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -35,23 +47,24 @@ export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersPro
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-8pxr">
-        <Label htmlFor="history-period">조회 기간</Label>
+        <Label id="history-period-label">조회 기간</Label>
         <DateRangeInput
-          id="history-period"
+          role="group"
+          aria-labelledby="history-period-label"
           value={{ start: draft.startDate, end: draft.endDate }}
           onChange={({ start, end }) => setDraft({ ...draft, startDate: start, endDate: end })}
         />
       </div>
 
       <div className="flex flex-col gap-8pxr">
-        <Label htmlFor="history-keyword">선적 / 상품</Label>
+        <Label id="history-keyword-label">선적 / 상품</Label>
         <div className="relative">
           <Search
             className="pointer-events-none absolute top-1/2 left-12pxr size-18pxr -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
-            id="history-keyword"
+            aria-labelledby="history-keyword-label"
             className="pl-40pxr"
             placeholder="선적 번호 또는 상품 검색"
             value={draft.keyword}
@@ -61,37 +74,23 @@ export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersPro
       </div>
 
       <div className="flex flex-col gap-8pxr">
-        <Label htmlFor="history-status">상태</Label>
-        <Select
-          id="history-status"
-          value={draft.status}
-          onChange={(event) =>
-            setDraft({ ...draft, status: event.target.value as HistoryStatus | '' })
-          }
-        >
-          <option value="">전체 상태</option>
-          {HISTORY_STATUS_OPTIONS.map((status) => (
-            <option key={status} value={status}>
-              {HISTORY_STATUS_LABEL[status]}
-            </option>
-          ))}
-        </Select>
+        <Label id="history-selector-label">선택자</Label>
+        <Dropdown
+          aria-labelledby="history-selector-label"
+          options={selectorOptions}
+          value={draft.selector}
+          onChange={(selector) => setDraft({ ...draft, selector })}
+        />
       </div>
 
       <div className="flex flex-col gap-8pxr">
-        <Label htmlFor="history-selector">선택자</Label>
-        <Select
-          id="history-selector"
-          value={draft.selector}
-          onChange={(event) => setDraft({ ...draft, selector: event.target.value })}
-        >
-          <option value="">전체 팀원</option>
-          {selectors.map((selector) => (
-            <option key={selector} value={selector}>
-              {selector}
-            </option>
-          ))}
-        </Select>
+        <Label id="history-status-label">상태</Label>
+        <Dropdown
+          aria-labelledby="history-status-label"
+          options={STATUS_OPTIONS}
+          value={draft.status}
+          onChange={(status) => setDraft({ ...draft, status: status as HistoryStatus | '' })}
+        />
       </div>
 
       <Button type="submit" size="lg" className="h-44pxr md:col-span-2 xl:col-span-1">

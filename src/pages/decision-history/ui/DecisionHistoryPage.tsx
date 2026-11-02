@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { Card, CardContent } from '@/shared/ui/card'
-import { Pagination } from '@/shared/ui/pagination'
+import { TableTemplate } from '@/shared/ui/table-template'
 
 import {
   DEFAULT_HISTORY_FILTER,
@@ -52,15 +52,18 @@ export function DecisionHistoryPage() {
       <Card className="rounded-panel">
         <CardContent className="flex flex-col gap-16pxr p-32pxr">
           <HistoryFilters value={filter} selectors={SELECTORS} onSearch={handleSearch} />
-          <p className="text-b2 text-muted-foreground">총 {filtered.length}건</p>
-          <div className="overflow-x-auto">
+          <TableTemplate
+            totalCount={filtered.length}
+            page={currentPage}
+            pageCount={pageCount}
+            onPageChange={setPage}
+          >
             <HistoryTable
               records={pageRecords}
               selectedId={isDrawerOpen ? (selected?.id ?? null) : null}
               onSelect={handleSelect}
             />
-          </div>
-          <Pagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+          </TableTemplate>
         </CardContent>
       </Card>
 

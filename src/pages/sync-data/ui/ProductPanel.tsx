@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/shared/ui/card'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
-import { Pagination } from '@/shared/ui/pagination'
+import { TableTemplate } from '@/shared/ui/table-template'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
 import {
@@ -84,28 +84,29 @@ export function ProductPanel() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-16pxr">
-              <p className="text-b2 text-muted-foreground">총 {filtered.length}건</p>
-              <div className="flex items-center gap-8pxr">
-                <Checkbox
-                  id="only-errors"
-                  checked={onlyErrors}
-                  onCheckedChange={(checked) => {
-                    setOnlyErrors(checked === true)
-                    setPage(1)
-                  }}
-                />
-                <Label htmlFor="only-errors" className="cursor-pointer text-b1 font-normal">
-                  오류만 보기
-                </Label>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
+            <TableTemplate
+              totalCount={filtered.length}
+              page={currentPage}
+              pageCount={pageCount}
+              onPageChange={setPage}
+              Controls={
+                <>
+                  <Checkbox
+                    id="only-errors"
+                    checked={onlyErrors}
+                    onCheckedChange={(checked) => {
+                      setOnlyErrors(checked === true)
+                      setPage(1)
+                    }}
+                  />
+                  <Label htmlFor="only-errors" className="cursor-pointer text-b1 font-normal">
+                    오류만 보기
+                  </Label>
+                </>
+              }
+            >
               <ProductTable products={pageProducts} />
-            </div>
-
-            <Pagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+            </TableTemplate>
 
             {PRODUCT_ERROR_COUNT > 0 && (
               <div

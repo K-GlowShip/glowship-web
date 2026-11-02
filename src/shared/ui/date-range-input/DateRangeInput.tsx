@@ -18,15 +18,13 @@ interface DateRangeInputProps extends Omit<ComponentProps<'div'>, 'onChange'> {
   /** 'YYYY-MM-DD' 형식. 아직 고르지 않았으면 빈 문자열 */
   value: DateRange
   onChange: (range: DateRange) => void
-  /** 시작일 칸에 붙는다. 바깥의 <Label htmlFor>와 연결할 때 쓴다. */
-  id?: string
 }
 
 /**
  * 시작일과 종료일 입력 칸 두 개가 한 상자에 있는 기간 입력.
  * 칸을 누르면 달력이 열리고, 시작일을 고르면 곧바로 종료일 선택으로 넘어간다.
  */
-export function DateRangeInput({ className, value, onChange, id, ...props }: DateRangeInputProps) {
+export function DateRangeInput({ className, value, onChange, ...props }: DateRangeInputProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
@@ -78,7 +76,6 @@ export function DateRangeInput({ className, value, onChange, id, ...props }: Dat
             <CalendarIcon className="size-18pxr" aria-hidden="true" />
           </span>
           <DateField
-            id={id}
             label="시작일"
             value={value.start}
             active={open && activeField === 'start'}
