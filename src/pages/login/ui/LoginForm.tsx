@@ -91,7 +91,6 @@ export function LoginForm() {
             type="button"
             className="absolute top-1/2 right-12pxr -translate-y-1/2 cursor-pointer text-muted-foreground outline-none hover:text-foreground focus-visible:text-primary"
             aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
-            aria-pressed={showPassword}
             onClick={() => setShowPassword((prev) => !prev)}
           >
             {showPassword ? (
