@@ -1,3 +1,5 @@
+import { formatYYYYMMDD, kstToUtc } from '@/shared/lib/kst-date'
+
 import type { HistoryRecord, HistoryStatus } from './history'
 
 // TODO: 승인 및 실행 이력 API 명세 확정 후 서버 응답으로 교체
@@ -38,15 +40,16 @@ const TEMPLATES = [
 
 const pad = (value: number) => String(value).padStart(2, '0')
 
-const toDateTime = (date: Date) =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+// 서버 응답과 같은 형식(ISO 8601 UTC, 'Z')으로 만든다.
+const toUtcIso = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z')
 
-const toBaseDataAt = (date: Date) => `${pad(date.getMonth() + 1)}.${pad(date.getDate())} 09:00 KST`
+// 기준 데이터는 그 날(한국 날짜) 09:00에 수집한 것으로 둔다.
+const toBaseDataAt = (date: Date) => kstToUtc(`${formatYYYYMMDD(toUtcIso(date))}T09:00`)
 
 const toExecutionId = (date: Date, index: number) =>
-  `EX-${String(date.getFullYear()).slice(2)}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(index % 100)}`
+  `EX-${formatYYYYMMDD(toUtcIso(date)).replaceAll('-', '').slice(2)}-${pad(index % 100)}`
 
-const GENERATED_START = new Date(2026, 9, 20, 17, 30)
+const GENERATED_START = new Date(kstToUtc('2026-10-20T17:30'))
 const GENERATED_STEP_MS = 3 * 60 * 60 * 1000
 
 const createGeneratedRecord = (index: number): HistoryRecord => {
@@ -56,7 +59,7 @@ const createGeneratedRecord = (index: number): HistoryRecord => {
 
   return {
     id: `history-${index + 1}`,
-    selectedAt: toDateTime(date),
+    selectedAt: toUtcIso(date),
     shipmentCode: template.shipmentCode,
     productName: template.productName,
     option: template.option,
@@ -78,7 +81,7 @@ const createGeneratedRecord = (index: number): HistoryRecord => {
 const FEATURED_RECORDS: HistoryRecord[] = [
   {
     id: 'history-1',
-    selectedAt: '2026-10-21T09:24',
+    selectedAt: '2026-10-21T00:24:00Z',
     shipmentCode: 'GS-1024',
     productName: '크림',
     option: 'NJ 재고 전환',
@@ -89,7 +92,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     reason:
       '추가 운송비 없이 위험 주문 42건을 우선 보호합니다. LA 입고 전까지 NJ의 여유 재고 800개를 활용합니다.',
     comment: { author: '박지훈', time: '09:12', text: 'NJ 창고 전환 가능 수량 확인했습니다.' },
-    baseDataAt: '10.21 09:00 KST',
+    baseDataAt: '2026-10-21T00:00:00Z',
     analysis: {
       shortage: 1240,
       riskOrders: 42,
@@ -98,7 +101,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
   },
   {
     id: 'history-2',
-    selectedAt: '2026-10-21T08:51',
+    selectedAt: '2026-10-20T23:51:00Z',
     shipmentCode: 'GS-1023',
     productName: '선크림',
     option: '항공 긴급 운송',
@@ -108,7 +111,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     approval: null,
     reason: '성수기 판매 손실을 막기 위해 항공으로 우선 확보합니다.',
     comment: null,
-    baseDataAt: '10.21 08:30 KST',
+    baseDataAt: '2026-10-20T23:30:00Z',
     analysis: {
       shortage: 940,
       riskOrders: 27,

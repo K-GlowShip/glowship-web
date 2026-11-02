@@ -1,3 +1,5 @@
+import { formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+
 export type HistoryStatus = 'final' | 'draft' | 'reanalysis'
 
 export interface HistoryComment {
@@ -8,7 +10,7 @@ export interface HistoryComment {
 
 export interface HistoryRecord {
   id: string
-  /** 'YYYY-MM-DDTHH:mm' 형식 */
+  /** ISO 8601 UTC. 예: '2026-10-21T00:24:00Z' */
   selectedAt: string
   shipmentCode: string
   productName: string
@@ -19,6 +21,7 @@ export interface HistoryRecord {
   approval: string | null
   reason: string
   comment: HistoryComment | null
+  /** ISO 8601 UTC. 예: '2026-10-21T00:00:00Z' */
   baseDataAt: string
   analysis: {
     shortage: number
@@ -28,7 +31,9 @@ export interface HistoryRecord {
 }
 
 export interface HistoryFilter {
+  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜 */
   startDate: string
+  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜 */
   endDate: string
   keyword: string
   status: HistoryStatus | ''
@@ -56,15 +61,18 @@ export const DEFAULT_HISTORY_FILTER: HistoryFilter = {
   selector: '',
 }
 
-/** '2026-10-21T09:24' -> '10.21 09:24' */
-export const formatSelectedAt = (selectedAt: string) =>
-  `${selectedAt.slice(5, 10).replace('-', '.')} ${selectedAt.slice(11, 16)}`
+/** UTC 시각을 한국 시간으로. '2026-10-21T00:24:00Z' -> '2026.10.21 09:24' */
+export const formatSelectedAt = formatYYYYMMDDHHmm
+
+/** UTC 시각을 한국 시간으로. '2026-10-21T00:00:00Z' -> '2026.10.21 09:00 KST' */
+export const formatBaseDataAt = (baseDataAt: string) => `${formatYYYYMMDDHHmm(baseDataAt)} KST`
 
 export const filterHistory = (records: HistoryRecord[], filter: HistoryFilter) => {
   const keyword = filter.keyword.trim().toLowerCase()
 
   return records.filter((record) => {
-    const date = record.selectedAt.slice(0, 10)
+    // 조회 기간은 한국 날짜이므로, UTC 시각을 한국 날짜로 바꿔 비교한다.
+    const date = formatYYYYMMDD(record.selectedAt)
     if (filter.startDate && date < filter.startDate) {
       return false
     }

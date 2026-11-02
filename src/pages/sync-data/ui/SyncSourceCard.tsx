@@ -1,6 +1,7 @@
 import { Database } from 'lucide-react'
 
 import { cn } from '@/shared/lib/cn'
+import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
@@ -23,7 +24,9 @@ export function SyncSourceCard({ source }: { source: SyncSource }) {
           </div>
           <Badge variant={isError ? 'danger' : 'success'}>{SYNC_STATUS_LABEL[source.status]}</Badge>
         </div>
-        <p className="text-b1 text-muted-foreground">마지막 수집 · {source.lastCollectedAt}</p>
+        <p className="text-b1 text-muted-foreground">
+          마지막 수집 · {formatYYYYMMDDHHmm(source.lastCollectedAt)} KST
+        </p>
         <div className="flex items-center justify-between gap-8pxr">
           <span className="text-caption text-muted-foreground">{source.interval}</span>
           {/* TODO: 동기화 API 확정 후 요청 연결 */}

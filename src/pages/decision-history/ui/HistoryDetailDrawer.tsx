@@ -10,6 +10,7 @@ import {
 } from '@/shared/ui/drawer'
 
 import {
+  formatBaseDataAt,
   formatSelectedAt,
   HISTORY_DISCLAIMER,
   HISTORY_STATUS_LABEL,
@@ -57,7 +58,7 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
             </p>
           )}
           <p className="text-caption text-muted-foreground">
-            기준 데이터 {record.baseDataAt}
+            기준 데이터 {formatBaseDataAt(record.baseDataAt)}
             {record.executionId && ` · 실행 ID ${record.executionId}`}
           </p>
         </section>

@@ -5,6 +5,7 @@ export interface SyncSource {
   name: string
   system: string
   status: SyncStatus
+  /** ISO 8601 UTC. 예: '2026-10-21T00:30:00Z' */
   lastCollectedAt: string
   interval: string
 }
@@ -21,7 +22,7 @@ export const SYNC_SOURCES: SyncSource[] = [
     name: '주문 데이터',
     system: 'SAP ERP',
     status: 'normal',
-    lastCollectedAt: '10.21 09:30 KST',
+    lastCollectedAt: '2026-10-21T00:30:00Z',
     interval: '10분마다 자동 수집',
   },
   {
@@ -29,7 +30,7 @@ export const SYNC_SOURCES: SyncSource[] = [
     name: '재고 데이터',
     system: 'WMS · LA / NJ',
     status: 'normal',
-    lastCollectedAt: '10.21 09:30 KST',
+    lastCollectedAt: '2026-10-21T00:30:00Z',
     interval: '10분마다 자동 수집',
   },
   {
@@ -37,7 +38,7 @@ export const SYNC_SOURCES: SyncSource[] = [
     name: '선적 데이터',
     system: 'TMS',
     status: 'error',
-    lastCollectedAt: '10.21 09:10 KST',
+    lastCollectedAt: '2026-10-21T00:10:00Z',
     interval: '10분마다 자동 수집',
   },
 ]
