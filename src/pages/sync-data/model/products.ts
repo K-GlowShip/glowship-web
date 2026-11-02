@@ -55,6 +55,13 @@ const PRODUCT_TEMPLATES = [
   },
   { name: '수분 선크림', erpCode: 'SKU-SN-02', laCode: 'LA-002', njCode: 'NJ-002', isHit: true },
   { name: '글로우 세럼', erpCode: 'SKU-SR-03', laCode: 'LA-003', njCode: 'NJ-003', isHit: false },
+  {
+    name: '글로우쉽 시카 판테놀 수분 장벽 리페어 크림 기획세트 (본품 50ml + 미니 15ml x 2 + 쿠션 퍼프 증정) 대용량 리필 한정 에디션',
+    erpCode: 'SKU-CR-04',
+    laCode: 'LA-004',
+    njCode: 'NJ-004',
+    isHit: false,
+  },
 ]
 
 const MOCK_PRODUCT_COUNT = 128

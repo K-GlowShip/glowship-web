@@ -118,6 +118,26 @@ const FEATURED_RECORDS: HistoryRecord[] = [
       note: '사실: 재고 소진 예상 3일 · 가정: 항공 운임 승인 · 미확인: 통관 소요 시간',
     },
   },
+  {
+    id: 'history-3',
+    selectedAt: '2026-10-20T08:30:00Z',
+    shipmentCode: 'GS-1025',
+    productName:
+      '글로우쉽 시카 판테놀 수분 장벽 리페어 크림 기획세트 (본품 50ml + 미니 15ml x 2 + 쿠션 퍼프 증정) 대용량 리필 한정 에디션',
+    option: 'NJ 재고 전환',
+    selector: '이서연',
+    executionId: 'EX-261020-02',
+    status: 'final',
+    approval: '팀장 승인',
+    reason: '기획세트 한정 물량이라 NJ 여유 재고를 먼저 전환해 위험 주문을 보호합니다.',
+    comment: null,
+    baseDataAt: '2026-10-20T00:00:00Z',
+    analysis: {
+      shortage: 460,
+      riskOrders: 12,
+      note: '사실: NJ 가용 재고 300개 · 가정: 일 판매량 유지 · 미확인: 리필 입고 일정',
+    },
+  },
 ]
 
 export const HISTORY_RECORDS: HistoryRecord[] = Array.from(
