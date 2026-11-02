@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
+import { markLoggedIn } from '@/entities/session'
 import { login } from '@/shared/api'
 import { env } from '@/shared/config'
 import { encodeBase64 } from '@/shared/lib/encode-base64'
@@ -16,4 +17,5 @@ export const useLogin = () =>
       }
       await login({ email: values.email.trim(), password: encodeBase64(values.password) })
     },
+    onSuccess: markLoggedIn,
   })
