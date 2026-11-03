@@ -73,7 +73,7 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
                 </div>
               </TableCell>
               <TableCell>{product.isHit ? '예' : '아니오'}</TableCell>
-              <TableCell>{product.emergencyAirEligible ? '가능' : '불가'}</TableCell>
+              <TableCell>{product.isEmergencyAirEligible ? '가능' : '불가'}</TableCell>
               <TableCell>
                 <Badge variant={isError ? 'danger' : 'success'}>
                   {VALIDATION_STATUS_LABEL[product.validationStatus]}

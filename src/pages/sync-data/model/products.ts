@@ -25,7 +25,7 @@ export interface Product {
   erpCode: string
   externalCodes: ExternalCode[]
   isHit: boolean
-  emergencyAirEligible: boolean
+  isEmergencyAirEligible: boolean
   validationStatus: ValidationStatus
   /** 이 오류 때문에 분석이 보류된 지연의 선적 코드. 명세 `affectedDelayEvents[]` */
   affectedShipmentCodes: string[]
@@ -53,7 +53,7 @@ export const PRODUCT_PAGE_SIZE = 20
 export const getProductErrorImpact = ({ affectedShipmentCodes }: Product) =>
   affectedShipmentCodes.length === 0
     ? null
-    : `영향: ${affectedShipmentCodes.join(', ')} 분석 보류. ERP 상품 정보를 보완해 다시 수집한 뒤, 지연 대응 센터에서 "재분석 요청"을 해 주세요.`
+    : `영향: ${affectedShipmentCodes.join(', ')} 분석 보류. 상품 정보를 보완해 다시 수집한 뒤, 지연 대응 센터에서 "재분석 요청"을 해 주세요.`
 
 export const isCodeMissing = ({ externalCode }: ExternalCode) => externalCode === null
 
@@ -103,7 +103,7 @@ const PRODUCT_TEMPLATES: ProductTemplate[] = [
     erpCode: 'SKU-CR-01',
     wmsCode: 'WMS-001',
     tmsCode: 'TMS-001',
-    emergencyAirEligible: true,
+    isEmergencyAirEligible: true,
     isHit: true,
   },
   {
@@ -116,7 +116,7 @@ const PRODUCT_TEMPLATES: ProductTemplate[] = [
     erpCode: 'SKU-SN-02',
     wmsCode: 'WMS-002',
     tmsCode: 'TMS-002',
-    emergencyAirEligible: true,
+    isEmergencyAirEligible: true,
     isHit: true,
   },
   {
@@ -129,7 +129,7 @@ const PRODUCT_TEMPLATES: ProductTemplate[] = [
     erpCode: 'SKU-SR-03',
     wmsCode: 'WMS-003',
     tmsCode: 'TMS-003',
-    emergencyAirEligible: true,
+    isEmergencyAirEligible: true,
     isHit: false,
   },
   {
@@ -142,7 +142,7 @@ const PRODUCT_TEMPLATES: ProductTemplate[] = [
     erpCode: 'SKU-CR-04',
     wmsCode: 'WMS-004',
     tmsCode: 'TMS-004',
-    emergencyAirEligible: false,
+    isEmergencyAirEligible: false,
     isHit: false,
   },
 ]

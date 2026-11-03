@@ -92,8 +92,8 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
           </dl>
           {analysis.warnings.length > 0 && (
             <ul className="flex flex-col gap-4pxr text-b2 text-warning">
-              {analysis.warnings.map((warning) => (
-                <li key={warning.code}>{warning.text}</li>
+              {analysis.warnings.map((warning, index) => (
+                <li key={`${warning.code}-${index}`}>{warning.text}</li>
               ))}
             </ul>
           )}
