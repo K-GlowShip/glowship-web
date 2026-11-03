@@ -18,7 +18,6 @@ export interface HistoryRecord {
   selector: string
   executionId: string | null
   status: HistoryStatus
-  approval: string | null
   reason: string
   comment: HistoryComment | null
   /** ISO 8601 UTC. 예: '2026-10-21T00:00:00Z' */

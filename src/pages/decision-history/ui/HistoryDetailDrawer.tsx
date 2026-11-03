@@ -1,4 +1,3 @@
-import { Badge } from '@/shared/ui/badge'
 import {
   Drawer,
   DrawerBody,
@@ -41,7 +40,6 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
           <DrawerTitle>
             {HISTORY_STATUS_LABEL[record.status]}: {record.option}
           </DrawerTitle>
-          {record.approval && <Badge variant="success">{record.approval}</Badge>}
         </div>
         <DrawerDescription>
           {record.shipmentCode} / {record.productName} · {record.selector} ·{' '}
