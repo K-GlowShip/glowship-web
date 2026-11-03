@@ -1,0 +1,1 @@
+export { TableTemplate } from './TableTemplate'

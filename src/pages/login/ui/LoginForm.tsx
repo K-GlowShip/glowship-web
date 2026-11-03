@@ -111,7 +111,7 @@ export function LoginForm() {
 
       {env.isDemoLogin && (
         <p className="text-center text-caption text-muted-foreground">
-          데모 계정 · {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
+          데모 계정: {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
         </p>
       )}
     </form>
