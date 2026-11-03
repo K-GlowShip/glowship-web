@@ -8,6 +8,7 @@ import {
   getIncreasedShortage,
   getShortageSkuCount,
   getVisibleImpacts,
+  RESULT_CLASS,
   RESULT_CLASS_LABEL,
   type SkuImpact,
   WAREHOUSE_LABEL,
@@ -45,7 +46,8 @@ export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps)
         <p
           className={cn(
             'text-b2',
-            analysis.resultClass === 'PURE_NO_RISK' || analysis.resultClass === 'WARNING_NO_RISK'
+            analysis.resultClass === RESULT_CLASS.PURE_NO_RISK ||
+              analysis.resultClass === RESULT_CLASS.WARNING_NO_RISK
               ? 'text-muted-foreground'
               : 'text-danger',
           )}
@@ -69,12 +71,12 @@ export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps)
 
 const summaryText = ({ impacts, resultClass, riskOrders }: DelayAnalysis) => {
   switch (resultClass) {
-    case 'FORECAST_ONLY_READY':
+    case RESULT_CLASS.FORECAST_ONLY_READY:
       return `실제 지연 유발 위험 주문 없음 · 지연 증분 예측 부족 ${getShortageSkuCount(impacts)}개 상품`
-    case 'READY_ORDER_RISK':
+    case RESULT_CLASS.READY_ORDER_RISK:
       return `지연으로 늘어난 부족 ${getIncreasedShortage(impacts).toLocaleString()}개 · 위험 주문 ${riskOrders.length}건`
-    case 'PURE_NO_RISK':
-    case 'WARNING_NO_RISK':
+    case RESULT_CLASS.PURE_NO_RISK:
+    case RESULT_CLASS.WARNING_NO_RISK:
       return RESULT_CLASS_LABEL[resultClass]
   }
 }

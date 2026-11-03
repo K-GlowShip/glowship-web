@@ -2,7 +2,12 @@ import { ChevronDown } from 'lucide-react'
 
 import { Badge } from '@/shared/ui/badge'
 
-import { ATTRIBUTION_LABEL, formatMonthDay, type RiskOrder } from '../model/delay-center'
+import {
+  ATTRIBUTION_LABEL,
+  formatMonthDay,
+  RISK_ATTRIBUTION,
+  type RiskOrder,
+} from '../model/delay-center'
 
 interface AtRiskOrdersProps {
   orders: RiskOrder[]
@@ -30,7 +35,9 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                 />
                 <span className="text-b1 font-bold">{order.orderCode}</span>
                 <Badge
-                  variant={order.attribution === 'delay_induced' ? 'danger' : 'neutral'}
+                  variant={
+                    order.attribution === RISK_ATTRIBUTION.DELAY_INDUCED ? 'danger' : 'neutral'
+                  }
                   dot={false}
                 >
                   {ATTRIBUTION_LABEL[order.attribution]}

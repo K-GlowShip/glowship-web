@@ -7,6 +7,7 @@ import {
   DELAY_STATUS_LABEL,
   DELAY_STATUS_OPTIONS,
   type DelayStatusFilter,
+  STATUS_FILTER_ALL,
 } from '../model/delay-center'
 
 interface DelayListFiltersProps {
@@ -26,7 +27,7 @@ export function DelayListFilters({
   onStatusChange,
 }: DelayListFiltersProps) {
   const statusOptions: DropdownOption[] = [
-    { value: 'all', label: `전체 (${counts.all})` },
+    { value: STATUS_FILTER_ALL, label: `전체 (${counts[STATUS_FILTER_ALL]})` },
     ...DELAY_STATUS_OPTIONS.map((value) => ({
       value,
       label: `${DELAY_STATUS_LABEL[value]} (${counts[value]})`,

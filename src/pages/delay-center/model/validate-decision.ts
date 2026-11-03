@@ -1,4 +1,4 @@
-import type { ClientRole } from './delay-center'
+import { CLIENT_ROLE, type ClientRole } from './delay-center'
 
 const DECISION_ERROR_MESSAGE = {
   OPTION_REQUIRED: '대응안을 선택해주세요.',
@@ -19,7 +19,7 @@ export function validateDecision(role: ClientRole, { optionId, text }: DecisionV
   const hasOption = optionId !== ''
   const hasText = text.trim() !== ''
 
-  if (role === 'member') {
+  if (role === CLIENT_ROLE.MEMBER) {
     return hasOption || hasText ? '' : DECISION_ERROR_MESSAGE.OPTION_OR_OPINION_REQUIRED
   }
   if (!hasOption) {

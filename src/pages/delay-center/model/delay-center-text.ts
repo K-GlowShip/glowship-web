@@ -1,4 +1,4 @@
-import type { ClientRole } from './delay-center'
+import { CLIENT_ROLE, type ClientRole } from './delay-center'
 
 interface DecisionFormText {
   optionLabel: string
@@ -9,13 +9,13 @@ interface DecisionFormText {
 
 /** 역할마다 달라지는 선택 폼 문구. 팀장은 최종 선택, 팀원은 의견·초안 저장이다. */
 export const DECISION_FORM_TEXT = {
-  lead: {
+  [CLIENT_ROLE.LEAD]: {
     optionLabel: '최종 대응안',
     textLabel: '선택 이유',
     textPlaceholder: '이 대응안을 선택한 이유를 입력하세요.',
     submit: '최종 선택',
   },
-  member: {
+  [CLIENT_ROLE.MEMBER]: {
     optionLabel: '선택한 대응안',
     textLabel: '의견',
     textPlaceholder: '동료와 팀장이 참고할 의견을 입력하세요.',

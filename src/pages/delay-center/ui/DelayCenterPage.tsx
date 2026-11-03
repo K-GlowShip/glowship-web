@@ -9,6 +9,7 @@ import {
   type DelayStatusFilter,
   filterDelayCases,
   sortDelayCases,
+  STATUS_FILTER_ALL,
 } from '../model/delay-center'
 import { CURRENT_ROLE, DELAY_CASES } from '../model/delay-center-mock'
 import { DelayDetail } from './DelayDetail'
@@ -18,12 +19,12 @@ const SORTED_CASES = sortDelayCases(DELAY_CASES)
 const COUNTS = countByStatus(SORTED_CASES)
 
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
-  value === 'all' || (DELAY_STATUS_OPTIONS as string[]).includes(value)
+  value === STATUS_FILTER_ALL || (DELAY_STATUS_OPTIONS as string[]).includes(value)
 
 export function DelayCenterPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [keyword, setKeyword] = useState('')
-  const [status, setStatus] = useState<DelayStatusFilter>('all')
+  const [status, setStatus] = useState<DelayStatusFilter>(STATUS_FILTER_ALL)
 
   const visibleCases = filterDelayCases(SORTED_CASES, status, keyword)
   // URL의 id가 없거나 목록에 없으면 첫 번째 항목을 보여 준다. 상세가 비어 있는 상태를 만들지 않기 위해서다.

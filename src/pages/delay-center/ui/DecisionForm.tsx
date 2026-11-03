@@ -7,8 +7,10 @@ import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 
 import {
+  CLIENT_ROLE,
   type ClientRole,
   type DelayOption,
+  FEASIBILITY,
   FEASIBILITY_LABEL,
   getSelectableOptions,
   OPTION_TYPE_LABEL,
@@ -34,7 +36,7 @@ interface DecisionFormProps {
  * 최종 선택은 실행 가능한 대응안만 고를 수 있고 이유가 필수다.
  */
 export function DecisionForm({ role, options }: DecisionFormProps) {
-  const isLead = role === 'lead'
+  const isLead = role === CLIENT_ROLE.LEAD
   const labels = DECISION_FORM_TEXT[role]
   const selectable = getSelectableOptions(role, options)
   const recommendedId = selectable.find((option) => option.recommended)?.id ?? NO_OPTION
@@ -50,7 +52,8 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
       value: option.id,
       label: [
         OPTION_TYPE_LABEL[option.type],
-        option.feasibility === 'NEEDS_CHECK' && FEASIBILITY_LABEL.NEEDS_CHECK,
+        option.feasibility === FEASIBILITY.NEEDS_CHECK &&
+          FEASIBILITY_LABEL[FEASIBILITY.NEEDS_CHECK],
         option.recommended && 'AI 추천',
       ]
         .filter(Boolean)
