@@ -1,9 +1,5 @@
-import { Link } from 'react-router'
-
-import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
-import { buttonVariants } from '@/shared/ui/button'
 
 import { type ClientRole, type DelayCase, formatMonthDay, STAGE_LABEL } from '../model/delay-center'
 import { ANALYSIS_NOTICE, DEFAULT_PROGRESS_STEP, EMPTY_TEXT } from '../model/delay-center-text'
@@ -92,11 +88,6 @@ function NoResultNotice({ delayCase }: { delayCase: DelayCase }) {
     <div className="flex flex-col items-start gap-12pxr rounded-card bg-danger-bg p-24pxr text-danger">
       <p className="text-b1 font-bold">{delayCase.failureMessage ?? ANALYSIS_NOTICE.NO_RESULT}</p>
       <p className="text-b2">{ANALYSIS_NOTICE.REANALYZE_GUIDE}</p>
-      {delayCase.status === 'on_hold' && (
-        <Link to={ROUTES.SYNC_DATA} className={buttonVariants({ variant: 'secondary' })}>
-          데이터 확인
-        </Link>
-      )}
     </div>
   )
 }

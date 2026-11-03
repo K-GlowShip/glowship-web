@@ -1,9 +1,6 @@
 import { Check } from 'lucide-react'
-import { Link } from 'react-router'
 
-import { ROUTES } from '@/shared/config'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
-import { buttonVariants } from '@/shared/ui/button'
 
 import {
   canDecide,
@@ -53,12 +50,6 @@ export function DecisionSection({ delayCase, analysis, role }: DecisionSectionPr
               .filter(Boolean)
               .join(' · ')}
           </p>
-          <Link
-            to={ROUTES.DECISION_HISTORY}
-            className={buttonVariants({ variant: 'secondary', className: 'self-start' })}
-          >
-            이력에서 보기
-          </Link>
         </div>
       ) : canDecide(delayCase) ? (
         <DecisionForm key={delayCase.id} role={role} options={analysis.options} />
