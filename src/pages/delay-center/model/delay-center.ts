@@ -1,7 +1,11 @@
 import { EMPTY_TEXT } from './delay-center-text'
 
-/** 서버 `GET /delay-events` 탭(현재 실행 상태)에 최종 선택 완료를 더한 구분 */
-export type DelayStatus = 'ready' | 'analyzing' | 'on_hold' | 'needs_reanalysis' | 'finalized'
+/**
+ * 서버 `GET /delay-events` 탭(현재 실행 상태)에 최종 선택 완료, 위험 없음(`NO_RISK`), 지연 해소(`NO_DELAY`)를 더한 구분.
+ * 위험 없음·지연 해소는 서버 탭 표(4.4)에 없는 제안이다. 서버 연동 때 `status` 값을 맞춰야 한다.
+ */
+export type DelayStatus =
+  'ready' | 'analyzing' | 'on_hold' | 'needs_reanalysis' | 'finalized' | 'no_risk' | 'no_delay'
 
 export type DelayStatusFilter = DelayStatus | 'all'
 
@@ -28,7 +32,8 @@ export type ReasonCode =
   | 'MISSING_OPERATING_RULE'
   | 'MISSING_REQUIRED_DATA'
 
-export type ResultClass = 'READY_ORDER_RISK' | 'FORECAST_ONLY_READY'
+export type ResultClass =
+  'READY_ORDER_RISK' | 'FORECAST_ONLY_READY' | 'PURE_NO_RISK' | 'WARNING_NO_RISK'
 
 export interface DelayOption {
   id: string
@@ -85,6 +90,7 @@ export interface AiExplanation {
 }
 
 export interface DelayAnalysis {
+  /** 위험 없음(`NO_RISK`)이면 `PURE_NO_RISK`·`WARNING_NO_RISK`이고, 위험 주문·대응안·설명이 비어 있다. */
   resultClass: ResultClass
   impact: InventoryImpact
   /** `FORECAST_ONLY_READY`일 때 지연 증분 예측 부족 SKU 수 */
@@ -141,7 +147,7 @@ export interface DelayCase {
   failureMessage: string | null
   /** 자료 변경으로 재분석이 필요할 때 사유 */
   staleReason: string | null
-  /** 결과가 없으면(분석 중·보류·실패) null */
+  /** 결과가 없으면(분석 중·보류·실패·지연 해소) null */
   analysis: DelayAnalysis | null
   opinions: MemberOpinion[]
   finalDecision: FinalDecision | null
@@ -153,6 +159,8 @@ export const DELAY_STATUS_LABEL: Record<DelayStatus, string> = {
   on_hold: '분석 보류',
   needs_reanalysis: '재분석 필요',
   finalized: '선택 완료',
+  no_risk: '위험 없음',
+  no_delay: '지연 해소',
 }
 
 export const DELAY_STATUS_BADGE_VARIANT = {
@@ -161,6 +169,8 @@ export const DELAY_STATUS_BADGE_VARIANT = {
   on_hold: 'danger',
   needs_reanalysis: 'neutral',
   finalized: 'success',
+  no_risk: 'success',
+  no_delay: 'neutral',
 } as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
 
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
@@ -244,6 +254,8 @@ export const countByStatus = (cases: DelayCase[]): Record<DelayStatusFilter, num
     on_hold: 0,
     needs_reanalysis: 0,
     finalized: 0,
+    no_risk: 0,
+    no_delay: 0,
   }
   for (const delayCase of cases) {
     counts[delayCase.status] += 1
@@ -291,6 +303,31 @@ const CAN_REANALYZE: Record<DelayStatus, boolean> = {
   on_hold: true,
   needs_reanalysis: true,
   finalized: false,
+  no_risk: true,
+  no_delay: false,
 }
 
 export const canReanalyze = (delayCase: DelayCase) => CAN_REANALYZE[delayCase.status]
+
+// 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)과 상태별 고정 문구를 그대로 쓴다.
+export const RESULT_CLASS_LABEL: Record<ResultClass, string> = {
+  READY_ORDER_RISK: '실주문 납기 위험',
+  FORECAST_ONLY_READY: '예측 기준 부족 위험',
+  PURE_NO_RISK: '지연 영향 없음',
+  WARNING_NO_RISK: '지연 영향 없음(기존 부족 있음)',
+}
+
+export const NO_RISK_MESSAGE: Record<'PURE_NO_RISK' | 'WARNING_NO_RISK', string> = {
+  PURE_NO_RISK: '지연으로 늘어나는 부족이 없습니다.',
+  WARNING_NO_RISK: '지연으로 늘어나는 부족은 없지만, 계획 기준으로 이미 부족한 SKU가 있습니다.',
+}
+
+/** 계획 유지는 항상 가능한 기준선이라, 그 밖에 실행 가능한 대응안이 하나도 없는지 본다. */
+export const hasNoFeasibleOption = (options: DelayOption[]) =>
+  !options.some((option) => option.type !== 'KEEP_PLAN' && option.feasibility === 'FEASIBLE')
+
+const MISSING_DATA_REASONS: ReasonCode[] = ['MISSING_OPERATING_RULE', 'MISSING_REQUIRED_DATA']
+
+/** 운영 기준·필수 자료가 없어 판정하지 못한(`확인 필요`) 대응안 */
+export const getOptionsMissingData = (options: DelayOption[]) =>
+  options.filter((option) => option.reasonCode && MISSING_DATA_REASONS.includes(option.reasonCode))

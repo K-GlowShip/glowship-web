@@ -1,6 +1,6 @@
 import { cn } from '@/shared/lib/cn'
 
-import { type DelayAnalysis, formatMonthDay } from '../model/delay-center'
+import { type DelayAnalysis, formatMonthDay, RESULT_CLASS_LABEL } from '../model/delay-center'
 
 interface Milestone {
   label: string
@@ -21,7 +21,7 @@ interface ImpactSectionProps {
 
 /** 안전재고 하회일과 실제 소진일을 나눠 보여 줘서, 여유가 줄어드는 시점과 팔 수 없게 되는 시점을 구분하게 한다. */
 export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps) {
-  const { impact, resultClass, riskOrders, forecastOnlySkuCount } = analysis
+  const { impact, resultClass } = analysis
 
   const milestones: Milestone[] = []
   if (impact.safetyStockBreachDate) {
@@ -53,10 +53,15 @@ export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps)
         <h3 id="impact-title" className="text-h3 font-bold">
           재고 영향
         </h3>
-        <p className="text-b2 text-danger">
-          {resultClass === 'FORECAST_ONLY_READY'
-            ? `실제 지연 유발 위험 주문 없음 · 지연 증분 예측 부족 ${forecastOnlySkuCount}개`
-            : `지연으로 늘어난 부족 ${impact.increasedShortage.toLocaleString()}개 · 위험 주문 ${riskOrders.length}건`}
+        <p
+          className={cn(
+            'text-b2',
+            resultClass === 'PURE_NO_RISK' || resultClass === 'WARNING_NO_RISK'
+              ? 'text-muted-foreground'
+              : 'text-danger',
+          )}
+        >
+          {summaryText(analysis)}
         </p>
       </div>
 
@@ -80,4 +85,16 @@ export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps)
       </ol>
     </section>
   )
+}
+
+const summaryText = ({ impact, resultClass, riskOrders, forecastOnlySkuCount }: DelayAnalysis) => {
+  switch (resultClass) {
+    case 'FORECAST_ONLY_READY':
+      return `실제 지연 유발 위험 주문 없음 · 지연 증분 예측 부족 ${forecastOnlySkuCount}개`
+    case 'READY_ORDER_RISK':
+      return `지연으로 늘어난 부족 ${impact.increasedShortage.toLocaleString()}개 · 위험 주문 ${riskOrders.length}건`
+    case 'PURE_NO_RISK':
+    case 'WARNING_NO_RISK':
+      return RESULT_CLASS_LABEL[resultClass]
+  }
 }

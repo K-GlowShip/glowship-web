@@ -33,6 +33,13 @@ export const ANALYSIS_NOTICE = {
   IN_PROGRESS: '완료되면 대응안 비교와 선택 화면이 열립니다.',
   NO_RESULT: '분석 결과가 없습니다.',
   REANALYZE_GUIDE: '자료를 보완한 뒤 재분석을 요청하면 새 분석이 시작됩니다.',
+  ON_HOLD: '필수 자료 결손으로 분석을 보류했습니다.',
+  NO_RISK: '현재 등록된 주문과 기준에서는 납기 위험 주문이 없습니다.',
+  NO_DELAY: '예상 입고일이 계획 입고일 이전으로 돌아왔습니다.',
+  NO_FEASIBLE_OPTION:
+    '계획 유지 외에 실행 가능한 대응안이 없습니다. 대응안별 불가 사유를 보고 직접 검토하세요.',
+  MISSING_DATA:
+    '운영 기준이나 필수 자료가 없어 판정하지 못한 대응안이 있습니다. 자료를 보완한 뒤 재분석을 요청하세요.',
 } as const
 
 export const DEFAULT_PROGRESS_STEP = '분석'

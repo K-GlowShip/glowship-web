@@ -1,7 +1,16 @@
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 
-import { type ClientRole, type DelayCase, formatMonthDay, STAGE_LABEL } from '../model/delay-center'
+import {
+  type ClientRole,
+  type DelayAnalysis,
+  type DelayCase,
+  formatMonthDay,
+  getOptionsMissingData,
+  hasNoFeasibleOption,
+  NO_RISK_MESSAGE,
+  STAGE_LABEL,
+} from '../model/delay-center'
 import { ANALYSIS_NOTICE, DEFAULT_PROGRESS_STEP, EMPTY_TEXT } from '../model/delay-center-text'
 import { AiExplanationCard } from './AiExplanationCard'
 import { AtRiskOrders } from './AtRiskOrders'
@@ -48,7 +57,12 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
         </p>
       )}
 
-      {analysis ? (
+      {analysis && delayCase.status === 'no_risk' ? (
+        <>
+          <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
+          <NoRiskNotice resultClass={analysis.resultClass} />
+        </>
+      ) : analysis ? (
         <>
           <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
           <AtRiskOrders orders={analysis.riskOrders} />
@@ -57,6 +71,7 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
             <h3 id="options-title" className="text-h3 font-bold">
               대응안 비교
             </h3>
+            <OptionNotices options={analysis.options} />
             <OptionTable options={analysis.options} />
           </section>
 
@@ -71,25 +86,81 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   )
 }
 
-/** 결과가 없는 상태(분석 중·보류·실패)의 안내. */
-function NoResultNotice({ delayCase }: { delayCase: DelayCase }) {
-  if (delayCase.status === 'analyzing') {
-    return (
-      <p
-        role="status"
-        className="rounded-card bg-info-bg px-24pxr py-32pxr text-center text-b1 text-info"
-      >
-        {delayCase.progressStep ?? DEFAULT_PROGRESS_STEP} · {ANALYSIS_NOTICE.IN_PROGRESS}
-      </p>
-    )
-  }
-
+/** 위험 주문이 없어 대응안 분석 없이 끝난 결과의 안내. */
+function NoRiskNotice({ resultClass }: { resultClass: DelayAnalysis['resultClass'] }) {
   return (
-    <div className="flex flex-col items-start gap-12pxr rounded-card bg-danger-bg p-24pxr text-danger">
-      <p className="text-b1 font-bold">{delayCase.failureMessage ?? ANALYSIS_NOTICE.NO_RESULT}</p>
-      <p className="text-b2">{ANALYSIS_NOTICE.REANALYZE_GUIDE}</p>
+    <div
+      role="status"
+      className="flex flex-col gap-4pxr rounded-card bg-success-bg px-24pxr py-24pxr text-success"
+    >
+      <p className="text-b1 font-bold">{ANALYSIS_NOTICE.NO_RISK}</p>
+      {(resultClass === 'PURE_NO_RISK' || resultClass === 'WARNING_NO_RISK') && (
+        <p className="text-b2">{NO_RISK_MESSAGE[resultClass]}</p>
+      )}
     </div>
   )
+}
+
+/** 대응안을 판정하지 못하거나 실행할 수 없는 경우의 안내. 사유는 표의 각 행에 있다. */
+function OptionNotices({ options }: { options: DelayAnalysis['options'] }) {
+  const notices = [
+    hasNoFeasibleOption(options) && ANALYSIS_NOTICE.NO_FEASIBLE_OPTION,
+    getOptionsMissingData(options).length > 0 && ANALYSIS_NOTICE.MISSING_DATA,
+  ].filter((notice) => notice !== false)
+
+  return notices.map((notice) => (
+    <p
+      key={notice}
+      role="status"
+      className="rounded-card bg-warning-bg px-16pxr py-12pxr text-b2 text-warning"
+    >
+      {notice}
+    </p>
+  ))
+}
+
+/** 결과가 없는 상태(분석 중·보류·실패·지연 해소)의 안내. 상태를 추가하면 여기도 적어야 컴파일된다. */
+function NoResultNotice({ delayCase }: { delayCase: DelayCase }) {
+  switch (delayCase.status) {
+    case 'analyzing':
+      return (
+        <p
+          role="status"
+          className="rounded-card bg-info-bg px-24pxr py-32pxr text-center text-b1 text-info"
+        >
+          {delayCase.progressStep ?? DEFAULT_PROGRESS_STEP} · {ANALYSIS_NOTICE.IN_PROGRESS}
+        </p>
+      )
+    case 'no_delay':
+      return (
+        <p
+          role="status"
+          className="rounded-card bg-background px-24pxr py-32pxr text-center text-b1 text-muted-foreground"
+        >
+          {ANALYSIS_NOTICE.NO_DELAY}
+        </p>
+      )
+    case 'on_hold':
+      return (
+        <div className="flex flex-col items-start gap-12pxr rounded-card bg-danger-bg p-24pxr text-danger">
+          <p className="text-b1 font-bold">{delayCase.failureMessage ?? ANALYSIS_NOTICE.ON_HOLD}</p>
+          <p className="text-b2">{ANALYSIS_NOTICE.REANALYZE_GUIDE}</p>
+        </div>
+      )
+    case 'ready':
+    case 'needs_reanalysis':
+    case 'finalized':
+    case 'no_risk':
+      // 결과가 있어야 하는 상태인데 없다. 서버 응답이 비었을 때를 위한 안내다.
+      return (
+        <div className="flex flex-col items-start gap-12pxr rounded-card bg-danger-bg p-24pxr text-danger">
+          <p className="text-b1 font-bold">
+            {delayCase.failureMessage ?? ANALYSIS_NOTICE.NO_RESULT}
+          </p>
+          <p className="text-b2">{ANALYSIS_NOTICE.REANALYZE_GUIDE}</p>
+        </div>
+      )
+  }
 }
 
 function SummaryItem({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
