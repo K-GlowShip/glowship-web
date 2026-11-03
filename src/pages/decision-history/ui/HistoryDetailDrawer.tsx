@@ -20,12 +20,20 @@ interface HistoryDetailDrawerProps {
   record: HistoryRecord | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onCloseAutoFocus: (event: Event) => void
 }
 
-export function HistoryDetailDrawer({ record, open, onOpenChange }: HistoryDetailDrawerProps) {
+export function HistoryDetailDrawer({
+  record,
+  open,
+  onOpenChange,
+  onCloseAutoFocus,
+}: HistoryDetailDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>{record && <HistoryDetail record={record} />}</DrawerContent>
+      <DrawerContent onCloseAutoFocus={onCloseAutoFocus}>
+        {record && <HistoryDetail record={record} />}
+      </DrawerContent>
     </Drawer>
   )
 }

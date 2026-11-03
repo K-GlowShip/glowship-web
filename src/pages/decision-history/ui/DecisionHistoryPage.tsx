@@ -65,6 +65,7 @@ export function DecisionHistoryPage() {
         record={detail.selected}
         open={detail.open}
         onOpenChange={detail.onOpenChange}
+        onCloseAutoFocus={detail.onCloseAutoFocus}
       />
     </div>
   )

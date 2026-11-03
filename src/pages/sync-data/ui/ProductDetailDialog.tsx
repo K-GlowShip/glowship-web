@@ -16,12 +16,18 @@ interface ProductDetailDialogProps {
   product: Product | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onCloseAutoFocus: (event: Event) => void
 }
 
-export function ProductDetailDialog({ product, open, onOpenChange }: ProductDetailDialogProps) {
+export function ProductDetailDialog({
+  product,
+  open,
+  onOpenChange,
+  onCloseAutoFocus,
+}: ProductDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby={undefined}>
+      <DialogContent aria-describedby={undefined} onCloseAutoFocus={onCloseAutoFocus}>
         {product && <ProductDetail product={product} />}
       </DialogContent>
     </Dialog>

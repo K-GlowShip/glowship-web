@@ -107,6 +107,7 @@ export function ProductPanel() {
         product={detailDialog.selected}
         open={detailDialog.open}
         onOpenChange={detailDialog.onOpenChange}
+        onCloseAutoFocus={detailDialog.onCloseAutoFocus}
       />
     </Card>
   )
