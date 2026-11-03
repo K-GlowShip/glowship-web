@@ -27,7 +27,12 @@ export interface HistoryRecord {
   analysis: {
     shortage: number
     riskOrders: number
-    note: string
+    /** 저장된 분석의 `run_summary`. 지연 선적 일정과 결과 분류(1~2문장) */
+    runSummary: string
+    /** 저장된 분석의 `risk_summary`. 영향 SKU 수·위험 주문 수와 귀속, "예측 기준" 표기(1~3문장) */
+    riskSummary: string
+    /** 저장된 분석의 `warnings[]`. 없으면 빈 배열 */
+    warnings: { code: string; text: string }[]
   }
 }
 

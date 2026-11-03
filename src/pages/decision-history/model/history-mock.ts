@@ -16,7 +16,10 @@ const TEMPLATES = [
     reason: '지연 영향이 제한적이라 추가 비용 없이 기존 일정을 유지합니다.',
     shortage: 320,
     riskOrders: 8,
-    note: '사실: LA 입고 예정 유지 · 가정: 일 판매량 유지 · 미확인: 선적 지연 사유',
+    runSummary: '선적이 계획보다 2일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+    riskSummary:
+      '영향 SKU 1개에서 위험 주문 8건이 예상됩니다(지연 유발 8건). 예측 기준: 최근 28일 일 평균 판매량.',
+    warnings: [],
   },
   {
     shipmentCode: 'GS-1022',
@@ -25,7 +28,10 @@ const TEMPLATES = [
     reason: '긴급 주문 물량만 먼저 보내 위험 주문을 줄입니다.',
     shortage: 580,
     riskOrders: 15,
-    note: '사실: 긴급 주문 15건 · 가정: 분할 운송 가능 · 미확인: 추가 운임',
+    runSummary: '선적이 계획보다 3일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+    riskSummary:
+      '영향 SKU 2개에서 위험 주문 15건이 예상됩니다(지연 유발 12건, 기존 위험 3건). 예측 기준: 최근 28일 일 평균 판매량.',
+    warnings: [],
   },
   {
     shipmentCode: 'GS-1023',
@@ -34,7 +40,15 @@ const TEMPLATES = [
     reason: '성수기 판매 손실을 막기 위해 항공으로 우선 확보합니다.',
     shortage: 940,
     riskOrders: 27,
-    note: '사실: 재고 소진 예상 3일 · 가정: 항공 운임 승인 · 미확인: 통관 소요 시간',
+    runSummary: '선적이 계획보다 5일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+    riskSummary:
+      '영향 SKU 1개에서 재고 소진이 3일 앞당겨지고 위험 주문 27건이 예상됩니다(지연 유발 27건). 예측 기준: 최근 28일 일 평균 판매량.',
+    warnings: [
+      {
+        code: 'FORECAST_EVENT_OVERLAP',
+        text: '판매 기준 기간이 행사 기간과 겹쳐 예측이 실제와 다를 수 있습니다.',
+      },
+    ],
   },
 ]
 
@@ -70,7 +84,9 @@ const createGeneratedRecord = (index: number): HistoryRecord => {
     analysis: {
       shortage: template.shortage,
       riskOrders: template.riskOrders,
-      note: template.note,
+      runSummary: template.runSummary,
+      riskSummary: template.riskSummary,
+      warnings: template.warnings,
     },
   }
 }
@@ -92,7 +108,10 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     analysis: {
       shortage: 1240,
       riskOrders: 42,
-      note: '사실: NJ 가용 재고 800개 · 가정: 일 판매량 유지 · 미확인: 현지 통관 완료 시각',
+      runSummary: '선적이 계획보다 4일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+      riskSummary:
+        '영향 SKU 1개에서 위험 주문 42건이 예상됩니다(지연 유발 42건). 예측 기준: 최근 28일 일 평균 판매량.',
+      warnings: [],
     },
   },
   {
@@ -110,7 +129,15 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     analysis: {
       shortage: 940,
       riskOrders: 27,
-      note: '사실: 재고 소진 예상 3일 · 가정: 항공 운임 승인 · 미확인: 통관 소요 시간',
+      runSummary: '선적이 계획보다 5일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+      riskSummary:
+        '영향 SKU 1개에서 재고 소진이 3일 앞당겨지고 위험 주문 27건이 예상됩니다(지연 유발 27건). 예측 기준: 최근 28일 일 평균 판매량.',
+      warnings: [
+        {
+          code: 'FORECAST_EVENT_OVERLAP',
+          text: '판매 기준 기간이 행사 기간과 겹쳐 예측이 실제와 다를 수 있습니다.',
+        },
+      ],
     },
   },
   {
@@ -129,7 +156,10 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     analysis: {
       shortage: 460,
       riskOrders: 12,
-      note: '사실: NJ 가용 재고 300개 · 가정: 일 판매량 유지 · 미확인: 리필 입고 일정',
+      runSummary: '선적이 계획보다 2일 늦은 입고 예정입니다. 결과 분류: 지연 유발 위험 주문 있음.',
+      riskSummary:
+        '영향 SKU 1개에서 위험 주문 12건이 예상됩니다(지연 유발 12건). 예측 기준: 최근 28일 일 평균 판매량.',
+      warnings: [],
     },
   },
 ]

@@ -80,7 +80,23 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
               <dd className="text-h1 font-bold text-danger">{analysis.riskOrders}건</dd>
             </div>
           </dl>
-          <p className="text-b2 text-muted-foreground">{analysis.note}</p>
+          <dl className="flex flex-col gap-8pxr text-b2">
+            <div>
+              <dt className="font-bold">분석 요약</dt>
+              <dd className="text-muted-foreground">{analysis.runSummary}</dd>
+            </div>
+            <div>
+              <dt className="font-bold">영향 요약</dt>
+              <dd className="text-muted-foreground">{analysis.riskSummary}</dd>
+            </div>
+          </dl>
+          {analysis.warnings.length > 0 && (
+            <ul className="flex flex-col gap-4pxr text-b2 text-warning">
+              {analysis.warnings.map((warning) => (
+                <li key={warning.code}>{warning.text}</li>
+              ))}
+            </ul>
+          )}
         </section>
       </DrawerBody>
 
