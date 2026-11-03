@@ -20,7 +20,7 @@ export const PRODUCT_STATUS_LABEL: Record<ProductStatus, string> = {
   'missing-code': '코드 누락',
 }
 
-export const PRODUCT_PAGE_SIZE = 11
+export const PRODUCT_PAGE_SIZE = 20
 
 export const PRODUCT_ERROR_NOTICE = {
   title: '검증 오류: NJ 창고 코드가 누락되었습니다',
