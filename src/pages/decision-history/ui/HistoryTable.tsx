@@ -18,9 +18,9 @@ import {
 } from '../model/history'
 
 const STATUS_BADGE_VARIANT = {
-  final: 'success',
-  draft: 'neutral',
-  reanalysis: 'warning',
+  FINAL: 'success',
+  DRAFT: 'neutral',
+  NEEDS_REANALYSIS: 'warning',
 } as const satisfies Record<HistoryStatus, 'success' | 'neutral' | 'warning'>
 
 interface HistoryTableProps {

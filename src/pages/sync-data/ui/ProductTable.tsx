@@ -12,7 +12,7 @@ import {
 import {
   EXTERNAL_CODE_SOURCE_LABEL,
   isProductError,
-  PRODUCT_STATUS_LABEL,
+  VALIDATION_STATUS_LABEL,
   type Product,
 } from '../model/products'
 
@@ -76,7 +76,7 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
               <TableCell>{product.emergencyAirEligible ? '가능' : '불가'}</TableCell>
               <TableCell>
                 <Badge variant={isError ? 'danger' : 'success'}>
-                  {PRODUCT_STATUS_LABEL[product.status]}
+                  {VALIDATION_STATUS_LABEL[product.validationStatus]}
                 </Badge>
               </TableCell>
             </TableRow>

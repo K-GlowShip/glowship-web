@@ -1,6 +1,7 @@
 import { formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 
-export type HistoryStatus = 'final' | 'draft' | 'reanalysis'
+/** 명세 v6.2 2절 판단 이력 상태 코드 */
+export type HistoryStatus = 'FINAL' | 'DRAFT' | 'NEEDS_REANALYSIS'
 
 export interface HistoryComment {
   author: string
@@ -41,9 +42,9 @@ export interface HistoryFilter {
 }
 
 export const HISTORY_STATUS_LABEL: Record<HistoryStatus, string> = {
-  final: '최종 선택',
-  draft: '초안',
-  reanalysis: '재분석 필요',
+  FINAL: '최종 선택',
+  DRAFT: '초안',
+  NEEDS_REANALYSIS: '재분석 필요',
 }
 
 export const HISTORY_STATUS_OPTIONS = Object.keys(HISTORY_STATUS_LABEL) as HistoryStatus[]

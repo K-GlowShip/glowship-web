@@ -4,10 +4,14 @@ import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 
-import { SYNC_STATUS_LABEL, type SyncSource } from '../model/sync-sources'
+import {
+  SYNC_STATUS_BADGE_VARIANT,
+  SYNC_STATUS_LABEL,
+  type SyncSource,
+} from '../model/sync-sources'
 
 export function SyncSourceCard({ source }: { source: SyncSource }) {
-  const isError = source.status === 'error'
+  const isError = source.status === 'FAILED'
 
   return (
     <Card className={cn(isError && 'border-danger')}>
@@ -17,7 +21,9 @@ export function SyncSourceCard({ source }: { source: SyncSource }) {
             <h2 className="text-h3 font-bold">{source.name}</h2>
             <p className="text-b2 text-muted-foreground">{source.system}</p>
           </div>
-          <Badge variant={isError ? 'danger' : 'success'}>{SYNC_STATUS_LABEL[source.status]}</Badge>
+          <Badge variant={SYNC_STATUS_BADGE_VARIANT[source.status]}>
+            {SYNC_STATUS_LABEL[source.status]}
+          </Badge>
         </div>
         <div className="flex items-end justify-between gap-12pxr">
           <div>

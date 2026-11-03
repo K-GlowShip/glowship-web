@@ -1,14 +1,15 @@
-export type ProductStatus = 'valid' | 'missing-code'
+/** 명세 v6.2 `GET /skus`의 `validationStatus` */
+export type ValidationStatus = 'OK' | 'CODE_MISSING' | 'ISSUE_OPEN'
 
 /** 상품 외부 코드를 내려주는 원천. 명세 v6.2 `GET /skus`의 `externalCodes[].sourceDomain` */
 export type ExternalCodeSource = 'INVENTORY' | 'SHIPMENT'
 
-/** 서버 `external_entity_mappings.mapping_status` 값 */
-export type MappingStatus = 'PENDING' | 'MAPPED' | 'UNMAPPED'
+/** `GET /skus`의 `externalCodes[].mappingStatus`. 어느 SKU에도 붙지 않은 `PENDING`은 오지 않는다 */
+export type MappingStatus = 'MAPPED' | 'UNMAPPED'
 
 export interface ExternalCode {
   sourceDomain: ExternalCodeSource
-  /** 매핑되지 않은 원천은 null */
+  /** 서버가 SKU 코드를 쓰는 원천(INVENTORY, SHIPMENT)을 항상 내려주고, 매핑이 없으면 null */
   externalCode: string | null
   mappingStatus: MappingStatus
 }
@@ -25,7 +26,9 @@ export interface Product {
   externalCodes: ExternalCode[]
   isHit: boolean
   emergencyAirEligible: boolean
-  status: ProductStatus
+  validationStatus: ValidationStatus
+  /** 이 오류 때문에 분석이 보류된 지연의 선적 코드. 명세 `affectedDelayEvents[]` */
+  affectedShipmentCodes: string[]
 }
 
 export interface ProductFilter {
@@ -33,9 +36,10 @@ export interface ProductFilter {
   onlyErrors: boolean
 }
 
-export const PRODUCT_STATUS_LABEL: Record<ProductStatus, string> = {
-  valid: '정상',
-  'missing-code': '코드 누락',
+export const VALIDATION_STATUS_LABEL: Record<ValidationStatus, string> = {
+  OK: '정상',
+  CODE_MISSING: '코드 누락',
+  ISSUE_OPEN: '검증 오류',
 }
 
 export const EXTERNAL_CODE_SOURCE_LABEL: Record<ExternalCodeSource, string> = {
@@ -45,22 +49,25 @@ export const EXTERNAL_CODE_SOURCE_LABEL: Record<ExternalCodeSource, string> = {
 
 export const PRODUCT_PAGE_SIZE = 20
 
-export const PRODUCT_ERROR_NOTICE = {
-  impact:
-    '영향: GS-1024 재고 전환 분석 보류. ERP 상품 정보를 보완한 뒤 다시 수집하면 자동 재분석합니다.',
-}
+/** 분석이 보류된 지연이 없으면 null. 보완 수집이 들어와도 보류된 실행은 그대로여서 재분석 요청이 필요하다(D18). */
+export const getProductErrorImpact = ({ affectedShipmentCodes }: Product) =>
+  affectedShipmentCodes.length === 0
+    ? null
+    : `영향: ${affectedShipmentCodes.join(', ')} 분석 보류. ERP 상품 정보를 보완해 다시 수집한 뒤, 지연 대응 센터에서 "재분석 요청"을 해 주세요.`
 
-export const isCodeMissing = ({ mappingStatus }: ExternalCode) => mappingStatus !== 'MAPPED'
+export const isCodeMissing = ({ externalCode }: ExternalCode) => externalCode === null
 
 export const getProductErrorTitle = (product: Product) => {
   const sources = product.externalCodes
     .filter(isCodeMissing)
     .map(({ sourceDomain }) => EXTERNAL_CODE_SOURCE_LABEL[sourceDomain])
 
-  return `검증 오류: ${sources.join(', ')} 외부 코드가 매핑되지 않았습니다`
+  return sources.length === 0
+    ? '검증 오류가 있습니다'
+    : `검증 오류: ${sources.join(', ')} 외부 코드가 매핑되지 않았습니다`
 }
 
-export const isProductError = (product: Product) => product.status !== 'valid'
+export const isProductError = (product: Product) => product.validationStatus !== 'OK'
 
 export const filterProducts = (products: Product[], { query, onlyErrors }: ProductFilter) => {
   const keyword = query.trim().toLowerCase()
@@ -77,7 +84,10 @@ export const filterProducts = (products: Product[], { query, onlyErrors }: Produ
   })
 }
 
-type ProductTemplate = Omit<Product, 'id' | 'externalCodes' | 'status'> & {
+type ProductTemplate = Omit<
+  Product,
+  'id' | 'externalCodes' | 'validationStatus' | 'affectedShipmentCodes'
+> & {
   wmsCode: string
   tmsCode: string
 }
@@ -140,6 +150,9 @@ const PRODUCT_TEMPLATES: ProductTemplate[] = [
 const MOCK_PRODUCT_COUNT = 128
 const MOCK_ERROR_INTERVAL = 63
 
+// 오류 상품마다 분석이 보류된 지연이 다르다. 순서대로 돌려 쓴다.
+const MOCK_AFFECTED_SHIPMENT_CODES = [['GS-1024'], ['GS-1025', 'GS-1026']]
+
 // TODO: 연동 데이터 API 명세 확정 후 서버 응답으로 교체
 export const PRODUCTS: Product[] = Array.from({ length: MOCK_PRODUCT_COUNT }, (_, index) => {
   const { wmsCode, tmsCode, ...template } = PRODUCT_TEMPLATES[index % PRODUCT_TEMPLATES.length]
@@ -156,6 +169,11 @@ export const PRODUCTS: Product[] = Array.from({ length: MOCK_PRODUCT_COUNT }, (_
       },
       { sourceDomain: 'SHIPMENT', externalCode: tmsCode, mappingStatus: 'MAPPED' },
     ],
-    status: hasMissingCode ? 'missing-code' : 'valid',
+    validationStatus: hasMissingCode ? 'CODE_MISSING' : 'OK',
+    affectedShipmentCodes: hasMissingCode
+      ? MOCK_AFFECTED_SHIPMENT_CODES[
+          (index / MOCK_ERROR_INTERVAL) % MOCK_AFFECTED_SHIPMENT_CODES.length
+        ]
+      : [],
   }
 })

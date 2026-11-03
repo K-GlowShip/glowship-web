@@ -6,7 +6,7 @@ import type { HistoryRecord, HistoryStatus } from './history'
 
 const MOCK_RECORD_COUNT = 128
 const SELECTORS = ['김민지', '박지훈', '이서연']
-const STATUS_CYCLE: HistoryStatus[] = ['reanalysis', 'final', 'draft']
+const STATUS_CYCLE: HistoryStatus[] = ['NEEDS_REANALYSIS', 'FINAL', 'DRAFT']
 
 const TEMPLATES = [
   {
@@ -84,7 +84,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     option: 'NJ 재고 전환',
     selector: '김민지',
     runCode: 'AN-261021-042',
-    status: 'final',
+    status: 'FINAL',
     reason:
       '추가 운송비 없이 위험 주문 42건을 우선 보호합니다. LA 입고 전까지 NJ의 여유 재고 800개를 활용합니다.',
     comment: { author: '박지훈', time: '09:12', text: 'NJ 창고 전환 가능 수량 확인했습니다.' },
@@ -103,7 +103,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     option: '항공 긴급 운송',
     selector: '박지훈',
     runCode: 'AN-261020-038',
-    status: 'draft',
+    status: 'DRAFT',
     reason: '성수기 판매 손실을 막기 위해 항공으로 우선 확보합니다.',
     comment: null,
     baseDataAt: '2026-10-20T23:30:00Z',
@@ -122,7 +122,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     option: 'NJ 재고 전환',
     selector: '이서연',
     runCode: 'AN-261020-021',
-    status: 'final',
+    status: 'FINAL',
     reason: '기획세트 한정 물량이라 NJ 여유 재고를 먼저 전환해 위험 주문을 보호합니다.',
     comment: null,
     baseDataAt: '2026-10-20T00:00:00Z',

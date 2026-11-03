@@ -8,7 +8,7 @@ import {
   getProductErrorTitle,
   isProductError,
   isCodeMissing,
-  PRODUCT_ERROR_NOTICE,
+  getProductErrorImpact,
   type Product,
 } from '../model/products'
 
@@ -35,6 +35,8 @@ export function ProductDetailDialog({
 }
 
 function ProductDetail({ product }: { product: Product }) {
+  const impact = getProductErrorImpact(product)
+
   return (
     <>
       <DialogHeader>
@@ -66,7 +68,7 @@ function ProductDetail({ product }: { product: Product }) {
             <CircleAlert className="mt-2pxr size-20pxr shrink-0" aria-hidden="true" />
             <div>
               <p className="text-b1 font-bold">{getProductErrorTitle(product)}</p>
-              <p className="text-b2">{PRODUCT_ERROR_NOTICE.impact}</p>
+              {impact && <p className="text-b2">{impact}</p>}
             </div>
           </div>
         )}
