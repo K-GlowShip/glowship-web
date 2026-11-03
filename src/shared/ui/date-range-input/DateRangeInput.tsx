@@ -132,7 +132,7 @@ export function DateRangeInput({ className, value, onChange, ...props }: DateRan
 }
 
 interface DateFieldProps extends Omit<ComponentProps<'button'>, 'value'> {
-  /** 화면 문구이자 스크린리더가 읽는 이름. 값이 없을 때는 안내 문구로도 쓴다. */
+  /** 화면 문구이자 스크린리더가 읽는 이름. 값이 있으면 이름 뒤에 값을 붙여 읽고, 없을 때는 안내 문구로도 쓴다. */
   label: string
   /** 'YYYY-MM-DD' 형식. 비어 있으면 label을 흐리게 보여 준다. */
   value: string
@@ -145,7 +145,7 @@ function DateField({ label, value, active, className, ...props }: DateFieldProps
   return (
     <button
       type="button"
-      aria-label={label}
+      aria-label={value ? `${label} ${formatDisplayDate(value)}` : label}
       data-active={active}
       className={cn(
         'min-w-0 flex-1 cursor-pointer rounded-control px-8pxr py-4pxr text-center text-b1 outline-none',
