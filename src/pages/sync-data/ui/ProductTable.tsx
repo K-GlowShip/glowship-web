@@ -12,7 +12,13 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import { isProductError, PRODUCT_STATUS_LABEL, type Product } from '../model/products'
+import {
+  EXTERNAL_CODE_SOURCE_LABEL,
+  getTotalAvailableQuantity,
+  isProductError,
+  PRODUCT_STATUS_LABEL,
+  type Product,
+} from '../model/products'
 
 interface ProductTableProps {
   products: Product[]
@@ -21,19 +27,21 @@ interface ProductTableProps {
 
 export function ProductTable({ products, onSelectError }: ProductTableProps) {
   return (
-    <Table className="min-w-800pxr">
+    <Table className="min-w-1210pxr">
       <TableHeader>
         <TableRow>
-          <TableHead>상품</TableHead>
-          <TableHead className="w-160pxr">ERP 코드</TableHead>
-          <TableHead className="w-220pxr">LA / NJ 창고 코드</TableHead>
-          <TableHead className="w-120pxr">히트 상품</TableHead>
-          <TableHead className="w-160pxr">검증 상태</TableHead>
+          <TableHead className="min-w-300pxr">상품</TableHead>
+          <TableHead className="w-140pxr">ERP 코드</TableHead>
+          <TableHead className="w-210pxr">외부 코드</TableHead>
+          <TableHead className="w-100pxr whitespace-nowrap">히트 상품</TableHead>
+          <TableHead className="w-120pxr whitespace-nowrap">긴급 항공 가능</TableHead>
+          <TableHead className="w-200pxr">가용 재고</TableHead>
+          <TableHead className="w-140pxr">검증 상태</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {products.length === 0 && (
-          <TableEmptyRow colSpan={5}>조건에 맞는 상품이 없습니다.</TableEmptyRow>
+          <TableEmptyRow colSpan={7}>조건에 맞는 상품이 없습니다.</TableEmptyRow>
         )}
         {products.map((product) => {
           const isError = isProductError(product)
@@ -56,12 +64,36 @@ export function ProductTable({ products, onSelectError }: ProductTableProps) {
                 ) : (
                   product.name
                 )}
+                <p className="text-b2 text-muted-foreground">
+                  {product.brandName} · {product.category} / {product.subcategory}
+                </p>
               </TableCell>
               <TableCell>{product.erpCode}</TableCell>
               <TableCell>
-                {product.laCode} / {product.njCode ?? '—'}
+                <div className="flex flex-col gap-2pxr">
+                  {product.externalCodes.map((code) => (
+                    <span key={code.sourceDomain}>
+                      <span className="text-muted-foreground">
+                        {EXTERNAL_CODE_SOURCE_LABEL[code.sourceDomain]}:{' '}
+                      </span>
+                      {code.externalCode ?? '—'}
+                    </span>
+                  ))}
+                </div>
               </TableCell>
               <TableCell>{product.isHit ? '예' : '아니오'}</TableCell>
+              <TableCell>{product.emergencyAirEligible ? '가능' : '불가'}</TableCell>
+              <TableCell>
+                {getTotalAvailableQuantity(product).toLocaleString('ko-KR')}
+                <p className="text-b2 text-muted-foreground">
+                  {product.stocks
+                    .map(
+                      ({ warehouseName, availableQuantity }) =>
+                        `${warehouseName} ${availableQuantity.toLocaleString('ko-KR')}`,
+                    )
+                    .join(' · ')}
+                </p>
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-4pxr">
                   <Badge variant={isError ? 'danger' : 'success'}>
