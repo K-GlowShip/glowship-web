@@ -1,4 +1,11 @@
-import type { ClientRole, DelayAnalysis, DelayCase, DelayOption, RiskOrder } from './delay-center'
+import type {
+  ClientRole,
+  DelayAnalysis,
+  DelayCase,
+  DelayOption,
+  RiskOrder,
+  SkuImpact,
+} from './delay-center'
 
 // TODO: GET /delay-events, GET /analysis-runs/{runId} 연동 후 서버 응답으로 교체
 // TODO: GET /me가 생기면 역할을 서버 응답에서 읽는다 (지금은 헤더의 예시 값 '김민지 · 팀장'과 맞춘 값)
@@ -86,17 +93,37 @@ const EXPLANATION = {
   warnings: ['판매 기준 기간과 행사 기간이 겹칩니다.'],
 }
 
+const HYDRA_CREAM_IMPACT: SkuImpact = {
+  skuCode: 'SKU-003',
+  productName: 'A Glow Hydra Cream 50ml',
+  region: 'WEST',
+  scope: 'IMPACTED',
+  estimable: true,
+  increasedShortage: 1240,
+  safetyStockBreachDate: '2026-10-22',
+  stockoutDate: '2026-10-24',
+  stockoutEndDate: '2026-10-27',
+  stockoutDays: 4,
+}
+
+// 증분은 없지만 안전재고 아래로 내려가는 SKU
+const WATCH_IMPACT: SkuImpact = {
+  skuCode: 'SKU-002',
+  productName: 'A Glow Hydra Toner 150ml',
+  region: 'WEST',
+  scope: 'WATCH',
+  estimable: true,
+  increasedShortage: 0,
+  safetyStockBreachDate: '2026-10-29',
+  stockoutDate: null,
+  stockoutEndDate: null,
+  stockoutDays: null,
+}
+
 // 해상 선적이 해상·항구 단계일 때의 후보: 계획 유지, 한국 창고 항공 보충, 다른 권역 창고 출고
 const READY_ANALYSIS: DelayAnalysis = {
   resultClass: 'READY_ORDER_RISK',
-  impact: {
-    increasedShortage: 1240,
-    safetyStockBreachDate: '2026-10-22',
-    stockoutDate: '2026-10-24',
-    stockoutEndDate: '2026-10-27',
-    stockoutDays: 4,
-  },
-  forecastOnlySkuCount: 0,
+  impacts: [HYDRA_CREAM_IMPACT, WATCH_IMPACT],
   riskOrders: RISK_ORDERS,
   options: [KR_AIR, OTHER_REGION, KEEP_PLAN],
   explanation: EXPLANATION,
@@ -194,7 +221,13 @@ export const DELAY_CASES: DelayCase[] = [
     expectedInbound: '2026-10-28',
     analysis: {
       ...READY_ANALYSIS,
-      impact: { ...READY_ANALYSIS.impact, increasedShortage: 420 },
+      impacts: [
+        {
+          ...HYDRA_CREAM_IMPACT,
+          productName: 'A Glow Hydra Toner Pad 60ea',
+          increasedShortage: 420,
+        },
+      ],
       riskOrders: RISK_ORDERS.slice(0, 2),
       options: [
         {
@@ -240,8 +273,19 @@ export const DELAY_CASES: DelayCase[] = [
     analysis: {
       ...READY_ANALYSIS,
       resultClass: 'FORECAST_ONLY_READY',
-      impact: { ...READY_ANALYSIS.impact, increasedShortage: 610 },
-      forecastOnlySkuCount: 2,
+      impacts: [
+        { ...HYDRA_CREAM_IMPACT, productName: 'A Glow Hydra Serum 30ml', increasedShortage: 410 },
+        { ...WATCH_IMPACT, scope: 'IMPACTED', increasedShortage: 200, stockoutDate: null },
+        {
+          ...WATCH_IMPACT,
+          skuCode: 'SKU-009',
+          productName: 'A Glow Hydra Serum 15ml',
+          scope: 'IMPACTED',
+          estimable: false,
+          increasedShortage: null,
+          safetyStockBreachDate: null,
+        },
+      ],
       riskOrders: [],
       options: [
         {
@@ -312,14 +356,14 @@ export const DELAY_CASES: DelayCase[] = [
     expectedInbound: '2026-10-28',
     analysis: {
       resultClass: 'WARNING_NO_RISK',
-      impact: {
-        increasedShortage: 0,
-        safetyStockBreachDate: '2026-10-30',
-        stockoutDate: null,
-        stockoutEndDate: null,
-        stockoutDays: null,
-      },
-      forecastOnlySkuCount: 0,
+      impacts: [
+        {
+          ...WATCH_IMPACT,
+          skuCode: 'SKU-011',
+          productName: 'A Glow Calming Cream 50ml',
+          safetyStockBreachDate: '2026-10-30',
+        },
+      ],
       riskOrders: [],
       options: [],
       explanation: null,
@@ -353,7 +397,13 @@ export const DELAY_CASES: DelayCase[] = [
     expectedInbound: '2026-10-28',
     analysis: {
       ...READY_ANALYSIS,
-      impact: { ...READY_ANALYSIS.impact, increasedShortage: 300 },
+      impacts: [
+        {
+          ...HYDRA_CREAM_IMPACT,
+          productName: 'A Glow Cleansing Foam 150ml',
+          increasedShortage: 300,
+        },
+      ],
       riskOrders: RISK_ORDERS.slice(0, 1),
       options: [
         {

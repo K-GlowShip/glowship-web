@@ -6,6 +6,7 @@ import {
   type DelayAnalysis,
   type DelayCase,
   formatMonthDay,
+  getDetailSections,
   getOptionsMissingData,
   hasNoFeasibleOption,
   NO_RISK_MESSAGE,
@@ -26,6 +27,7 @@ interface DelayDetailProps {
 
 export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   const { analysis } = delayCase
+  const sections = getDetailSections(delayCase)
 
   return (
     <article className="flex min-w-0 flex-col gap-24pxr rounded-panel border border-border bg-card p-32pxr lg:flex-1">
@@ -57,27 +59,32 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
         </p>
       )}
 
-      {analysis && delayCase.status === 'no_risk' ? (
+      {analysis ? (
         <>
-          <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
-          <NoRiskNotice resultClass={analysis.resultClass} />
-        </>
-      ) : analysis ? (
-        <>
-          <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
-          <AtRiskOrders orders={analysis.riskOrders} />
+          {sections.includes('impact') && (
+            <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
+          )}
+          {sections.includes('riskOrders') && <AtRiskOrders orders={analysis.riskOrders} />}
 
-          <section aria-labelledby="options-title" className="flex flex-col gap-16pxr">
-            <h3 id="options-title" className="text-h3 font-bold">
-              대응안 비교
-            </h3>
-            <OptionNotices options={analysis.options} />
-            <OptionTable options={analysis.options} />
-          </section>
+          {sections.includes('options') && (
+            <section aria-labelledby="options-title" className="flex flex-col gap-16pxr">
+              <h3 id="options-title" className="text-h3 font-bold">
+                대응안 비교
+              </h3>
+              <OptionNotices options={analysis.options} />
+              <OptionTable options={analysis.options} />
+            </section>
+          )}
 
-          {analysis.explanation && <AiExplanationCard explanation={analysis.explanation} />}
+          {sections.includes('explanation') && analysis.explanation && (
+            <AiExplanationCard explanation={analysis.explanation} />
+          )}
 
-          <DecisionSection delayCase={delayCase} analysis={analysis} role={role} />
+          {sections.includes('decision') && (
+            <DecisionSection delayCase={delayCase} analysis={analysis} role={role} />
+          )}
+
+          {delayCase.status === 'no_risk' && <NoRiskNotice resultClass={analysis.resultClass} />}
         </>
       ) : (
         <NoResultNotice delayCase={delayCase} />

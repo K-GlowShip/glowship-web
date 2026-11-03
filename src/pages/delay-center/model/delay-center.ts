@@ -35,6 +35,8 @@ export type ReasonCode =
 export type ResultClass =
   'READY_ORDER_RISK' | 'FORECAST_ONLY_READY' | 'PURE_NO_RISK' | 'WARNING_NO_RISK'
 
+export type RiskAttribution = 'delay_induced' | 'pre_existing'
+
 export interface DelayOption {
   id: string
   type: OptionType
@@ -62,7 +64,7 @@ export interface RiskOrder {
   orderCode: string
   /** 위험으로 판정한 사유(`riskReason`) */
   riskReason: string
-  attribution: 'delay_induced' | 'pre_existing'
+  attribution: RiskAttribution
   /** 'YYYY-MM-DD' */
   promisedDate: string
   /** 'YYYY-MM-DD' */
@@ -70,9 +72,21 @@ export interface RiskOrder {
   lines: RiskOrderLine[]
 }
 
-export interface InventoryImpact {
+/** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
+export type SkuScope = 'IMPACTED' | 'WATCH' | 'SHIPMENT_ONLY'
+
+export type WarehouseRegion = 'WEST' | 'EAST' | 'KR'
+
+/** SKU·창고 하나의 재고 영향(`inventory_impact_results` 한 행) */
+export interface SkuImpact {
+  skuCode: string
+  productName: string
+  region: WarehouseRegion
+  scope: SkuScope
+  /** 판정할 수 없는 SKU(`NOT_ESTIMABLE`)면 false이고 아래 값은 모두 null */
+  estimable: boolean
   /** 지연으로 늘어난 부족 수량(지연 반영 부족 − 계획 기준 부족) */
-  increasedShortage: number
+  increasedShortage: number | null
   /** 'YYYY-MM-DD'. 안전재고 아래로 내려가는 날 */
   safetyStockBreachDate: string | null
   /** 'YYYY-MM-DD'. 재고가 바닥나는 날 */
@@ -92,9 +106,8 @@ export interface AiExplanation {
 export interface DelayAnalysis {
   /** 위험 없음(`NO_RISK`)이면 `PURE_NO_RISK`·`WARNING_NO_RISK`이고, 위험 주문·대응안·설명이 비어 있다. */
   resultClass: ResultClass
-  impact: InventoryImpact
-  /** `FORECAST_ONLY_READY`일 때 지연 증분 예측 부족 SKU 수 */
-  forecastOnlySkuCount: number
+  /** SKU·창고별 재고 영향. `SHIPMENT_ONLY`를 뺀 행만 화면에 쓴다. */
+  impacts: SkuImpact[]
   riskOrders: RiskOrder[]
   options: DelayOption[]
   /** 설명 검증을 통과하지 못했으면 null */
@@ -331,3 +344,50 @@ const MISSING_DATA_REASONS: ReasonCode[] = ['MISSING_OPERATING_RULE', 'MISSING_R
 /** 운영 기준·필수 자료가 없어 판정하지 못한(`확인 필요`) 대응안 */
 export const getOptionsMissingData = (options: DelayOption[]) =>
   options.filter((option) => option.reasonCode && MISSING_DATA_REASONS.includes(option.reasonCode))
+
+export const WAREHOUSE_LABEL: Record<WarehouseRegion, string> = {
+  WEST: '서부(LA)',
+  EAST: '동부(NJ)',
+  KR: '한국',
+}
+
+/** 화면에 보여 줄 재고 영향 행. 지연 선적에만 있는 SKU는 빼고, 영향이 있는 SKU를 먼저 둔다. */
+export const getVisibleImpacts = (impacts: SkuImpact[]) =>
+  impacts
+    .filter((impact) => impact.scope !== 'SHIPMENT_ONLY')
+    .sort((a, b) => Number(b.scope === 'IMPACTED') - Number(a.scope === 'IMPACTED'))
+
+const sumShortage = (impacts: SkuImpact[]) =>
+  impacts.reduce((sum, impact) => sum + (impact.increasedShortage ?? 0), 0)
+
+/** 지연으로 늘어난 부족 수량. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
+export const getIncreasedShortage = (impacts: SkuImpact[]) =>
+  sumShortage(impacts.filter((impact) => impact.scope === 'IMPACTED'))
+
+/** 지연 증분 예측 부족이 있는 SKU 수 */
+export const getShortageSkuCount = (impacts: SkuImpact[]) =>
+  impacts.filter((impact) => impact.scope === 'IMPACTED' && (impact.increasedShortage ?? 0) > 0)
+    .length
+
+export type DetailSection = 'impact' | 'riskOrders' | 'options' | 'explanation' | 'decision'
+
+export const NO_SECTIONS: DetailSection[] = []
+export const NO_RISK_SECTIONS: DetailSection[] = ['impact']
+export const FULL_SECTIONS: DetailSection[] = [
+  'impact',
+  'riskOrders',
+  'options',
+  'explanation',
+  'decision',
+]
+
+/**
+ * 상태별로 상세에 보여 줄 섹션과 순서. 재고 영향 → 위험 주문 → 대응안 비교 → 설명 → 선택 순서(serviceflow 3~4단계).
+ * 결과가 없으면(분석 중·보류·실패·지연 해소) 섹션 없이 안내만 보여 준다. 위험 없음은 재고 영향만 있다.
+ */
+export const getDetailSections = ({ status, analysis }: DelayCase) => {
+  if (!analysis) {
+    return NO_SECTIONS
+  }
+  return status === 'no_risk' ? NO_RISK_SECTIONS : FULL_SECTIONS
+}
