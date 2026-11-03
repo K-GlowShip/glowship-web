@@ -1,0 +1,303 @@
+import type { ClientRole, DelayAnalysis, DelayCase, DelayOption, RiskOrder } from './delay-center'
+
+// TODO: GET /delay-events, GET /analysis-runs/{runId} 연동 후 서버 응답으로 교체
+// TODO: GET /me가 생기면 역할을 서버 응답에서 읽는다 (지금은 헤더의 예시 값 '김민지 · 팀장'과 맞춘 값)
+export const CURRENT_ROLE: ClientRole = 'lead'
+
+// 형식은 2026 H1 합성 데이터(shipments·orders·skus·users)를 따른다.
+const MEMBER = 'A Beauty Company Member 1'
+const LEAD = 'A Beauty Company Lead'
+
+const KEEP_PLAN: DelayOption = {
+  id: 'keep-plan',
+  type: 'KEEP_PLAN',
+  feasibility: 'FEASIBLE',
+  reasonCode: null,
+  expectedArrival: '2026-10-28',
+  securableQuantity: 0,
+  recoveredOrders: 0,
+  remainingRiskOrders: 42,
+  recommended: false,
+  explanation: '추가 대응 없이 예상 입고일을 기다리며, 위험 주문 42건이 그대로 남습니다.',
+}
+
+const KR_AIR: DelayOption = {
+  id: 'kr-air',
+  type: 'KR_AIR_REPLENISH',
+  feasibility: 'FEASIBLE',
+  reasonCode: null,
+  expectedArrival: '2026-10-24',
+  securableQuantity: 1240,
+  recoveredOrders: 42,
+  remainingRiskOrders: 0,
+  recommended: true,
+  explanation: '지연 유발 위험 주문 42건을 모두 회복하고 남는 위험 주문이 없습니다.',
+}
+
+const OTHER_REGION: DelayOption = {
+  id: 'other-region',
+  type: 'OTHER_REGION_FULFILL',
+  feasibility: 'FEASIBLE',
+  reasonCode: null,
+  expectedArrival: '2026-10-23',
+  securableQuantity: 800,
+  recoveredOrders: 30,
+  remainingRiskOrders: 12,
+  recommended: false,
+  explanation: '지연 유발 위험 주문 30건을 회복하고 12건이 남습니다.',
+}
+
+const RISK_ORDERS: RiskOrder[] = [
+  {
+    orderCode: 'A-ORD-20261018-0231',
+    riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
+    attribution: 'delay_induced',
+    promisedDate: '2026-10-26',
+    expectedDate: '2026-10-29',
+    lines: [
+      { lineNo: 1, skuCode: 'SKU-003', openQuantity: 120 },
+      { lineNo: 2, skuCode: 'SKU-002', openQuantity: 40 },
+    ],
+  },
+  {
+    orderCode: 'A-ORD-20261019-0114',
+    riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
+    attribution: 'delay_induced',
+    promisedDate: '2026-10-27',
+    expectedDate: '2026-10-30',
+    lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 80 }],
+  },
+  {
+    orderCode: 'A-ORD-20261015-0302',
+    riskReason: '계획 입고일 기준으로도 SKU-003 재고가 부족합니다.',
+    attribution: 'pre_existing',
+    promisedDate: '2026-10-25',
+    expectedDate: '2026-10-28',
+    lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 60 }],
+  },
+]
+
+const EXPLANATION = {
+  runSummary:
+    '선적 OCN-20260910의 3PL 입고가 10월 24일에서 10월 28일로 4일 밀렸고, 실주문 납기 위험이 있습니다.',
+  riskSummary:
+    'A Glow Hydra Cream 50ml의 부족이 지연으로 1,240개 늘고 위험 주문은 42건입니다. 예측 기준 값입니다.',
+  recommendation: '한국 창고 항공 보충이 지연 유발 위험 주문을 가장 많이 회복해 1순위입니다.',
+  warnings: ['판매 기준 기간과 행사 기간이 겹칩니다.'],
+}
+
+// 해상 선적이 해상·항구 단계일 때의 후보: 계획 유지, 한국 창고 항공 보충, 다른 권역 창고 출고
+const READY_ANALYSIS: DelayAnalysis = {
+  resultClass: 'READY_ORDER_RISK',
+  impact: {
+    increasedShortage: 1240,
+    safetyStockBreachDate: '2026-10-22',
+    stockoutDate: '2026-10-24',
+    stockoutEndDate: '2026-10-27',
+    stockoutDays: 4,
+  },
+  forecastOnlySkuCount: 0,
+  riskOrders: RISK_ORDERS,
+  options: [KR_AIR, OTHER_REGION, KEEP_PLAN],
+  explanation: EXPLANATION,
+}
+
+const BASE = {
+  route: 'KR → LOS ANGELES',
+  transportMode: 'OCEAN',
+  stage: 'AT_SEA',
+  skuCount: 1,
+  baseDataAt: '2026-10-21T00:30:00Z',
+  dataNotice: null,
+  progressStep: null,
+  failureMessage: null,
+  staleReason: null,
+  finalDecision: null,
+} as const
+
+export const DELAY_CASES: DelayCase[] = [
+  {
+    ...BASE,
+    id: 'de-1024',
+    shipmentCode: 'OCN-20260910',
+    productName: 'A Glow Hydra Cream 50ml',
+    skuCount: 3,
+    runCode: 'AN-261021-042',
+    status: 'ready',
+    delayDays: 4,
+    plannedInbound: '2026-10-24',
+    expectedInbound: '2026-10-28',
+    dataNotice: 'TMS 수집이 지연되어 선적 정보가 오래되었을 수 있습니다.',
+    analysis: READY_ANALYSIS,
+    opinions: [
+      {
+        id: 'op-1',
+        author: MEMBER,
+        createdAt: '2026-10-21T00:12:00Z',
+        optionId: 'other-region',
+        text: '다른 권역 창고 출고를 제안합니다. 창고 담당자에게 가능 수량을 확인했습니다.',
+      },
+      {
+        id: 'op-2',
+        author: MEMBER,
+        createdAt: '2026-10-21T01:40:00Z',
+        optionId: 'kr-air',
+        text: '위험 주문을 0건으로 만들 수 있는 항공 보충도 검토가 필요해 보입니다. 포워더에게 가능 여부를 아직 확인하지 못했습니다.',
+      },
+    ],
+  },
+  {
+    ...BASE,
+    id: 'de-1023',
+    shipmentCode: 'OCN-20260911',
+    productName: 'A Glow Calming Serum 30ml',
+    runCode: null,
+    baseDataAt: null,
+    status: 'analyzing',
+    stage: 'AT_PORT',
+    delayDays: 3,
+    plannedInbound: '2026-10-25',
+    expectedInbound: '2026-10-28',
+    progressStep: '대응안 분석 중',
+    analysis: null,
+    opinions: [],
+  },
+  {
+    ...BASE,
+    id: 'de-1021',
+    shipmentCode: 'AIR-REG-20261005',
+    productName: 'A Glow Hydra Mask Pack 5ea',
+    runCode: 'AN-261021-039',
+    status: 'on_hold',
+    transportMode: 'AIR',
+    stage: 'IN_AIR',
+    delayDays: 3,
+    plannedInbound: '2026-10-25',
+    expectedInbound: '2026-10-28',
+    failureMessage: '필수 자료 결손으로 분석을 보류했습니다.',
+    dataNotice: '재고(WMS) 수집 오류로 일부 자료가 없습니다.',
+    analysis: null,
+    opinions: [],
+  },
+  {
+    ...BASE,
+    id: 'de-1020',
+    shipmentCode: 'OCN-20260913',
+    productName: 'A Glow Hydra Toner Pad 60ea',
+    skuCount: 2,
+    runCode: 'AN-261021-037',
+    status: 'ready',
+    // 해상 선적이 출항 전이면 출항 전 항공 전환이 후보가 된다
+    stage: 'PRE_DEPARTURE',
+    delayDays: 2,
+    plannedInbound: '2026-10-26',
+    expectedInbound: '2026-10-28',
+    analysis: {
+      ...READY_ANALYSIS,
+      impact: { ...READY_ANALYSIS.impact, increasedShortage: 420 },
+      riskOrders: RISK_ORDERS.slice(0, 2),
+      options: [
+        {
+          id: 'pre-air',
+          type: 'PRE_DEPARTURE_AIR',
+          feasibility: 'FEASIBLE',
+          reasonCode: null,
+          expectedArrival: '2026-10-24',
+          securableQuantity: 420,
+          recoveredOrders: 2,
+          remainingRiskOrders: 0,
+          recommended: true,
+          explanation: '지연 유발 위험 주문 2건을 모두 회복합니다.',
+        },
+        {
+          ...OTHER_REGION,
+          feasibility: 'NOT_FEASIBLE',
+          reasonCode: 'NO_TRANSFERABLE_STOCK',
+          expectedArrival: null,
+          securableQuantity: 0,
+          recoveredOrders: 0,
+          remainingRiskOrders: 2,
+          explanation: '공여 창고에 넘길 재고가 없어 효과가 없습니다.',
+        },
+        { ...KEEP_PLAN, remainingRiskOrders: 2 },
+      ],
+    },
+    opinions: [],
+  },
+  {
+    ...BASE,
+    id: 'de-1019',
+    shipmentCode: 'AIR-REG-20261006',
+    productName: 'A Glow Hydra Serum 30ml',
+    runCode: 'AN-261021-035',
+    status: 'ready',
+    transportMode: 'AIR',
+    stage: 'IN_AIR',
+    delayDays: 2,
+    plannedInbound: '2026-10-26',
+    expectedInbound: '2026-10-28',
+    // 실제 지연 유발 위험 주문은 없고 지연 증분 예측 부족만 있는 결과
+    analysis: {
+      ...READY_ANALYSIS,
+      resultClass: 'FORECAST_ONLY_READY',
+      impact: { ...READY_ANALYSIS.impact, increasedShortage: 610 },
+      forecastOnlySkuCount: 2,
+      riskOrders: [],
+      options: [
+        {
+          ...KR_AIR,
+          securableQuantity: 610,
+          recoveredOrders: 0,
+          remainingRiskOrders: 0,
+          explanation: '위험 주문은 없지만 예측 부족 610개를 줄일 수 있습니다.',
+        },
+        {
+          ...OTHER_REGION,
+          feasibility: 'NEEDS_CHECK',
+          reasonCode: 'DONOR_NO_NEXT_INBOUND',
+          expectedArrival: null,
+          securableQuantity: null,
+          recoveredOrders: null,
+          remainingRiskOrders: null,
+          explanation: '공여 창고의 다음 입고가 없어 판정할 수 없습니다.',
+        },
+        { ...KEEP_PLAN, remainingRiskOrders: 0 },
+      ],
+    },
+    opinions: [],
+  },
+  {
+    ...BASE,
+    id: 'de-1018',
+    shipmentCode: 'OCN-20260915',
+    productName: 'A Glow Hydra Mist 100ml',
+    runCode: 'AN-261020-031',
+    status: 'needs_reanalysis',
+    stage: 'AT_PORT',
+    delayDays: 1,
+    plannedInbound: '2026-10-27',
+    expectedInbound: '2026-10-28',
+    staleReason: '주문 데이터가 변경되었습니다.',
+    analysis: READY_ANALYSIS,
+    opinions: [],
+  },
+  {
+    ...BASE,
+    id: 'de-1017',
+    shipmentCode: 'OCN-20260909',
+    productName: 'A Glow Calming Toner 150ml',
+    runCode: 'AN-261019-027',
+    status: 'finalized',
+    delayDays: 2,
+    plannedInbound: '2026-10-24',
+    expectedInbound: '2026-10-26',
+    analysis: READY_ANALYSIS,
+    opinions: [],
+    finalDecision: {
+      author: LEAD,
+      decidedAt: '2026-10-20T02:10:00Z',
+      optionId: 'kr-air',
+      reason: '위험 주문을 모두 회복할 수 있는 유일한 대응안이라 선택합니다.',
+    },
+  },
+]
