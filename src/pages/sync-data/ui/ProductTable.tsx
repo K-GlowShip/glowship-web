@@ -1,6 +1,3 @@
-import { ChevronRight } from 'lucide-react'
-
-import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ui/badge'
 import {
   Table,
@@ -14,7 +11,6 @@ import {
 
 import {
   EXTERNAL_CODE_SOURCE_LABEL,
-  getTotalAvailableQuantity,
   isProductError,
   PRODUCT_STATUS_LABEL,
   type Product,
@@ -22,12 +18,12 @@ import {
 
 interface ProductTableProps {
   products: Product[]
-  onSelectError: (product: Product) => void
+  onSelect: (product: Product) => void
 }
 
-export function ProductTable({ products, onSelectError }: ProductTableProps) {
+export function ProductTable({ products, onSelect }: ProductTableProps) {
   return (
-    <Table className="min-w-1210pxr">
+    <Table className="min-w-1010pxr">
       <TableHeader>
         <TableRow>
           <TableHead className="min-w-300pxr">상품</TableHead>
@@ -35,13 +31,12 @@ export function ProductTable({ products, onSelectError }: ProductTableProps) {
           <TableHead className="w-210pxr">외부 코드</TableHead>
           <TableHead className="w-100pxr whitespace-nowrap">히트 상품</TableHead>
           <TableHead className="w-120pxr whitespace-nowrap">긴급 항공 가능</TableHead>
-          <TableHead className="w-200pxr">가용 재고</TableHead>
           <TableHead className="w-140pxr">검증 상태</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {products.length === 0 && (
-          <TableEmptyRow colSpan={7}>조건에 맞는 상품이 없습니다.</TableEmptyRow>
+          <TableEmptyRow colSpan={6}>조건에 맞는 상품이 없습니다.</TableEmptyRow>
         )}
         {products.map((product) => {
           const isError = isProductError(product)
@@ -49,21 +44,17 @@ export function ProductTable({ products, onSelectError }: ProductTableProps) {
           return (
             <TableRow
               key={product.id}
-              className={cn(isError && 'group cursor-pointer hover:bg-background')}
-              onClick={isError ? () => onSelectError(product) : undefined}
+              className="cursor-pointer hover:bg-background"
+              onClick={() => onSelect(product)}
             >
               <TableCell className="wrap-break-word">
-                {isError ? (
-                  <button
-                    type="button"
-                    className="cursor-pointer text-left outline-none focus-visible:underline"
-                    aria-label={`${product.name} 오류 상세 보기`}
-                  >
-                    {product.name}
-                  </button>
-                ) : (
-                  product.name
-                )}
+                <button
+                  type="button"
+                  className="cursor-pointer text-left outline-none focus-visible:underline"
+                  aria-label={`${product.name} 상세 보기`}
+                >
+                  {product.name}
+                </button>
                 <p className="text-b2 text-muted-foreground">
                   {product.brandName} · {product.category} / {product.subcategory}
                 </p>
@@ -84,28 +75,9 @@ export function ProductTable({ products, onSelectError }: ProductTableProps) {
               <TableCell>{product.isHit ? '예' : '아니오'}</TableCell>
               <TableCell>{product.emergencyAirEligible ? '가능' : '불가'}</TableCell>
               <TableCell>
-                {getTotalAvailableQuantity(product).toLocaleString('ko-KR')}
-                <p className="text-b2 text-muted-foreground">
-                  {product.stocks
-                    .map(
-                      ({ warehouseName, availableQuantity }) =>
-                        `${warehouseName} ${availableQuantity.toLocaleString('ko-KR')}`,
-                    )
-                    .join(' · ')}
-                </p>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-4pxr">
-                  <Badge variant={isError ? 'danger' : 'success'}>
-                    {PRODUCT_STATUS_LABEL[product.status]}
-                  </Badge>
-                  {isError && (
-                    <ChevronRight
-                      className="size-16pxr text-muted-foreground group-hover:text-foreground"
-                      aria-hidden="true"
-                    />
-                  )}
-                </div>
+                <Badge variant={isError ? 'danger' : 'success'}>
+                  {PRODUCT_STATUS_LABEL[product.status]}
+                </Badge>
               </TableCell>
             </TableRow>
           )

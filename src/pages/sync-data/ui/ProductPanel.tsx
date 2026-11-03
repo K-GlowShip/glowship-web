@@ -10,7 +10,7 @@ import { TableTemplate } from '@/shared/ui/table-template'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
 import { filterProducts, PRODUCT_PAGE_SIZE, PRODUCTS, type Product } from '../model/products'
-import { ProductErrorDialog } from './ProductErrorDialog'
+import { ProductDetailDialog } from './ProductDetailDialog'
 import { ProductTable } from './ProductTable'
 
 // TODO: 주문·재고·선적 탭 디자인 확정 후 구현
@@ -24,7 +24,7 @@ export function ProductPanel() {
   const [query, setQuery] = useState('')
   const [onlyErrors, setOnlyErrors] = useState(false)
   const [page, setPage] = useState(1)
-  const errorDialog = useDetailDialog<Product>()
+  const detailDialog = useDetailDialog<Product>()
 
   const filtered = filterProducts(PRODUCTS, { query, onlyErrors })
   const pageCount = Math.max(1, Math.ceil(filtered.length / PRODUCT_PAGE_SIZE))
@@ -97,16 +97,16 @@ export function ProductPanel() {
                 </>
               }
             >
-              <ProductTable products={pageProducts} onSelectError={errorDialog.show} />
+              <ProductTable products={pageProducts} onSelect={detailDialog.show} />
             </TableTemplate>
           </TabsContent>
         </Tabs>
       </CardContent>
 
-      <ProductErrorDialog
-        product={errorDialog.selected}
-        open={errorDialog.open}
-        onOpenChange={errorDialog.onOpenChange}
+      <ProductDetailDialog
+        product={detailDialog.selected}
+        open={detailDialog.open}
+        onOpenChange={detailDialog.onOpenChange}
       />
     </Card>
   )

@@ -6,28 +6,29 @@ import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/
 import {
   EXTERNAL_CODE_SOURCE_LABEL,
   getProductErrorTitle,
+  isProductError,
   isCodeMissing,
   PRODUCT_ERROR_NOTICE,
   type Product,
 } from '../model/products'
 
-interface ProductErrorDialogProps {
+interface ProductDetailDialogProps {
   product: Product | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function ProductErrorDialog({ product, open, onOpenChange }: ProductErrorDialogProps) {
+export function ProductDetailDialog({ product, open, onOpenChange }: ProductDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby={undefined}>
-        {product && <ProductError product={product} />}
+        {product && <ProductDetail product={product} />}
       </DialogContent>
     </Dialog>
   )
 }
 
-function ProductError({ product }: { product: Product }) {
+function ProductDetail({ product }: { product: Product }) {
   return (
     <>
       <DialogHeader>
@@ -54,13 +55,15 @@ function ProductError({ product }: { product: Product }) {
           ))}
         </dl>
 
-        <div className="flex items-start gap-12pxr rounded-card bg-danger-bg p-16pxr text-danger">
-          <CircleAlert className="mt-2pxr size-20pxr shrink-0" aria-hidden="true" />
-          <div>
-            <p className="text-b1 font-bold">{getProductErrorTitle(product)}</p>
-            <p className="text-b2">{PRODUCT_ERROR_NOTICE.impact}</p>
+        {isProductError(product) && (
+          <div className="flex items-start gap-12pxr rounded-card bg-danger-bg p-16pxr text-danger">
+            <CircleAlert className="mt-2pxr size-20pxr shrink-0" aria-hidden="true" />
+            <div>
+              <p className="text-b1 font-bold">{getProductErrorTitle(product)}</p>
+              <p className="text-b2">{PRODUCT_ERROR_NOTICE.impact}</p>
+            </div>
           </div>
-        </div>
+        )}
       </DialogBody>
     </>
   )

@@ -13,12 +13,6 @@ export interface ExternalCode {
   mappingStatus: MappingStatus
 }
 
-export interface WarehouseStock {
-  warehouseName: string
-  /** 서버 `inventory_daily.available_quantity` */
-  availableQuantity: number
-}
-
 export interface Product {
   id: string
   name: string
@@ -31,7 +25,6 @@ export interface Product {
   externalCodes: ExternalCode[]
   isHit: boolean
   emergencyAirEligible: boolean
-  stocks: WarehouseStock[]
   status: ProductStatus
 }
 
@@ -49,9 +42,6 @@ export const EXTERNAL_CODE_SOURCE_LABEL: Record<ExternalCodeSource, string> = {
   INVENTORY: '재고(WMS)',
   SHIPMENT: '선적(TMS)',
 }
-
-export const getTotalAvailableQuantity = ({ stocks }: Product) =>
-  stocks.reduce((total, { availableQuantity }) => total + availableQuantity, 0)
 
 export const PRODUCT_PAGE_SIZE = 20
 
@@ -87,10 +77,15 @@ export const filterProducts = (products: Product[], { query, onlyErrors }: Produ
   })
 }
 
-const PRODUCT_TEMPLATES = [
+type ProductTemplate = Omit<Product, 'id' | 'externalCodes' | 'status'> & {
+  wmsCode: string
+  tmsCode: string
+}
+
+const PRODUCT_TEMPLATES: ProductTemplate[] = [
   {
     name: '세라마이드 크림',
-    brandName: 'A뷰티',
+    brandName: 'A Glow',
     category: '스킨케어',
     subcategory: '크림',
     hs10: '3304990000',
@@ -98,16 +93,12 @@ const PRODUCT_TEMPLATES = [
     erpCode: 'SKU-CR-01',
     wmsCode: 'WMS-001',
     tmsCode: 'TMS-001',
-    stocks: [
-      { warehouseName: 'LA', availableQuantity: 1200 },
-      { warehouseName: 'NJ', availableQuantity: 800 },
-    ],
     emergencyAirEligible: true,
     isHit: true,
   },
   {
     name: '수분 선크림',
-    brandName: 'A뷰티',
+    brandName: 'A Glow',
     category: '선케어',
     subcategory: '선크림',
     hs10: '3304990000',
@@ -115,16 +106,12 @@ const PRODUCT_TEMPLATES = [
     erpCode: 'SKU-SN-02',
     wmsCode: 'WMS-002',
     tmsCode: 'TMS-002',
-    stocks: [
-      { warehouseName: 'LA', availableQuantity: 2400 },
-      { warehouseName: 'NJ', availableQuantity: 1600 },
-    ],
     emergencyAirEligible: true,
     isHit: true,
   },
   {
     name: '글로우 세럼',
-    brandName: 'A뷰티',
+    brandName: 'A Glow',
     category: '스킨케어',
     subcategory: '세럼',
     hs10: '3304990000',
@@ -132,16 +119,12 @@ const PRODUCT_TEMPLATES = [
     erpCode: 'SKU-SR-03',
     wmsCode: 'WMS-003',
     tmsCode: 'TMS-003',
-    stocks: [
-      { warehouseName: 'LA', availableQuantity: 900 },
-      { warehouseName: 'NJ', availableQuantity: 300 },
-    ],
     emergencyAirEligible: true,
     isHit: false,
   },
   {
     name: '글로우쉽 시카 판테놀 수분 장벽 리페어 크림 기획세트 (본품 50ml + 미니 15ml x 2 + 쿠션 퍼프 증정) 대용량 리필 한정 에디션',
-    brandName: 'A뷰티',
+    brandName: 'A Glow',
     category: '스킨케어',
     subcategory: '크림',
     hs10: '3304990000',
@@ -149,10 +132,6 @@ const PRODUCT_TEMPLATES = [
     erpCode: 'SKU-CR-04',
     wmsCode: 'WMS-004',
     tmsCode: 'TMS-004',
-    stocks: [
-      { warehouseName: 'LA', availableQuantity: 150 },
-      { warehouseName: 'NJ', availableQuantity: 0 },
-    ],
     emergencyAirEligible: false,
     isHit: false,
   },
