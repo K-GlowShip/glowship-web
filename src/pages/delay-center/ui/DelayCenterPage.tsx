@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { DELAY_CENTER_CASE_PARAM } from '@/shared/config'
+
 import {
   countByStatus,
   DELAY_STATUS_OPTIONS,
@@ -12,7 +14,6 @@ import { CURRENT_ROLE, DELAY_CASES } from '../model/delay-center-mock'
 import { DelayDetail } from './DelayDetail'
 import { DelayList } from './DelayList'
 
-const CASE_PARAM = 'id'
 const SORTED_CASES = sortDelayCases(DELAY_CASES)
 const COUNTS = countByStatus(SORTED_CASES)
 
@@ -27,12 +28,12 @@ export function DelayCenterPage() {
   const visibleCases = filterDelayCases(SORTED_CASES, status, keyword)
   // URL의 id가 없거나 목록에 없으면 첫 번째 항목을 보여 준다. 상세가 비어 있는 상태를 만들지 않기 위해서다.
   const selected =
-    visibleCases.find((delayCase) => delayCase.id === searchParams.get(CASE_PARAM)) ??
+    visibleCases.find((delayCase) => delayCase.id === searchParams.get(DELAY_CENTER_CASE_PARAM)) ??
     visibleCases[0] ??
     null
 
   const handleSelect = (id: string) => {
-    setSearchParams({ [CASE_PARAM]: id }, { replace: true })
+    setSearchParams({ [DELAY_CENTER_CASE_PARAM]: id }, { replace: true })
   }
 
   const handleStatusChange = (next: DelayStatusFilter) => {

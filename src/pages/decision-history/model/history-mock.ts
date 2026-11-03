@@ -3,6 +3,7 @@ import { formatYYYYMMDD, kstToUtc } from '@/shared/lib/kst-date'
 import type { HistoryRecord, HistoryStatus } from './history'
 
 // TODO: 승인 및 실행 이력 API 명세 확정 후 서버 응답으로 교체
+// delayEventId는 지연 대응 센터 mock(delay-center-mock)의 지연 건 ID와 맞춰 링크가 실제 건으로 열리게 한다.
 
 const MOCK_RECORD_COUNT = 128
 const SELECTORS = ['김민지', '박지훈', '이서연']
@@ -10,6 +11,7 @@ const STATUS_CYCLE: HistoryStatus[] = ['NEEDS_REANALYSIS', 'FINAL', 'DRAFT']
 
 const TEMPLATES = [
   {
+    delayEventId: 'de-1021',
     shipmentCode: 'GS-1021',
     productName: '클렌징',
     option: '기존 일정 유지',
@@ -22,6 +24,7 @@ const TEMPLATES = [
     warnings: [],
   },
   {
+    delayEventId: 'de-1020',
     shipmentCode: 'GS-1022',
     productName: '토너',
     option: '일부 물량 분할 운송',
@@ -34,6 +37,7 @@ const TEMPLATES = [
     warnings: [],
   },
   {
+    delayEventId: 'de-1023',
     shipmentCode: 'GS-1023',
     productName: '선크림',
     option: '항공 긴급 운송',
@@ -72,6 +76,7 @@ const createGeneratedRecord = (index: number): HistoryRecord => {
   return {
     id: `history-${index + 1}`,
     selectedAt: toUtcIso(date),
+    delayEventId: template.delayEventId,
     shipmentCode: template.shipmentCode,
     productName: template.productName,
     option: template.option,
@@ -95,6 +100,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
   {
     id: 'history-1',
     selectedAt: '2026-10-21T00:24:00Z',
+    delayEventId: 'de-1024',
     shipmentCode: 'GS-1024',
     productName: '크림',
     option: 'NJ 재고 전환',
@@ -117,6 +123,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
   {
     id: 'history-2',
     selectedAt: '2026-10-20T23:51:00Z',
+    delayEventId: 'de-1023',
     shipmentCode: 'GS-1023',
     productName: '선크림',
     option: '항공 긴급 운송',
@@ -143,6 +150,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
   {
     id: 'history-3',
     selectedAt: '2026-10-20T08:30:00Z',
+    delayEventId: 'de-1017',
     shipmentCode: 'GS-1025',
     productName:
       '글로우쉽 시카 판테놀 수분 장벽 리페어 크림 기획세트 (본품 50ml + 미니 15ml x 2 + 쿠션 퍼프 증정) 대용량 리필 한정 에디션',

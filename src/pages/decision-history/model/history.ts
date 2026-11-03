@@ -13,6 +13,8 @@ export interface HistoryRecord {
   id: string
   /** ISO 8601 UTC. 예: '2026-10-21T00:24:00Z' */
   selectedAt: string
+  /** 이 기록의 지연 이벤트. 지연 대응 센터에서 해당 건을 열 때 쓴다 */
+  delayEventId: string
   shipmentCode: string
   productName: string
   option: string
