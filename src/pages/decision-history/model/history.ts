@@ -16,7 +16,8 @@ export interface HistoryRecord {
   productName: string
   option: string
   selector: string
-  executionId: string | null
+  /** 분석 실행의 표시용 ID. 초안·최종 선택 모두 있다. 예: 'AN-261021-042' */
+  runCode: string
   status: HistoryStatus
   reason: string
   comment: HistoryComment | null
@@ -49,8 +50,7 @@ export const HISTORY_STATUS_OPTIONS = Object.keys(HISTORY_STATUS_LABEL) as Histo
 
 export const HISTORY_PAGE_SIZE = 10
 
-export const HISTORY_DISCLAIMER =
-  '최종 선택은 판단의 기록이며 실제 출고 변경을 의미하지 않습니다. 실행 연동 여부와 실행 결과는 별도 상태로 표시합니다.'
+export const HISTORY_DISCLAIMER = '최종 선택은 판단의 기록이며 실제 출고 변경을 의미하지 않습니다.'
 
 export const DEFAULT_HISTORY_FILTER: HistoryFilter = {
   startDate: '2026-10-01',

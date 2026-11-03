@@ -71,7 +71,7 @@ export function HistoryTable({ records, selectedId, onSelect }: HistoryTableProp
               {record.option}
             </TableCell>
             <TableCell>{record.selector}</TableCell>
-            <TableCell>{record.executionId ?? '—'}</TableCell>
+            <TableCell>{record.runCode}</TableCell>
             <TableCell>
               <Badge variant={STATUS_BADGE_VARIANT[record.status]}>
                 {HISTORY_STATUS_LABEL[record.status]}

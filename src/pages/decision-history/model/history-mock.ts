@@ -38,16 +38,14 @@ const TEMPLATES = [
   },
 ]
 
-const pad = (value: number) => String(value).padStart(2, '0')
-
 // 서버 응답과 같은 형식(ISO 8601 UTC, 'Z')으로 만든다.
 const toUtcIso = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z')
 
 // 기준 데이터는 그 날(한국 날짜) 09:00에 수집한 것으로 둔다.
 const toBaseDataAt = (date: Date) => kstToUtc(`${formatYYYYMMDD(toUtcIso(date))}T09:00`)
 
-const toExecutionId = (date: Date, index: number) =>
-  `EX-${formatYYYYMMDD(toUtcIso(date)).replaceAll('-', '').slice(2)}-${pad(index % 100)}`
+const toRunCode = (date: Date, index: number) =>
+  `AN-${formatYYYYMMDD(toUtcIso(date)).replaceAll('-', '').slice(2)}-${String(index % 1000).padStart(3, '0')}`
 
 const GENERATED_START = new Date(kstToUtc('2026-10-20T17:30'))
 const GENERATED_STEP_MS = 3 * 60 * 60 * 1000
@@ -64,7 +62,7 @@ const createGeneratedRecord = (index: number): HistoryRecord => {
     productName: template.productName,
     option: template.option,
     selector: SELECTORS[index % SELECTORS.length],
-    executionId: status === 'draft' ? null : toExecutionId(date, index),
+    runCode: toRunCode(date, index),
     status,
     reason: template.reason,
     comment: null,
@@ -85,7 +83,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     productName: '크림',
     option: 'NJ 재고 전환',
     selector: '김민지',
-    executionId: 'EX-261021-08',
+    runCode: 'AN-261021-042',
     status: 'final',
     reason:
       '추가 운송비 없이 위험 주문 42건을 우선 보호합니다. LA 입고 전까지 NJ의 여유 재고 800개를 활용합니다.',
@@ -104,7 +102,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
     productName: '선크림',
     option: '항공 긴급 운송',
     selector: '박지훈',
-    executionId: null,
+    runCode: 'AN-261020-038',
     status: 'draft',
     reason: '성수기 판매 손실을 막기 위해 항공으로 우선 확보합니다.',
     comment: null,
@@ -123,7 +121,7 @@ const FEATURED_RECORDS: HistoryRecord[] = [
       '글로우쉽 시카 판테놀 수분 장벽 리페어 크림 기획세트 (본품 50ml + 미니 15ml x 2 + 쿠션 퍼프 증정) 대용량 리필 한정 에디션',
     option: 'NJ 재고 전환',
     selector: '이서연',
-    executionId: 'EX-261020-02',
+    runCode: 'AN-261020-021',
     status: 'final',
     reason: '기획세트 한정 물량이라 NJ 여유 재고를 먼저 전환해 위험 주문을 보호합니다.',
     comment: null,

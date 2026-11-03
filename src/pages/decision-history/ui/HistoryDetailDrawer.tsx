@@ -64,8 +64,7 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
             </p>
           )}
           <p className="text-caption text-muted-foreground">
-            기준 데이터 {formatBaseDataAt(record.baseDataAt)}
-            {record.executionId && ` · 실행 ID ${record.executionId}`}
+            기준 데이터 {formatBaseDataAt(record.baseDataAt)} · 실행 ID {record.runCode}
           </p>
         </section>
 
