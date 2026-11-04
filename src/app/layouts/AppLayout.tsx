@@ -11,7 +11,8 @@ const TITLE_HIDDEN_SCROLL_TOP = 68
 export function AppLayout() {
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLElement>(null)
-  const pageTitle = NAV_ITEMS.find(({ to }) => to === pathname)?.label ?? ''
+  const pageTitle =
+    NAV_ITEMS.find(({ to }) => pathname === to || pathname.startsWith(`${to}/`))?.label ?? ''
   const [isTitleHidden, setIsTitleHidden] = useState(false)
 
   // 본문만 스크롤되므로 화면을 이동하면 스크롤 위치를 맨 위로 되돌린다.

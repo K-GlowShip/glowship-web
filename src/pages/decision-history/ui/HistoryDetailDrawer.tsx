@@ -1,3 +1,7 @@
+import { Link } from 'react-router'
+
+import { delayCenterPath } from '@/shared/config'
+import { buttonVariants } from '@/shared/ui/button'
 import {
   Drawer,
   DrawerBody,
@@ -98,6 +102,13 @@ function HistoryDetail({ record }: { record: HistoryRecord }) {
             </ul>
           )}
         </section>
+
+        <Link
+          to={delayCenterPath(record.delayEventId)}
+          className={buttonVariants({ variant: 'secondary', className: 'self-start' })}
+        >
+          지연 건 상세 보기
+        </Link>
       </DrawerBody>
 
       <DrawerFooter>{HISTORY_DISCLAIMER}</DrawerFooter>

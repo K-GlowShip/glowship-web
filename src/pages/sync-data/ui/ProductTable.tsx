@@ -29,8 +29,8 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
           <TableHead className="min-w-300pxr">상품</TableHead>
           <TableHead className="w-140pxr">ERP 코드</TableHead>
           <TableHead className="w-210pxr">외부 코드</TableHead>
-          <TableHead className="w-100pxr whitespace-nowrap">히트 상품</TableHead>
-          <TableHead className="w-120pxr whitespace-nowrap">긴급 항공 가능</TableHead>
+          <TableHead className="w-100pxr">히트 상품</TableHead>
+          <TableHead className="w-120pxr">긴급 항공 가능</TableHead>
           <TableHead className="w-140pxr">검증 상태</TableHead>
         </TableRow>
       </TableHeader>

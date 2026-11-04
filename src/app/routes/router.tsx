@@ -3,7 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import { DashboardPage } from '@/pages/dashboard'
 import { DecisionHistoryPage } from '@/pages/decision-history'
-import { DelayCenterPage } from '@/pages/delay-center'
+import { DelayCenterPage, DelayDetailPage } from '@/pages/delay-center'
 import { LoginPage } from '@/pages/login'
 import { SyncDataPage } from '@/pages/sync-data'
 import { ROUTES } from '@/shared/config'
@@ -25,6 +25,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
           { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
           { path: ROUTES.DELAY_CENTER, element: <DelayCenterPage /> },
+          { path: ROUTES.DELAY_CENTER_DETAIL, element: <DelayDetailPage /> },
           { path: ROUTES.DECISION_HISTORY, element: <DecisionHistoryPage /> },
           { path: ROUTES.SYNC_DATA, element: <SyncDataPage /> },
         ],
