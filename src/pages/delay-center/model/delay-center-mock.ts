@@ -131,6 +131,36 @@ const READY_ANALYSIS: DelayAnalysis = {
   explanation: EXPLANATION,
 }
 
+// 다른 권역 창고 출고가 1순위인 결과. 한국 창고 항공 보충은 회복하는 주문이 더 적다
+const OTHER_REGION_FIRST_ANALYSIS: DelayAnalysis = {
+  ...READY_ANALYSIS,
+  options: [
+    {
+      ...OTHER_REGION,
+      expectedArrival: '2026-10-23',
+      securableQuantity: 1240,
+      recoveredOrders: 42,
+      remainingRiskOrders: 0,
+      recommended: true,
+      explanation: '지연 유발 위험 주문 42건을 모두 회복하고 남는 위험 주문이 없습니다.',
+    },
+    {
+      ...KR_AIR,
+      expectedArrival: '2026-10-24',
+      securableQuantity: 800,
+      recoveredOrders: 30,
+      remainingRiskOrders: 12,
+      recommended: false,
+      explanation: '지연 유발 위험 주문 30건을 회복하고 12건이 남습니다.',
+    },
+    KEEP_PLAN,
+  ],
+  explanation: {
+    ...EXPLANATION,
+    recommendation: '다른 권역 창고 출고가 지연 유발 위험 주문을 가장 많이 회복해 1순위입니다.',
+  },
+}
+
 const BASE = {
   route: 'KR → LOS ANGELES',
   transportMode: 'OCEAN',
@@ -352,7 +382,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     plannedInbound: '2026-10-27',
     expectedInbound: '2026-10-28',
     staleReason: '주문 데이터가 변경되었습니다.',
-    analysis: READY_ANALYSIS,
+    analysis: OTHER_REGION_FIRST_ANALYSIS,
     opinions: [],
   },
   {

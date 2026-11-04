@@ -480,7 +480,7 @@ const AIR_FORECAST_CASE = delayCase({
       }),
     ],
     options: [
-      option('kr-air', 'KR_AIR_REPLENISH', {
+      option('other-region', 'OTHER_REGION_FULFILL', {
         expectedArrival: '2026-10-26',
         securableQuantity: 330,
         recoveredOrders: 0,
@@ -488,7 +488,7 @@ const AIR_FORECAST_CASE = delayCase({
         recommended: true,
         explanation: '위험 주문은 없지만 예측 부족 330개를 줄일 수 있습니다.',
       }),
-      option('other-region', 'OTHER_REGION_FULFILL', {
+      option('kr-air', 'KR_AIR_REPLENISH', {
         feasibility: 'NEEDS_CHECK',
         reasonCode: 'MISSING_REQUIRED_DATA',
         explanation: '필수 자료가 없어 판정할 수 없습니다.',
@@ -498,7 +498,7 @@ const AIR_FORECAST_CASE = delayCase({
     explanation: explanation(
       '선적 AIR-REG-20261011의 3PL 입고가 10월 27일에서 10월 28일로 1일 밀렸습니다.',
       '실제 지연 유발 위험 주문은 없고 2개 상품에서 지연 증분 예측 부족이 있습니다. 예측 기준 값입니다.',
-      '한국 창고 항공 보충이 예측 부족을 가장 많이 줄여 1순위입니다.',
+      '다른 권역 창고 출고가 예측 부족을 가장 많이 줄여 1순위입니다.',
       ['판매 기준 기간과 행사 기간이 겹칩니다.', '확인이 필요한 대응안이 있습니다.'],
     ),
   }),
@@ -768,6 +768,34 @@ const FINALIZED_ANALYSIS = analysis({
   ),
 })
 
+// 다른 권역 창고 출고가 1순위인 결과. 한국 창고 항공 보충은 회복하는 주문이 더 적다
+const FINALIZED_OTHER_FIRST_ANALYSIS: DelayAnalysis = {
+  ...FINALIZED_ANALYSIS,
+  options: [
+    option('other-region', 'OTHER_REGION_FULFILL', {
+      expectedArrival: '2026-10-24',
+      securableQuantity: 700,
+      recoveredOrders: 5,
+      remainingRiskOrders: 0,
+      recommended: true,
+      explanation: '지연 유발 위험 주문 5건을 모두 회복합니다.',
+    }),
+    option('kr-air', 'KR_AIR_REPLENISH', {
+      expectedArrival: '2026-10-25',
+      securableQuantity: 300,
+      recoveredOrders: 2,
+      remainingRiskOrders: 3,
+      explanation: '지연 유발 위험 주문 2건을 회복하고 3건이 남습니다.',
+    }),
+    keepPlan(5),
+  ],
+  explanation: explanation(
+    '선적 OCN-20260909의 3PL 입고가 10월 19일에서 10월 21일로 2일 밀렸고, 실주문 납기 위험이 있습니다.',
+    'A Glow Hydra Cream 50ml의 부족이 지연으로 700개 늘고 위험 주문은 5건입니다. 예측 기준 값입니다.',
+    '다른 권역 창고 출고가 지연 유발 위험 주문을 가장 많이 회복해 1순위입니다.',
+  ),
+}
+
 // 팀장이 현재 계획 유지를 선택하고, 이유에 실제 조치를 적은 경우
 const FINALIZED_KEEP_CASE = delayCase({
   id: 'de-1003',
@@ -862,7 +890,7 @@ const CLOSED_WITHOUT_DECISION_CASE = delayCase({
   baseDataAt: '2026-10-19T00:30:00Z',
   runCode: 'AN-261017-014',
   runs: [run(1, 'AN-261017-014', 'ready', true, '2026-10-17T01:00:00Z', '2026-10-17T01:06:00Z')],
-  analysis: FINALIZED_ANALYSIS,
+  analysis: FINALIZED_OTHER_FIRST_ANALYSIS,
   opinions: [
     opinion(
       'op-m8',
