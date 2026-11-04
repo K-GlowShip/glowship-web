@@ -73,20 +73,27 @@ function StockoutCell({
   )
 }
 
-/** 열 이름 옆에 정보 아이콘을 두고, 마우스를 올리거나 포커스하면 설명을 보여 준다 */
+/** 정보 아이콘. 마우스를 올리거나 포커스하면 설명을 보여 준다 */
+function InfoTip({ label, description }: { label: string; description: string }) {
+  return (
+    <Tooltip content={description}>
+      <button
+        type="button"
+        aria-label={`${label} 설명`}
+        className="cursor-pointer rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
+      >
+        <Info className="size-14pxr" aria-hidden="true" />
+      </button>
+    </Tooltip>
+  )
+}
+
+/** 열 이름 옆에 정보 아이콘을 둔다 */
 function InfoHeader({ label, description }: { label: string; description: string }) {
   return (
     <span className="inline-flex items-center gap-4pxr">
       {label}
-      <Tooltip content={description}>
-        <button
-          type="button"
-          aria-label={`${label} 설명`}
-          className="cursor-pointer rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
-        >
-          <Info className="size-14pxr" aria-hidden="true" />
-        </button>
-      </Tooltip>
+      <InfoTip label={label} description={description} />
     </span>
   )
 }
@@ -103,12 +110,23 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col gap-4pxr">
+        <div className="flex items-center gap-8pxr">
           <CardTitle as="h2">거점별 재고 현황</CardTitle>
-          <p className="text-caption text-muted-foreground">
-            {formatMonthDay(baseDate)} 기준으로 계산한 참고값이며, 입고 예정은 반영하지 않았습니다.
-          </p>
+          <InfoTip
+            label="거점별 재고 현황"
+            description={`현재 재고와 평균 판매량으로 계산한 예측입니다.\n입고 예정과 지연은 반영하지 않아 지연 분석 결과와 다를 수 있습니다.`}
+          />
         </div>
+        <dl className="flex flex-wrap justify-end gap-x-16pxr gap-y-2pxr text-caption">
+          <div className="flex gap-6pxr">
+            <dt className="text-muted-foreground">기준일</dt>
+            <dd>{formatMonthDay(baseDate)}</dd>
+          </div>
+          <div className="flex gap-6pxr">
+            <dt className="text-muted-foreground">판매량 기간</dt>
+            <dd>최근 {inventory.salesBasisDays}일</dd>
+          </div>
+        </dl>
       </CardHeader>
       <CardContent className="flex flex-col gap-16pxr pt-16pxr">
         <div className="overflow-x-auto">
@@ -117,16 +135,11 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
               <TableRow>
                 <TableHead className="w-380pxr">거점 / 상품</TableHead>
                 <TableHead>가용 재고(개)</TableHead>
+                <TableHead>평균 일 판매량(개)</TableHead>
                 <TableHead>
                   <InfoHeader
-                    label="일 판매량(개)"
-                    description={`최근 ${inventory.salesBasisDays}일 평균 판매량입니다.`}
-                  />
-                </TableHead>
-                <TableHead>
-                  <InfoHeader
-                    label="안전재고 하회"
-                    description={`안전재고는 하루 판매량의 ${inventory.safetyStockDays}일분입니다. 재고가 이 수량 밑으로 처음 내려가는 날짜를 보여 줍니다.`}
+                    label={`안전재고(${inventory.safetyStockDays}일분) 하회`}
+                    description="가용 재고가 이 수량 밑으로 처음 내려가는 날짜입니다."
                   />
                 </TableHead>
                 <TableHead>소진 예상</TableHead>

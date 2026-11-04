@@ -34,6 +34,7 @@ export function SyncStatusCard({ syncStatus }: { syncStatus: SyncStatusResult })
     setIsRefreshing(true)
     timerRef.current = window.setTimeout(() => setIsRefreshing(false), MOCK_REFRESH_MS)
   }
+
   // FR-003: 수집 오류로 필수 자료가 빠지면 이에 기대는 분석이 보류된다
   const hasProblem = sources.some(
     ({ status }) => status === SYNC_STATUS.FAILED || status === SYNC_STATUS.PARTIAL_SUCCESS,

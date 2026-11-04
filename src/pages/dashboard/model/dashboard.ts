@@ -50,6 +50,8 @@ export const SHIPMENT_STAGE = {
 
 export type ShipmentStage = (typeof SHIPMENT_STAGE)[keyof typeof SHIPMENT_STAGE]
 
+// TODO: 운송 단계·지연 상태 표시명은 지연 대응 센터(pages/delay-center)에도 같은 값이 있다. 같은 layer끼리 import할 수 없어 두 벌이 됐으니,
+// 명세 2절의 표시명 고정 원칙에 맞게 entities로 올리는 후속 작업이 필요하다.
 export const SHIPMENT_STAGE_LABEL: Record<ShipmentStage, string> = {
   PRE_DEPARTURE: '출항 전',
   AT_SEA: '해상 운송',
