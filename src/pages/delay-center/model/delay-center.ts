@@ -1,3 +1,5 @@
+import { DELAY_LIST_STATUS_PARAM } from '@/shared/config'
+
 import { EMPTY_TEXT } from './delay-center-text'
 import {
   DELAY_STATUS,
@@ -489,7 +491,7 @@ export const getDetailSections = ({ status, analysis }: DelayCase) => {
 /** 목록의 검색 조건을 담는 주소 파라미터 이름. 상세에서 돌아올 때 조건이 유지되도록 주소에 담는다. */
 export const LIST_PARAM = {
   KEYWORD: 'q',
-  STATUS: 'status',
+  STATUS: DELAY_LIST_STATUS_PARAM,
   PAGE: 'page',
 } as const
 

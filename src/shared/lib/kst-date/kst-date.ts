@@ -81,3 +81,20 @@ export const toUtcDayStart = (kstDate: string) =>
 /** 한국 날짜 'YYYY-MM-DD'의 끝(23:59:59 KST)을 UTC 시각으로. (예: '2026-10-21' -> '2026-10-21T14:59:59Z') */
 export const toUtcDayEnd = (kstDate: string) =>
   KST_DATE_PATTERN.test(kstDate) ? kstToUtc(`${kstDate}T23:59:59`) : ''
+
+const kstLongDateFormatter = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: KST_TIME_ZONE,
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+})
+
+/** UTC 시각을 한국 날짜 '2026년 10월 21일 수요일'로 바꾼다. 올바르지 않은 값이면 ''. */
+export const formatKoreanLongDate = (isoUtc: string) => {
+  const date = new Date(isoUtc)
+  return Number.isNaN(date.getTime()) ? '' : kstLongDateFormatter.format(date)
+}
+
+/** UTC 시각을 한국 시간 'HH:mm'으로 바꾼다. (예: '2026-10-21T00:30:00Z' -> '09:30') */
+export const formatHHmm = (isoUtc: string) => formatYYYYMMDDHHmm(isoUtc).slice(-5)

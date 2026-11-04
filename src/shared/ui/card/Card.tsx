@@ -22,8 +22,15 @@ export function CardHeader({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
-export function CardTitle({ className, ...props }: ComponentProps<'h3'>) {
-  return <h3 data-slot="card-title" className={cn('text-h3 font-bold', className)} {...props} />
+interface CardTitleProps extends ComponentProps<'h3'> {
+  /** 화면의 제목 계층에 맞춰 h2~h3 중에서 고른다. 기본은 h3 */
+  as?: 'h2' | 'h3'
+}
+
+export function CardTitle({ as: Heading = 'h3', className, ...props }: CardTitleProps) {
+  return (
+    <Heading data-slot="card-title" className={cn('text-h3 font-bold', className)} {...props} />
+  )
 }
 
 export function CardContent({ className, ...props }: ComponentProps<'div'>) {
