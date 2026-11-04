@@ -6,6 +6,7 @@ import { Badge } from '@/shared/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 
 import {
+  type AiExplanation,
   type DelayOption,
   FEASIBILITY_BADGE_VARIANT,
   FEASIBILITY_LABEL,
@@ -16,8 +17,8 @@ import {
 
 interface OptionTableProps {
   options: DelayOption[]
-  /** AI 설명의 추천 근거. 추천 대응안의 행 아래에 보여 준다. */
-  recommendation: string | null
+  /** AI 설명. 생성에 실패했으면 null이고 대응안별 설명과 추천 근거가 없다. */
+  explanation: AiExplanation | null
 }
 
 const COLUMN_COUNT = 6
@@ -27,12 +28,12 @@ const EMPTY = '—'
 const ACCENT_CLASS = 'shadow-[inset_3px_0_0_var(--color-primary)]'
 
 /**
- * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. 대응안별 설명이 있으면 설명을 보여 주고,
- * 설명이 같은 말을 되풀이하는 사유 라벨(배지 아래)은 숨긴다. 설명 생성이 실패하면 사유 라벨이 대신 나온다.
+ * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. 정해진 사유(`reasonCode`) 라벨은 배지 아래에 항상 보여 주고,
+ * AI의 대응안별 설명은 행 아래에 덧붙인다. 설명 생성이 실패했으면 설명 줄은 없다.
  * 추천 대응안은 설명 뒤에 순위 기준(추천 근거)이 이어진다.
  * 불가·확인 필요인 대응안도 숨기지 않으며, 판정할 수 없는 값은 '—'로 표시한다.
  */
-export function OptionTable({ options, recommendation }: OptionTableProps) {
+export function OptionTable({ options, explanation }: OptionTableProps) {
   return (
     <div className="overflow-x-auto">
       <Table density="compact" className="min-w-680pxr">
@@ -48,7 +49,7 @@ export function OptionTable({ options, recommendation }: OptionTableProps) {
         </TableHeader>
         <TableBody>
           {options.map((option) => {
-            const evidence = getEvidence(option, recommendation)
+            const evidence = getEvidence(option, explanation)
 
             return (
               <Fragment key={option.id}>
@@ -64,7 +65,7 @@ export function OptionTable({ options, recommendation }: OptionTableProps) {
                       <Badge variant={FEASIBILITY_BADGE_VARIANT[option.feasibility]} dot={false}>
                         {FEASIBILITY_LABEL[option.feasibility]}
                       </Badge>
-                      {option.reasonCode && !option.explanation && (
+                      {option.reasonCode && (
                         <span className="text-caption text-muted-foreground">
                           {REASON_LABEL[option.reasonCode]}
                         </span>
@@ -80,12 +81,23 @@ export function OptionTable({ options, recommendation }: OptionTableProps) {
                       : `${option.securableQuantity.toLocaleString()}개`}
                   </TableCell>
                   <TableCell>
-                    {option.recoveredOrders === null ? EMPTY : `${option.recoveredOrders}건`}
+                    {option.delayInducedRecoveredOrders === null
+                      ? EMPTY
+                      : `${option.delayInducedRecoveredOrders}건`}
                   </TableCell>
                   <TableCell>
-                    {option.remainingRiskOrders === null
-                      ? EMPTY
-                      : `${option.remainingRiskOrders}건`}
+                    {option.notRecoveredOrders === null ? (
+                      EMPTY
+                    ) : (
+                      <div className="flex flex-col items-start gap-4pxr">
+                        <span>{option.notRecoveredOrders}건</span>
+                        {!!option.itemSecuredBlockedOrders && (
+                          <span className="text-caption text-muted-foreground">
+                            그중 일부 품목만 확보 {option.itemSecuredBlockedOrders}건
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
                 {evidence && (
@@ -125,10 +137,13 @@ interface OptionEvidence {
 }
 
 /** 행 아래에 보여 줄 근거. 설명도 추천 근거도 없으면 줄을 만들지 않는다. */
-const getEvidence = (option: DelayOption, recommendation: string | null): OptionEvidence | null => {
+const getEvidence = (
+  option: DelayOption,
+  explanation: AiExplanation | null,
+): OptionEvidence | null => {
   const evidence = {
-    explanation: option.explanation,
-    recommendation: option.recommended ? recommendation : null,
+    explanation: explanation?.optionExplanations[option.type] ?? null,
+    recommendation: option.recommended ? (explanation?.recommendation ?? null) : null,
   }
   return evidence.explanation || evidence.recommendation ? evidence : null
 }

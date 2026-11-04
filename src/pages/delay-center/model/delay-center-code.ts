@@ -1,30 +1,27 @@
 // 서버 코드값과 화면 구분값. 다른 model 파일이 서로 가져오다 순환하지 않도록 아무것도 가져오지 않는다.
 
-/**
- * 서버 `GET /delay-events` 탭(현재 실행 상태)에 최종 선택 완료, 위험 없음(`NO_RISK`), 지연 해소(`NO_DELAY`)를 더한 구분.
- * 위험 없음·지연 해소는 서버 탭 표(4.4)에 없는 제안이다. 서버 연동 때 `status` 값을 맞춰야 한다.
- */
+/** 서버 `GET /delay-events`의 `status` 코드값(API 명세 v6.2 2절, 4.4 탭 표) */
 export const DELAY_STATUS = {
-  READY: 'ready',
-  ANALYZING: 'analyzing',
-  ON_HOLD: 'on_hold',
-  NEEDS_REANALYSIS: 'needs_reanalysis',
-  FINALIZED: 'finalized',
-  NO_RISK: 'no_risk',
-  NO_DELAY: 'no_delay',
+  READY: 'READY_FOR_REVIEW',
+  ANALYZING: 'ANALYZING',
+  ON_HOLD: 'ON_HOLD',
+  NEEDS_REANALYSIS: 'NEEDS_REANALYSIS',
+  FINALIZED: 'FINALIZED',
+  NO_RISK: 'NO_RISK',
+  NO_DELAY: 'NO_DELAY',
 } as const
 
 export type DelayStatus = (typeof DELAY_STATUS)[keyof typeof DELAY_STATUS]
 
-/** 상태 필터에서 모든 상태를 보여 주는 값 */
-export const STATUS_FILTER_ALL = 'all'
+/** 상태 필터에서 모든 상태를 보여 주는 값(명세 4.4의 `ALL` 탭) */
+export const STATUS_FILTER_ALL = 'ALL'
 
 export type DelayStatusFilter = DelayStatus | typeof STATUS_FILTER_ALL
 
-/** 로그인 사용자의 역할. 초안은 팀원, 최종 선택은 팀장만 한다. */
+/** 로그인 사용자의 역할(명세 6절). 초안은 팀원, 최종 선택은 팀장만 한다. */
 export const CLIENT_ROLE = {
-  MEMBER: 'member',
-  LEAD: 'lead',
+  MEMBER: 'CLIENT_MEMBER',
+  LEAD: 'CLIENT_LEAD',
 } as const
 
 export type ClientRole = (typeof CLIENT_ROLE)[keyof typeof CLIENT_ROLE]
@@ -87,8 +84,8 @@ export const RESULT_CLASS = {
 export type ResultClass = (typeof RESULT_CLASS)[keyof typeof RESULT_CLASS]
 
 export const RISK_ATTRIBUTION = {
-  DELAY_INDUCED: 'delay_induced',
-  PRE_EXISTING: 'pre_existing',
+  DELAY_INDUCED: 'DELAY_INDUCED',
+  PRE_EXISTING: 'PRE_EXISTING',
 } as const
 
 export type RiskAttribution = (typeof RISK_ATTRIBUTION)[keyof typeof RISK_ATTRIBUTION]

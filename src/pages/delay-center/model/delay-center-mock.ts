@@ -1,57 +1,64 @@
 import type {
   AnalysisRunSummary,
   ClientRole,
-  DelayAnalysis,
   DelayCase,
-  DelayOption,
   RiskOrder,
   SkuImpact,
 } from './delay-center'
-import { MORE_DELAY_CASES } from './delay-center-mock-cases'
+import {
+  MORE_DELAY_CASES,
+  type MockAnalysis,
+  type MockDelayCase,
+  type MockOption,
+  toDelayCase,
+} from './delay-center-mock-cases'
 
 // TODO: GET /delay-events, GET /analysis-runs/{runId} 연동 후 서버 응답으로 교체
 // TODO: GET /me가 생기면 역할을 서버 응답에서 읽는다 (지금은 헤더의 예시 값 '김민지 · 팀장'과 맞춘 값)
-export const CURRENT_ROLE: ClientRole = 'lead'
+export const CURRENT_ROLE: ClientRole = 'CLIENT_LEAD'
 
 // 형식은 2026 H1 합성 데이터(shipments·orders·skus·users)를 따른다.
 const MEMBER = 'A Beauty Company Member 1'
 const LEAD = 'A Beauty Company Lead'
 
-const KEEP_PLAN: DelayOption = {
+const KEEP_PLAN: MockOption = {
   id: 'keep-plan',
   type: 'KEEP_PLAN',
   feasibility: 'FEASIBLE',
   reasonCode: null,
   expectedArrival: '2026-10-28',
   securableQuantity: 0,
-  recoveredOrders: 0,
-  remainingRiskOrders: 42,
+  delayInducedRecoveredOrders: 0,
+  notRecoveredOrders: 42,
+  itemSecuredBlockedOrders: null,
   recommended: false,
   explanation: '추가 대응 없이 예상 입고일을 기다리며, 위험 주문 42건이 그대로 남습니다.',
 }
 
-const KR_AIR: DelayOption = {
+const KR_AIR: MockOption = {
   id: 'kr-air',
   type: 'KR_AIR_REPLENISH',
   feasibility: 'FEASIBLE',
   reasonCode: null,
   expectedArrival: '2026-10-24',
   securableQuantity: 1240,
-  recoveredOrders: 42,
-  remainingRiskOrders: 0,
+  delayInducedRecoveredOrders: 42,
+  notRecoveredOrders: 0,
+  itemSecuredBlockedOrders: null,
   recommended: true,
   explanation: '지연 유발 위험 주문 42건을 모두 회복하고 남는 위험 주문이 없습니다.',
 }
 
-const OTHER_REGION: DelayOption = {
+const OTHER_REGION: MockOption = {
   id: 'other-region',
   type: 'OTHER_REGION_FULFILL',
   feasibility: 'FEASIBLE',
   reasonCode: null,
   expectedArrival: '2026-10-23',
   securableQuantity: 800,
-  recoveredOrders: 30,
-  remainingRiskOrders: 12,
+  delayInducedRecoveredOrders: 30,
+  notRecoveredOrders: 12,
+  itemSecuredBlockedOrders: 3,
   recommended: false,
   explanation: '지연 유발 위험 주문 30건을 회복하고 12건이 남습니다.',
 }
@@ -60,7 +67,7 @@ const RISK_ORDERS: RiskOrder[] = [
   {
     orderCode: 'A-ORD-20261018-0231',
     riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-    attribution: 'delay_induced',
+    attribution: 'DELAY_INDUCED',
     promisedDate: '2026-10-26',
     expectedDate: '2026-10-29',
     lines: [
@@ -71,7 +78,7 @@ const RISK_ORDERS: RiskOrder[] = [
   {
     orderCode: 'A-ORD-20261019-0114',
     riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-    attribution: 'delay_induced',
+    attribution: 'DELAY_INDUCED',
     promisedDate: '2026-10-27',
     expectedDate: '2026-10-30',
     lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 80 }],
@@ -79,7 +86,7 @@ const RISK_ORDERS: RiskOrder[] = [
   {
     orderCode: 'A-ORD-20261015-0302',
     riskReason: '계획 입고일 기준으로도 SKU-003 재고가 부족합니다.',
-    attribution: 'pre_existing',
+    attribution: 'PRE_EXISTING',
     promisedDate: '2026-10-25',
     expectedDate: '2026-10-28',
     lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 60 }],
@@ -99,7 +106,7 @@ const generateRiskOrders = (count: number): RiskOrder[] =>
     return {
       orderCode: `A-ORD-2026101${5 + (index % 4)}-${String(100 + index).padStart(4, '0')}`,
       riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-      attribution: 'delay_induced',
+      attribution: 'DELAY_INDUCED',
       promisedDate,
       expectedDate: addDays(promisedDate, 3 + (index % 2)),
       lines:
@@ -152,7 +159,7 @@ const WATCH_IMPACT: SkuImpact = {
 }
 
 // 해상 선적이 해상·항구 단계일 때의 후보: 계획 유지, 한국 창고 항공 보충, 다른 권역 창고 출고
-const READY_ANALYSIS: DelayAnalysis = {
+const READY_ANALYSIS: MockAnalysis = {
   resultClass: 'READY_ORDER_RISK',
   impacts: [HYDRA_CREAM_IMPACT, WATCH_IMPACT],
   riskOrders: MANY_RISK_ORDERS,
@@ -161,15 +168,16 @@ const READY_ANALYSIS: DelayAnalysis = {
 }
 
 // 다른 권역 창고 출고가 1순위인 결과. 한국 창고 항공 보충은 회복하는 주문이 더 적다
-const OTHER_REGION_FIRST_ANALYSIS: DelayAnalysis = {
+const OTHER_REGION_FIRST_ANALYSIS: MockAnalysis = {
   ...READY_ANALYSIS,
   options: [
     {
       ...OTHER_REGION,
       expectedArrival: '2026-10-23',
       securableQuantity: 1240,
-      recoveredOrders: 42,
-      remainingRiskOrders: 0,
+      delayInducedRecoveredOrders: 42,
+      notRecoveredOrders: 0,
+      itemSecuredBlockedOrders: null,
       recommended: true,
       explanation: '지연 유발 위험 주문 42건을 모두 회복하고 남는 위험 주문이 없습니다.',
     },
@@ -177,8 +185,9 @@ const OTHER_REGION_FIRST_ANALYSIS: DelayAnalysis = {
       ...KR_AIR,
       expectedArrival: '2026-10-24',
       securableQuantity: 800,
-      recoveredOrders: 30,
-      remainingRiskOrders: 12,
+      delayInducedRecoveredOrders: 30,
+      notRecoveredOrders: 12,
+      itemSecuredBlockedOrders: 3,
       recommended: false,
       explanation: '지연 유발 위험 주문 30건을 회복하고 12건이 남습니다.',
     },
@@ -206,7 +215,7 @@ const BASE = {
   finalDecision: null,
 } as const
 
-const BASE_DELAY_CASES: DelayCase[] = [
+const BASE_DELAY_CASES: MockDelayCase[] = [
   {
     ...BASE,
     id: 'de-1024',
@@ -215,13 +224,13 @@ const BASE_DELAY_CASES: DelayCase[] = [
     productName: 'A Glow Hydra Cream 50ml',
     skuCount: 3,
     runCode: 'AN-261021-042',
-    status: 'ready',
+    status: 'READY_FOR_REVIEW',
     previousExpectedInbound: '2026-10-26',
     runs: [
       {
         runCode: 'AN-261021-042',
         versionNo: 2,
-        status: 'ready',
+        status: 'READY_FOR_REVIEW',
         isLatest: true,
         startedAt: '2026-10-21T00:31:00Z',
         finishedAt: '2026-10-21T00:36:00Z',
@@ -229,7 +238,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
       {
         runCode: 'AN-261020-018',
         versionNo: 1,
-        status: 'needs_reanalysis',
+        status: 'NEEDS_REANALYSIS',
         isLatest: false,
         startedAt: '2026-10-20T01:02:00Z',
         finishedAt: '2026-10-20T01:07:00Z',
@@ -265,7 +274,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     productName: 'A Glow Calming Serum 30ml',
     runCode: null,
     baseDataAt: null,
-    status: 'analyzing',
+    status: 'ANALYZING',
     stage: 'AT_PORT',
     delayDays: 3,
     plannedInbound: '2026-10-25',
@@ -281,7 +290,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'AIR-REG-20261005',
     productName: 'A Glow Hydra Mask Pack 5ea',
     runCode: 'AN-261021-039',
-    status: 'on_hold',
+    status: 'ON_HOLD',
     transportMode: 'AIR',
     stage: 'IN_AIR',
     delayDays: 3,
@@ -300,7 +309,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     productName: 'A Glow Hydra Toner Pad 60ea',
     skuCount: 2,
     runCode: 'AN-261021-037',
-    status: 'ready',
+    status: 'READY_FOR_REVIEW',
     // 해상 선적이 출항 전이면 출항 전 항공 전환이 후보가 된다
     stage: 'PRE_DEPARTURE',
     delayDays: 2,
@@ -324,8 +333,9 @@ const BASE_DELAY_CASES: DelayCase[] = [
           reasonCode: null,
           expectedArrival: '2026-10-24',
           securableQuantity: 420,
-          recoveredOrders: 2,
-          remainingRiskOrders: 0,
+          delayInducedRecoveredOrders: 2,
+          notRecoveredOrders: 0,
+          itemSecuredBlockedOrders: null,
           recommended: true,
           explanation: '지연 유발 위험 주문 2건을 모두 회복합니다.',
         },
@@ -335,11 +345,11 @@ const BASE_DELAY_CASES: DelayCase[] = [
           reasonCode: 'NO_TRANSFERABLE_STOCK',
           expectedArrival: null,
           securableQuantity: 0,
-          recoveredOrders: 0,
-          remainingRiskOrders: 2,
+          delayInducedRecoveredOrders: 0,
+          notRecoveredOrders: 2,
           explanation: '공여 창고에 넘길 재고가 없어 효과가 없습니다.',
         },
-        { ...KEEP_PLAN, remainingRiskOrders: 2 },
+        { ...KEEP_PLAN, notRecoveredOrders: 2 },
       ],
     },
     opinions: [],
@@ -351,7 +361,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'AIR-REG-20261006',
     productName: 'A Glow Hydra Serum 30ml',
     runCode: 'AN-261021-035',
-    status: 'ready',
+    status: 'READY_FOR_REVIEW',
     transportMode: 'AIR',
     stage: 'IN_AIR',
     delayDays: 2,
@@ -379,8 +389,8 @@ const BASE_DELAY_CASES: DelayCase[] = [
         {
           ...KR_AIR,
           securableQuantity: 610,
-          recoveredOrders: 0,
-          remainingRiskOrders: 0,
+          delayInducedRecoveredOrders: 0,
+          notRecoveredOrders: 0,
           explanation: '위험 주문은 없지만 예측 부족 610개를 줄일 수 있습니다.',
         },
         {
@@ -389,11 +399,11 @@ const BASE_DELAY_CASES: DelayCase[] = [
           reasonCode: 'DONOR_NO_NEXT_INBOUND',
           expectedArrival: null,
           securableQuantity: null,
-          recoveredOrders: null,
-          remainingRiskOrders: null,
+          delayInducedRecoveredOrders: null,
+          notRecoveredOrders: null,
           explanation: '공여 창고의 다음 입고가 없어 판정할 수 없습니다.',
         },
-        { ...KEEP_PLAN, remainingRiskOrders: 0 },
+        { ...KEEP_PLAN, notRecoveredOrders: 0 },
       ],
     },
     opinions: [],
@@ -405,7 +415,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'OCN-20260915',
     productName: 'A Glow Hydra Mist 100ml',
     runCode: 'AN-261020-031',
-    status: 'needs_reanalysis',
+    status: 'NEEDS_REANALYSIS',
     stage: 'AT_PORT',
     delayDays: 1,
     plannedInbound: '2026-10-27',
@@ -421,7 +431,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'OCN-20260909',
     productName: 'A Glow Calming Toner 150ml',
     runCode: 'AN-261019-027',
-    status: 'finalized',
+    status: 'FINALIZED',
     delayDays: 2,
     plannedInbound: '2026-10-24',
     expectedInbound: '2026-10-26',
@@ -441,7 +451,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'OCN-20260916',
     productName: 'A Glow Calming Cream 50ml',
     runCode: 'AN-261021-044',
-    status: 'no_risk',
+    status: 'NO_RISK',
     delayDays: 1,
     plannedInbound: '2026-10-27',
     expectedInbound: '2026-10-28',
@@ -468,7 +478,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'OCN-20260917',
     productName: 'A Glow Hydra Lotion 120ml',
     runCode: 'AN-261021-041',
-    status: 'no_delay',
+    status: 'NO_DELAY',
     closedAt: '2026-10-21T00:40:00Z',
     delayDays: 0,
     plannedInbound: '2026-10-28',
@@ -483,7 +493,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
     shipmentCode: 'OCN-20260918',
     productName: 'A Glow Cleansing Foam 150ml',
     runCode: 'AN-261021-040',
-    status: 'ready',
+    status: 'READY_FOR_REVIEW',
     // 계획 유지 말고는 실행 가능한 대응안이 없고, 운영 기준이 없어 판정하지 못한 대응안도 있다
     stage: 'PRE_DEPARTURE',
     delayDays: 2,
@@ -507,8 +517,9 @@ const BASE_DELAY_CASES: DelayCase[] = [
           reasonCode: 'PROMISE_UNREACHABLE_LEADTIME',
           expectedArrival: null,
           securableQuantity: 0,
-          recoveredOrders: 0,
-          remainingRiskOrders: 1,
+          delayInducedRecoveredOrders: 0,
+          notRecoveredOrders: 1,
+          itemSecuredBlockedOrders: null,
           recommended: false,
           explanation: '배송 기간 안에 약속일을 맞출 수 없습니다.',
         },
@@ -518,11 +529,11 @@ const BASE_DELAY_CASES: DelayCase[] = [
           reasonCode: 'MISSING_OPERATING_RULE',
           expectedArrival: null,
           securableQuantity: null,
-          recoveredOrders: null,
-          remainingRiskOrders: null,
+          delayInducedRecoveredOrders: null,
+          notRecoveredOrders: null,
           explanation: '운영 기준이 없어 판정할 수 없습니다.',
         },
-        { ...KEEP_PLAN, remainingRiskOrders: 1 },
+        { ...KEEP_PLAN, notRecoveredOrders: 1 },
       ],
       explanation: {
         ...EXPLANATION,
@@ -533,4 +544,4 @@ const BASE_DELAY_CASES: DelayCase[] = [
   },
 ]
 
-export const DELAY_CASES: DelayCase[] = [...BASE_DELAY_CASES, ...MORE_DELAY_CASES]
+export const DELAY_CASES: DelayCase[] = [...BASE_DELAY_CASES, ...MORE_DELAY_CASES].map(toDelayCase)

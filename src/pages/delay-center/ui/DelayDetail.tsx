@@ -55,10 +55,7 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
                 대응안 비교
               </h3>
               <OptionNotices options={analysis.options} />
-              <OptionTable
-                options={analysis.options}
-                recommendation={analysis.explanation?.recommendation ?? null}
-              />
+              <OptionTable options={analysis.options} explanation={analysis.explanation} />
             </section>
           )}
 

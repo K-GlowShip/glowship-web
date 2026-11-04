@@ -37,12 +37,12 @@ export interface DelayOption {
   expectedArrival: string | null
   securableQuantity: number | null
   /** 지연 때문에 위험해진 주문 중 이 대응안으로 납기를 회복하는 주문 수 */
-  recoveredOrders: number | null
+  delayInducedRecoveredOrders: number | null
   /** 대응 후에도 남는 위험 주문 수 */
-  remainingRiskOrders: number | null
+  notRecoveredOrders: number | null
+  /** 남는 위험 주문 중 일부 품목만 확보되어 납기를 못 맞추는 주문 수. 화면에서는 "일부 품목만 확보"로 쓴다(부분 회복이라고 쓰지 않는다). */
+  itemSecuredBlockedOrders: number | null
   recommended: boolean
-  /** AI 설명(`option_explanations`). 설명이 없으면 null */
-  explanation: string | null
 }
 
 export interface RiskOrderLine {
@@ -89,6 +89,8 @@ export interface AiExplanation {
   riskSummary: string
   recommendation: string
   warnings: string[]
+  /** 대응안별 설명(`option_explanations`). 설명이 없는 대응안은 키가 없다. */
+  optionExplanations: Partial<Record<OptionType, string>>
 }
 
 export interface DelayAnalysis {
@@ -197,10 +199,7 @@ export const DELAY_STATUS_BADGE_VARIANT = {
   [DELAY_STATUS.NO_DELAY]: 'neutral',
 } as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
 
-/**
- * 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다.
- * API 명세 4.4의 `status` 값에는 선택 완료·위험 없음·지연 해소가 없어서, 서버 연동 때 서버가 이 값을 받도록 맞춰야 한다.
- */
+/** 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다. */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
 
 export const STAGE_LABEL: Record<StageCode, string> = {
@@ -257,10 +256,13 @@ export const FEASIBILITY_BADGE_VARIANT = {
   [FEASIBILITY.NEEDS_CHECK]: 'warning',
 } as const satisfies Record<Feasibility, 'success' | 'danger' | 'warning'>
 
-/** 역할별로 고를 수 있는 대응안. 최종 선택은 실행 가능한 안만, 초안은 확인 필요인 안까지 고른다. */
+/**
+ * 역할별로 고를 수 있는 대응안. 최종 선택은 실행 가능한 안만 고른다. 초안은 실행 가능 여부를 묻지 않아서
+ * 불가·확인 필요인 안도 고를 수 있다(명세 v6.2 4.6).
+ */
 const SELECTABLE_FEASIBILITY: Record<ClientRole, Feasibility[]> = {
   [CLIENT_ROLE.LEAD]: [FEASIBILITY.FEASIBLE],
-  [CLIENT_ROLE.MEMBER]: [FEASIBILITY.FEASIBLE, FEASIBILITY.NEEDS_CHECK],
+  [CLIENT_ROLE.MEMBER]: Object.values(FEASIBILITY),
 }
 
 export const getSelectableOptions = (role: ClientRole, options: DelayOption[]) =>
