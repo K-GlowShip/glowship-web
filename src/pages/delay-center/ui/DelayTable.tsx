@@ -90,7 +90,7 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
             </TableCell>
             <TableCell>
               <div className="flex flex-col">
-                <span>{STAGE_LABEL[delayCase.stage]}</span>
+                <span className="font-bold">{STAGE_LABEL[delayCase.stage]}</span>
                 <span className="text-caption text-muted-foreground">{formatRoute(delayCase)}</span>
               </div>
             </TableCell>
