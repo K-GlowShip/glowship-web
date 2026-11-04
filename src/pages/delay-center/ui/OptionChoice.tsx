@@ -9,8 +9,8 @@ import {
   FEASIBILITY,
   FEASIBILITY_BADGE_VARIANT,
   FEASIBILITY_LABEL,
-  formatMonthDay,
   getSelectableOptions,
+  type MemberOpinion,
   OPTION_TYPE_LABEL,
   REASON_LABEL,
 } from '../model/delay-center'
@@ -24,7 +24,7 @@ const RADIO_NAME = 'decision-option'
 const CARD_CLASS = cn(
   // relative가 없으면 화면 읽기 전용으로 숨긴 라디오(sr-only, 절대 위치)가 스크롤 영역 밖에 놓여서,
   // 카드를 누를 때 브라우저가 그 입력을 보이게 하려고 문서 전체를 스크롤해 화면이 밀려난다.
-  'relative flex cursor-pointer items-start gap-12pxr rounded-card border border-border bg-card p-16pxr',
+  'relative flex cursor-pointer items-start gap-12pxr rounded-card border border-border bg-card px-16pxr py-12pxr',
   'has-checked:border-primary has-checked:bg-primary-50 has-checked:shadow-[inset_0_0_0_1px_var(--color-primary)]',
   'has-focus-visible:ring-[3px] has-focus-visible:ring-primary/30',
   'has-disabled:cursor-not-allowed has-disabled:bg-background',
@@ -34,6 +34,8 @@ interface OptionChoiceProps {
   legend: string
   role: ClientRole
   options: DelayOption[]
+  /** 대응안마다 몇 명이 의견을 냈는지 보여 주는 데 쓴다 */
+  opinions: MemberOpinion[]
   /** 고른 대응안의 id. 고르지 않았으면 `NO_OPTION` */
   value: string
   /** 대응안을 안 고르고 의견만 저장할 수 있게 하는 항목을 보여 줄지(팀원) */
@@ -44,13 +46,16 @@ interface OptionChoiceProps {
 }
 
 /**
- * 대응안을 드롭다운에 숨기지 않고 펼쳐서 고르게 한다. 선택할 수 없는 대응안도 목록에 남기고 사유를 함께 보여 줘서
- * 왜 못 고르는지 알 수 있게 한다. 팀장은 실행 가능한 안만, 팀원은 확인 필요인 안까지 고를 수 있다.
+ * 대응안을 드롭다운에 숨기지 않고 펼쳐서 고르게 한다. 숫자 비교는 위의 대응안 비교 표에서 하므로 여기에는 이름과 상태만 두고,
+ * 표에 없는 '팀원 의견 N건'을 붙여서 의견이 몰린 대응안을 고르는 자리에서 바로 보게 한다.
+ * 선택할 수 없는 대응안도 목록에 남기고 사유를 한 줄 보여 줘서 왜 못 고르는지 알 수 있게 한다.
+ * 팀장은 실행 가능한 안만, 팀원은 확인 필요인 안까지 고를 수 있다.
  */
 export function OptionChoice({
   legend,
   role,
   options,
+  opinions,
   value,
   allowNone,
   guide,
@@ -70,6 +75,8 @@ export function OptionChoice({
 
       {options.map((option) => {
         const selectable = selectableIds.has(option.id)
+        const opinionCount = opinions.filter(({ optionId }) => optionId === option.id).length
+        const detail = getDetail(option, selectable)
 
         return (
           <ChoiceCard
@@ -79,7 +86,7 @@ export function OptionChoice({
             disabled={!selectable}
             onChange={onChange}
           >
-            <span className="flex flex-wrap items-center gap-8pxr">
+            <span className="flex flex-wrap items-center gap-x-8pxr gap-y-2pxr">
               <span className={cn('text-b1 font-bold', !selectable && 'text-muted-foreground')}>
                 {OPTION_TYPE_LABEL[option.type]}
               </span>
@@ -89,8 +96,13 @@ export function OptionChoice({
                   {FEASIBILITY_LABEL[option.feasibility]}
                 </Badge>
               )}
+              {opinionCount > 0 && (
+                <span className="ml-auto text-caption text-muted-foreground">
+                  팀원 의견 {opinionCount}건
+                </span>
+              )}
             </span>
-            <span className="text-b2 text-muted-foreground">{getDetail(option, selectable)}</span>
+            {detail && <span className="text-b2 text-muted-foreground">{detail}</span>}
           </ChoiceCard>
         )
       })}
@@ -100,20 +112,12 @@ export function OptionChoice({
   )
 }
 
-/** 선택할 수 있으면 비교에 필요한 값을, 없으면 그 이유를 한 줄로 보여 준다. 비교표의 숫자를 되풀이하지 않고 핵심만 적는다. */
+/** 사유가 있으면 한 줄로 보여 준다. 선택할 수 없는데 사유가 없으면 선택할 수 없다는 것만 알린다. */
 const getDetail = (option: DelayOption, selectable: boolean) => {
-  const reason = option.reasonCode ? REASON_LABEL[option.reasonCode] : null
-  if (!selectable) {
-    return reason ?? '선택할 수 없는 대응안입니다.'
+  if (option.reasonCode) {
+    return REASON_LABEL[option.reasonCode]
   }
-  return [
-    reason,
-    option.expectedArrival && `예상 도착 ${formatMonthDay(option.expectedArrival)}`,
-    option.recoveredOrders !== null && `회복 ${option.recoveredOrders}건`,
-    option.remainingRiskOrders !== null && `남은 위험 주문 ${option.remainingRiskOrders}건`,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  return selectable ? null : '선택할 수 없는 대응안입니다.'
 }
 
 interface ChoiceCardProps {

@@ -10,6 +10,7 @@ import {
   type ClientRole,
   type DelayOption,
   getSelectableOptions,
+  type MemberOpinion,
   OPTION_TYPE,
 } from '../model/delay-center'
 import {
@@ -25,6 +26,7 @@ const TEXT_MAX_LENGTH = 600
 interface DecisionFormProps {
   role: ClientRole
   options: DelayOption[]
+  opinions: MemberOpinion[]
 }
 
 /**
@@ -32,7 +34,7 @@ interface DecisionFormProps {
  * 초안은 실행 가능 여부와 상관없이 모든 대응안을 고를 수 있고 대응안과 의견 중 하나만 있으면 된다.
  * 최종 선택은 실행 가능한 대응안만 고를 수 있고 이유가 필수다.
  */
-export function DecisionForm({ role, options }: DecisionFormProps) {
+export function DecisionForm({ role, options, opinions }: DecisionFormProps) {
   const isLead = role === CLIENT_ROLE.LEAD
   const labels = DECISION_FORM_TEXT[role]
   const selectable = getSelectableOptions(role, options)
@@ -78,6 +80,7 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
         legend={labels.optionLabel}
         role={role}
         options={options}
+        opinions={opinions}
         value={optionId}
         allowNone={!isLead}
         guide={onlyKeepPlan ? ONLY_KEEP_PLAN_GUIDE : undefined}
