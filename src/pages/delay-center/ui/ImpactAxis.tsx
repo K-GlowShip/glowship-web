@@ -43,15 +43,18 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
     toDay(plannedInbound),
     toDay(expectedInbound),
     ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate, stockoutEndDate }) =>
-      [safetyStockBreachDate, stockoutDate, stockoutEndDate]
+      [safetyStockBreachDate, stockoutDate]
         .filter((date): date is string => date !== null)
-        .map(toDay),
+        .map(toDay)
+        // 품절 구간은 마지막 품절일이 끝나는 지점(다음 날 눈금)까지 그린다
+        .concat(stockoutEndDate ? [toDay(stockoutEndDate) + 1] : []),
     ),
   ]
   const min = Math.min(...days)
   // 날짜가 하나뿐이어도 축이 0으로 나뉘지 않게 하루 폭을 준다
   const max = Math.max(Math.max(...days), min + 1)
-  const toPercent = (date: string) => ((toDay(date) - min) / (max - min)) * 100
+  const dayToPercent = (day: number) => ((day - min) / (max - min)) * 100
+  const toPercent = (date: string) => dayToPercent(toDay(date))
 
   const tickStep = Math.max(1, Math.ceil((max - min) / TARGET_TICKS))
   const ticks: number[] = []
@@ -116,7 +119,12 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
         </div>
 
         {rows.map((row) => (
-          <StockRow key={`${row.skuCode}-${row.region}`} impact={row} toPercent={toPercent} />
+          <StockRow
+            key={`${row.skuCode}-${row.region}`}
+            impact={row}
+            toPercent={toPercent}
+            dayToPercent={dayToPercent}
+          />
         ))}
 
         {/* 입고 */}
@@ -186,10 +194,11 @@ function LegendDot({ className, label }: { className: string; label: string }) {
 interface StockRowProps {
   impact: SkuImpact
   toPercent: (date: string) => number
+  dayToPercent: (day: number) => number
 }
 
 /** 상품 하나의 재고 줄. 안전재고 하회와 재고 소진 점, 품절 구간 띠를 그린다. */
-function StockRow({ impact, toPercent }: StockRowProps) {
+function StockRow({ impact, toPercent, dayToPercent }: StockRowProps) {
   const { productName, skuCode, estimable, safetyStockBreachDate, stockoutDate, stockoutEndDate } =
     impact
 
@@ -213,7 +222,7 @@ function StockRow({ impact, toPercent }: StockRowProps) {
                 style={{
                   height: BAND_HEIGHT,
                   left: `${toPercent(stockoutDate)}%`,
-                  width: `${toPercent(stockoutEndDate) - toPercent(stockoutDate)}%`,
+                  width: `${dayToPercent(toDay(stockoutEndDate) + 1) - toPercent(stockoutDate)}%`,
                 }}
                 title={`품절 ${formatMonthDay(stockoutDate)}–${stockoutEndDate.slice(8)}`}
               />
