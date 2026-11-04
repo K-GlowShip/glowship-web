@@ -1,5 +1,7 @@
 import { Search } from 'lucide-react'
+import { type SubmitEvent, useState } from 'react'
 
+import { Button } from '@/shared/ui/button'
 import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
 import { Input } from '@/shared/ui/input'
 
@@ -14,18 +16,32 @@ interface DelayListFiltersProps {
   keyword: string
   status: DelayStatusFilter
   counts: Record<DelayStatusFilter, number>
-  onKeywordChange: (keyword: string) => void
-  onStatusChange: (status: DelayStatusFilter) => void
+  /** 검색 버튼을 누르거나 Enter를 칠 때만 부른다. 검색어와 상태를 고르는 동안에는 부르지 않는다. */
+  onSearch: (filters: { keyword: string; status: DelayStatusFilter }) => void
 }
 
-/** 지연 목록 위의 검색창과 상태 필터를 가로 한 줄로 둔다. 검색창은 넓은 화면에서도 320px로 고정한다. 상태 옆에 건수를 함께 보여 준다. */
-export function DelayListFilters({
-  keyword,
-  status,
-  counts,
-  onKeywordChange,
-  onStatusChange,
-}: DelayListFiltersProps) {
+/**
+ * 지연 목록 위의 상태 필터와 검색창을 가로 한 줄로 둔다(상태 필터가 앞). 검색창은 넓은 화면에서도 320px로 고정한다.
+ * 검색어와 상태는 고르는 동안 이 안에만 담아 두고, 검색 버튼(또는 Enter)을 눌렀을 때 한꺼번에 적용한다.
+ * 글자를 치거나 상태를 고를 때마다 서버에 요청하지 않게 하기 위해서다. 상태 옆에 건수를 함께 보여 준다.
+ */
+export function DelayListFilters({ keyword, status, counts, onSearch }: DelayListFiltersProps) {
+  const [draftKeyword, setDraftKeyword] = useState(keyword)
+  const [draftStatus, setDraftStatus] = useState(status)
+  const [synced, setSynced] = useState({ keyword, status })
+
+  // 뒤로 가기 등으로 주소의 검색 조건이 바뀌면 입력 칸도 맞춘다
+  if (keyword !== synced.keyword || status !== synced.status) {
+    setSynced({ keyword, status })
+    setDraftKeyword(keyword)
+    setDraftStatus(status)
+  }
+
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    onSearch({ keyword: draftKeyword.trim(), status: draftStatus })
+  }
+
   const statusOptions: DropdownOption[] = [
     { value: STATUS_FILTER_ALL, label: `전체 (${counts[STATUS_FILTER_ALL]})` },
     ...DELAY_STATUS_OPTIONS.map((value) => ({
@@ -35,8 +51,19 @@ export function DelayListFilters({
   ]
 
   return (
-    <div className="flex flex-col gap-8pxr md:flex-row md:items-center">
-      <div className="relative md:w-320pxr">
+    <form
+      role="search"
+      className="flex flex-col gap-8pxr md:flex-row md:items-center"
+      onSubmit={handleSubmit}
+    >
+      <Dropdown
+        className="md:w-220pxr md:shrink-0"
+        aria-label="상태 필터"
+        options={statusOptions}
+        value={draftStatus}
+        onChange={(value) => setDraftStatus(value as DelayStatusFilter)}
+      />
+      <div className="relative min-w-0 md:w-320pxr">
         <Search
           className="pointer-events-none absolute top-1/2 left-12pxr size-18pxr -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
@@ -45,17 +72,13 @@ export function DelayListFilters({
           aria-label="선적 번호 또는 상품 검색"
           className="pl-40pxr"
           placeholder="선적 번호 / 상품"
-          value={keyword}
-          onChange={(event) => onKeywordChange(event.target.value)}
+          value={draftKeyword}
+          onChange={(event) => setDraftKeyword(event.target.value)}
         />
       </div>
-      <Dropdown
-        className="md:w-220pxr"
-        aria-label="상태 필터"
-        options={statusOptions}
-        value={status}
-        onChange={(value) => onStatusChange(value as DelayStatusFilter)}
-      />
-    </div>
+      <Button type="submit" className="h-44pxr">
+        검색
+      </Button>
+    </form>
   )
 }

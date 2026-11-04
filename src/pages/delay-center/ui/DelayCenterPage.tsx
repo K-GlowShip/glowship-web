@@ -72,9 +72,11 @@ export function DelayCenterPage() {
             keyword={keyword}
             status={status}
             counts={COUNTS}
-            onKeywordChange={(value) => updateParams({ [LIST_PARAM.KEYWORD]: value })}
-            onStatusChange={(value) =>
-              updateParams({ [LIST_PARAM.STATUS]: value === STATUS_FILTER_ALL ? '' : value })
+            onSearch={({ keyword: nextKeyword, status: nextStatus }) =>
+              updateParams({
+                [LIST_PARAM.KEYWORD]: nextKeyword,
+                [LIST_PARAM.STATUS]: nextStatus === STATUS_FILTER_ALL ? '' : nextStatus,
+              })
             }
           />
           <TableTemplate
