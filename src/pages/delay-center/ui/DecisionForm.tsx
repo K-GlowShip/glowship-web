@@ -2,7 +2,6 @@ import { Check, Info } from 'lucide-react'
 import { type SubmitEvent, useRef, useState } from 'react'
 
 import { Button } from '@/shared/ui/button'
-import { Dropdown } from '@/shared/ui/dropdown'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 
@@ -10,22 +9,18 @@ import {
   CLIENT_ROLE,
   type ClientRole,
   type DelayOption,
-  FEASIBILITY,
-  FEASIBILITY_LABEL,
   getSelectableOptions,
   OPTION_TYPE,
-  OPTION_TYPE_LABEL,
 } from '../model/delay-center'
 import {
   DECISION_FORM_TEXT,
   DRAFT_SAVED_MESSAGE,
-  NO_OPTION_LABEL,
   ONLY_KEEP_PLAN_GUIDE,
 } from '../model/delay-center-text'
 import { validateDecision } from '../model/validate-decision'
+import { NO_OPTION, OptionChoice } from './OptionChoice'
 
 const TEXT_MAX_LENGTH = 600
-const NO_OPTION = ''
 
 interface DecisionFormProps {
   role: ClientRole
@@ -51,20 +46,6 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
   const textRef = useRef<HTMLTextAreaElement>(null)
   // 대응안이 없다는 오류는 대응안 칸의 문제라서, 이유·의견 칸은 대응안이 있는데 오류일 때(팀원은 둘 다 없을 때)만 오류로 표시한다.
   const isTextInvalid = error !== '' && (!isLead || optionId !== NO_OPTION)
-
-  const dropdownOptions = [
-    ...(isLead ? [] : [{ value: NO_OPTION, label: NO_OPTION_LABEL }]),
-    ...selectable.map((option) => ({
-      value: option.id,
-      label: [
-        OPTION_TYPE_LABEL[option.type],
-        option.feasibility !== FEASIBILITY.FEASIBLE && FEASIBILITY_LABEL[option.feasibility],
-        option.recommended && 'AI 추천',
-      ]
-        .filter(Boolean)
-        .join(' · '),
-    })),
-  ]
 
   const validate = () => {
     const message = validateDecision(role, { optionId, text })
@@ -93,22 +74,18 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
 
   return (
     <form className="flex flex-col gap-16pxr" onSubmit={handleSubmit} noValidate>
-      <div className="flex flex-col gap-8pxr">
-        <Label id="decision-option-label">{labels.optionLabel}</Label>
-        <Dropdown
-          aria-labelledby="decision-option-label"
-          options={dropdownOptions}
-          value={optionId}
-          placeholder="대응안을 선택하세요"
-          onChange={(value) => {
-            setOptionId(value)
-            clearFeedback()
-          }}
-        />
-        {onlyKeepPlan && (
-          <p className="text-caption text-muted-foreground">{ONLY_KEEP_PLAN_GUIDE}</p>
-        )}
-      </div>
+      <OptionChoice
+        legend={labels.optionLabel}
+        role={role}
+        options={options}
+        value={optionId}
+        allowNone={!isLead}
+        guide={onlyKeepPlan ? ONLY_KEEP_PLAN_GUIDE : undefined}
+        onChange={(value) => {
+          setOptionId(value)
+          clearFeedback()
+        }}
+      />
 
       <div className="flex flex-col gap-8pxr">
         <Label htmlFor="decision-text">
