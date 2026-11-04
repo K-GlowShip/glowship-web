@@ -16,13 +16,13 @@ interface DelayListFiltersProps {
   keyword: string
   status: DelayStatusFilter
   counts: Record<DelayStatusFilter, number>
-  /** 검색 버튼을 누르거나 Enter를 칠 때만 부른다. 검색어와 상태를 고르는 동안에는 부르지 않는다. */
+  /** 조회 버튼을 누르거나 Enter를 칠 때만 부른다. 검색어와 상태를 고르는 동안에는 부르지 않는다. */
   onSearch: (filters: { keyword: string; status: DelayStatusFilter }) => void
 }
 
 /**
  * 지연 목록 위의 상태 필터와 검색창을 가로 한 줄로 둔다(상태 필터가 앞). 검색창은 넓은 화면에서도 320px로 고정한다.
- * 검색어와 상태는 고르는 동안 이 안에만 담아 두고, 검색 버튼(또는 Enter)을 눌렀을 때 한꺼번에 적용한다.
+ * 검색어와 상태는 고르는 동안 이 안에만 담아 두고, 조회 버튼(또는 Enter)을 눌렀을 때 한꺼번에 적용한다.
  * 글자를 치거나 상태를 고를 때마다 서버에 요청하지 않게 하기 위해서다. 상태 옆에 건수를 함께 보여 준다.
  */
 export function DelayListFilters({ keyword, status, counts, onSearch }: DelayListFiltersProps) {
@@ -77,7 +77,7 @@ export function DelayListFilters({ keyword, status, counts, onSearch }: DelayLis
         />
       </div>
       <Button type="submit" className="h-44pxr">
-        검색
+        조회
       </Button>
     </form>
   )
