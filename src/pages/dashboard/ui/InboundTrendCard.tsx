@@ -51,7 +51,7 @@ export function InboundTrendCard() {
           ))}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-12pxr">
+      <CardContent className="flex flex-col gap-16pxr pt-16pxr">
         <ul className="flex flex-wrap items-center gap-x-16pxr gap-y-4pxr text-b2 text-muted-foreground">
           <li className="flex items-center gap-6pxr">
             <span className="h-3pxr w-16pxr rounded-full bg-primary-600" aria-hidden="true" />

@@ -87,10 +87,10 @@ const toKpis = (summary: DashboardSummary): Kpi[] => {
 
 export function KpiCards({ summary }: { summary: DashboardSummary }) {
   return (
-    <section aria-label="핵심 지표" className="grid gap-16pxr sm:grid-cols-2 xl:grid-cols-4">
+    <section aria-label="핵심 지표" className="grid gap-24pxr sm:grid-cols-2 xl:grid-cols-4">
       {toKpis(summary).map(({ id, label, value, caption, tone, icon: Icon, isAlert }) => (
         <Card key={id}>
-          <CardContent className="flex flex-col gap-8pxr p-20pxr">
+          <CardContent className="flex flex-col gap-8pxr">
             <div className="flex items-center justify-between">
               <p className="text-b1 text-muted-foreground">{label}</p>
               <Icon className="size-18pxr text-muted-foreground" aria-hidden="true" />

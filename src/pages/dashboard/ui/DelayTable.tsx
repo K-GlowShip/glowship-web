@@ -37,10 +37,10 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
           지연 대응 센터에서 보기 →
         </Link>
       </CardHeader>
-      <CardContent className="flex flex-col gap-16pxr">
+      <CardContent className="flex flex-col gap-16pxr pt-16pxr">
         <ul
           aria-label="상태별 지연 건수, 누르면 해당 상태 목록으로 이동"
-          className="grid grid-cols-2 gap-12pxr lg:grid-cols-4"
+          className="grid grid-cols-2 gap-16pxr lg:grid-cols-4"
         >
           {DELAY_STATUS_ORDER.map((status) => (
             <li key={status}>

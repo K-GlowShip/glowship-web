@@ -19,6 +19,8 @@ import { SyncStatusCard } from './SyncStatusCard'
 // 로그인 연동 전까지 Figma 예시 값을 사용한다 (AppGnb와 같은 값). 연동하면 GET /me로 바꾼다
 const USER_NAME = '김민지'
 
+// 간격은 두 단계로 맞춘다.
+// 24px: 구획 사이(화면 세로, 카드 옆 카드)와 카드 안쪽 여백. 16px: 카드 제목 아래와 카드 안 블록 사이.
 export function DashboardPage() {
   // TODO: 대시보드 API 연동 시 로딩·오류 상태와 함께 서버 응답으로 교체
   const summary = MOCK_SUMMARY

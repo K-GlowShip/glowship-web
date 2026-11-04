@@ -53,7 +53,7 @@ export function SyncStatusCard({ syncStatus }: { syncStatus: SyncStatusResult })
           <RefreshCw className={cn(isRefreshing && 'animate-spin motion-reduce:animate-none')} />
         </Button>
       </CardHeader>
-      <CardContent className="flex flex-col gap-16pxr">
+      <CardContent className="flex flex-col gap-16pxr pt-16pxr">
         {sources.length === 0 ? (
           <p className="py-24pxr text-center text-muted-foreground">수집 내역이 없습니다.</p>
         ) : (
