@@ -23,7 +23,6 @@ import {
   getAtRiskOrderCount,
   formatProductLabel,
   formatRoute,
-  isClosed,
   STAGE_LABEL,
 } from '../model/delay-center'
 
@@ -82,16 +81,9 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
               <span className="text-muted-foreground">{formatProductLabel(delayCase)}</span>
             </TableCell>
             <TableCell>
-              <div className="flex flex-wrap items-center gap-4pxr">
-                <Badge variant={DELAY_STATUS_BADGE_VARIANT[delayCase.status]}>
-                  {DELAY_STATUS_LABEL[delayCase.status]}
-                </Badge>
-                {isClosed(delayCase) && (
-                  <Badge variant="neutral" dot={false}>
-                    종료
-                  </Badge>
-                )}
-              </div>
+              <Badge variant={DELAY_STATUS_BADGE_VARIANT[delayCase.status]}>
+                {DELAY_STATUS_LABEL[delayCase.status]}
+              </Badge>
             </TableCell>
             <TableCell className={cn(delayCase.delayDays > 0 && 'font-bold text-danger')}>
               {delayCase.delayDays > 0 ? `+${delayCase.delayDays}일` : EMPTY}
