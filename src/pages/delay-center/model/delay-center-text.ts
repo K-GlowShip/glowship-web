@@ -41,6 +41,7 @@ export const ANALYSIS_NOTICE = {
   NO_RISK: '현재 등록된 주문과 기준에서는 납기 위험 주문이 없습니다.',
   NO_DELAY: '예상 입고일이 계획 입고일 이전으로 돌아왔습니다.',
   CLOSED: '종료된 지연이라 대응안 선택과 재분석을 할 수 없습니다.',
+  CANNOT_DECIDE: '지금은 대응안을 선택할 수 없습니다. 위쪽 안내를 확인해 주세요.',
   NO_FEASIBLE_OPTION:
     '계획 유지 외에 실행 가능한 대응안이 없습니다. 대응안별 불가 사유를 보고 직접 검토하세요.',
   MISSING_DATA:

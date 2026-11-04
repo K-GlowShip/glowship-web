@@ -7,7 +7,7 @@ import type { AiExplanation } from '../model/delay-center'
 interface AiExplanationCardProps {
   explanation: AiExplanation
   /**
-   * 추천 근거를 카드에서 보여 줄지. 추천 대응안이 있으면 그 행을 펼쳤을 때 보여 주므로 false다.
+   * 추천 근거를 카드에서 보여 줄지. 추천 대응안이 있으면 그 행 아래에 보여 주므로 false다.
    * 추천 대응안이 하나도 없을 때만 true로 둬서 추천 근거 문장이 사라지지 않게 한다.
    */
   showRecommendation: boolean
@@ -38,8 +38,12 @@ export function AiExplanationCard({ explanation, showRecommendation }: AiExplana
 
       {explanation.warnings.length > 0 && (
         <ul className="flex flex-col gap-4pxr">
-          {explanation.warnings.map((warning) => (
-            <li key={warning} className="flex items-center gap-6pxr text-b2 text-warning">
+          {explanation.warnings.map((warning, index) => (
+            // 같은 문구의 경고가 여러 번 올 수 있어서 순서를 key에 섞는다
+            <li
+              key={`${index}-${warning}`}
+              className="flex items-center gap-6pxr text-b2 text-warning"
+            >
               <TriangleAlert className="size-14pxr shrink-0" aria-hidden="true" />
               {warning}
             </li>

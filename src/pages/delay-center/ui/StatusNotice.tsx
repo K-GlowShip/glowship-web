@@ -1,3 +1,4 @@
+import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 
 import {
@@ -43,7 +44,10 @@ export function StatusNotice({ delayCase }: StatusNoticeProps) {
   return (
     <div
       role="status"
-      className={`flex flex-col gap-4pxr rounded-card px-20pxr py-16pxr ${TONE_CLASS[notice.tone]}`}
+      className={cn(
+        'flex flex-col gap-4pxr rounded-card px-20pxr py-16pxr',
+        TONE_CLASS[notice.tone],
+      )}
     >
       <p className="text-b1 font-bold">{notice.title}</p>
       {notice.detail && <p className="text-b2">{notice.detail}</p>}
@@ -107,6 +111,13 @@ const getNotice = (delayCase: DelayCase): Notice | null => {
         return {
           tone: 'danger',
           title: delayCase.failureMessage ?? ANALYSIS_NOTICE.NO_RESULT,
+          detail: ANALYSIS_NOTICE.REANALYZE_GUIDE,
+        }
+      }
+      if (status === DELAY_STATUS.READY && analysis.explanation === null) {
+        return {
+          tone: 'danger',
+          title: ANALYSIS_NOTICE.EXPLANATION_FAILED,
           detail: ANALYSIS_NOTICE.REANALYZE_GUIDE,
         }
       }
