@@ -18,7 +18,7 @@ interface DelayListFiltersProps {
   onStatusChange: (status: DelayStatusFilter) => void
 }
 
-/** 지연 목록 위의 검색창과 상태 필터. 상태 옆에 건수를 함께 보여 준다. */
+/** 지연 목록 위의 검색창과 상태 필터를 가로 한 줄로 둔다. 검색창은 넓은 화면에서도 320px로 고정한다. 상태 옆에 건수를 함께 보여 준다. */
 export function DelayListFilters({
   keyword,
   status,
@@ -35,8 +35,8 @@ export function DelayListFilters({
   ]
 
   return (
-    <div className="flex flex-col gap-8pxr rounded-card border border-border bg-card p-16pxr">
-      <div className="relative">
+    <div className="flex flex-col gap-8pxr md:flex-row md:items-center">
+      <div className="relative md:w-320pxr">
         <Search
           className="pointer-events-none absolute top-1/2 left-12pxr size-18pxr -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
@@ -50,6 +50,7 @@ export function DelayListFilters({
         />
       </div>
       <Dropdown
+        className="md:w-220pxr"
         aria-label="상태 필터"
         options={statusOptions}
         value={status}

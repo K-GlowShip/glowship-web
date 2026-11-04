@@ -151,6 +151,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1024',
+    detectedAt: '2026-10-21T01:00:00Z',
     shipmentCode: 'OCN-20260910',
     productName: 'A Glow Hydra Cream 50ml',
     skuCount: 3,
@@ -200,6 +201,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1023',
+    detectedAt: '2026-10-20T23:00:00Z',
     shipmentCode: 'OCN-20260911',
     productName: 'A Glow Calming Serum 30ml',
     runCode: null,
@@ -216,6 +218,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1021',
+    detectedAt: '2026-10-20T19:00:00Z',
     shipmentCode: 'AIR-REG-20261005',
     productName: 'A Glow Hydra Mask Pack 5ea',
     runCode: 'AN-261021-039',
@@ -233,6 +236,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1020',
+    detectedAt: '2026-10-20T17:00:00Z',
     shipmentCode: 'OCN-20260913',
     productName: 'A Glow Hydra Toner Pad 60ea',
     skuCount: 2,
@@ -284,6 +288,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1019',
+    detectedAt: '2026-10-20T15:00:00Z',
     shipmentCode: 'AIR-REG-20261006',
     productName: 'A Glow Hydra Serum 30ml',
     runCode: 'AN-261021-035',
@@ -337,6 +342,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1018',
+    detectedAt: '2026-10-20T13:00:00Z',
     shipmentCode: 'OCN-20260915',
     productName: 'A Glow Hydra Mist 100ml',
     runCode: 'AN-261020-031',
@@ -352,6 +358,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1017',
+    detectedAt: '2026-10-19T01:00:00Z',
     shipmentCode: 'OCN-20260909',
     productName: 'A Glow Calming Toner 150ml',
     runCode: 'AN-261019-027',
@@ -371,6 +378,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1016',
+    detectedAt: '2026-10-20T09:00:00Z',
     shipmentCode: 'OCN-20260916',
     productName: 'A Glow Calming Cream 50ml',
     runCode: 'AN-261021-044',
@@ -397,6 +405,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1015',
+    detectedAt: '2026-10-20T07:00:00Z',
     shipmentCode: 'OCN-20260917',
     productName: 'A Glow Hydra Lotion 120ml',
     runCode: 'AN-261021-041',
@@ -411,6 +420,7 @@ const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1014',
+    detectedAt: '2026-10-20T05:00:00Z',
     shipmentCode: 'OCN-20260918',
     productName: 'A Glow Cleansing Foam 150ml',
     runCode: 'AN-261021-040',

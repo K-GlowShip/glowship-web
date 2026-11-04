@@ -153,6 +153,8 @@ export interface DelayCase {
   plannedInbound: string
   /** 'YYYY-MM-DD' */
   expectedInbound: string
+  /** ISO 8601 UTC. 이 지연을 처음 감지한 시각 */
+  detectedAt: string
   /** 'YYYY-MM-DD'. 직전에 관측한 예상 입고일. 처음 감지한 지연이면 null */
   previousExpectedInbound: string | null
   /** ISO 8601 UTC. 지연이 종료된 시각(입고 완료·지연 해소). 열려 있으면 null */
@@ -281,13 +283,9 @@ export const ATTRIBUTION_LABEL = {
   [RISK_ATTRIBUTION.PRE_EXISTING]: '기존 위험',
 } as const satisfies Record<RiskOrder['attribution'], string>
 
-/** 선택 대기를 위로, 같은 상태끼리는 지연 일수가 큰 순서로 정렬한다. */
+/** API 명세 4.4의 정렬을 따른다. 감지 시각이 최신인 지연이 위로 오고, 같으면 ID 순서다. */
 export const sortDelayCases = (cases: DelayCase[]) =>
-  [...cases].sort((a, b) => {
-    const readyDiff =
-      Number(b.status === DELAY_STATUS.READY) - Number(a.status === DELAY_STATUS.READY)
-    return readyDiff || b.delayDays - a.delayDays
-  })
+  [...cases].sort((a, b) => b.detectedAt.localeCompare(a.detectedAt) || a.id.localeCompare(b.id))
 
 export const countByStatus = (cases: DelayCase[]): Record<DelayStatusFilter, number> => {
   const counts: Record<DelayStatusFilter, number> = {
@@ -334,6 +332,13 @@ export const formatExtraSkus = (skuCount: number) => (skuCount > 1 ? `외 ${skuC
 
 /** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. */
 export const formatMonthDay = (date: string) => date.slice(5).replace('-', '.')
+
+/**
+ * 위험 주문 수(서로 다른 주문 수). 저장된 계산 결과가 없으면(분석 중·분석 보류·도구 실패·지연 해소) null이다.
+ * 결과가 있으면 0건도 숫자로 준다. 설명 생성만 실패한 건도 계산 결과가 있어 숫자다.
+ */
+export const getAtRiskOrderCount = ({ analysis }: DelayCase) =>
+  analysis ? analysis.riskOrders.length : null
 
 /** 종료된 지연(입고 완료·지연 해소). 닫힌 지연의 초안·최종 선택·재분석은 서버가 `EPISODE_CLOSED`로 거부한다. */
 export const isClosed = ({ closedAt }: DelayCase) => closedAt !== null
@@ -455,3 +460,27 @@ export const getDetailSections = ({ status, analysis }: DelayCase) => {
   }
   return status === DELAY_STATUS.NO_RISK ? NO_RISK_SECTIONS : FULL_SECTIONS
 }
+
+/** 목록의 검색 조건을 담는 주소 파라미터 이름. 상세에서 돌아올 때 조건이 유지되도록 주소에 담는다. */
+export const LIST_PARAM = {
+  KEYWORD: 'q',
+  STATUS: 'status',
+  PAGE: 'page',
+} as const
+
+export const DELAY_PAGE_SIZE = 10
+
+/** 목록에서 상세로 이동할 때 함께 넘기는 값. 상세의 '목록으로' 링크가 검색 조건을 되살리는 데 쓴다. */
+export interface DelayListLocationState {
+  /** 목록 주소의 `?` 뒤 문자열. 예: 'status=ready&page=2' */
+  listSearch: string
+}
+
+/** 이동 상태에서 목록 검색 조건을 읽는다. 목록을 거치지 않고 들어왔으면 빈 문자열이다. */
+export const getListSearch = (state: unknown) =>
+  typeof state === 'object' &&
+  state !== null &&
+  'listSearch' in state &&
+  typeof state.listSearch === 'string'
+    ? state.listSearch
+    : ''

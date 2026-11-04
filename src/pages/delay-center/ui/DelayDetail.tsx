@@ -34,7 +34,7 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   const sections = getDetailSections(delayCase)
 
   return (
-    <article className="flex min-w-0 flex-col gap-24pxr rounded-panel border border-border bg-card p-32pxr lg:flex-1">
+    <article className="flex min-w-0 flex-col gap-24pxr rounded-panel border border-border bg-card p-32pxr">
       <DelayDetailHeader delayCase={delayCase} />
       <ShipmentSummary delayCase={delayCase} />
       <AnalysisInfo delayCase={delayCase} />

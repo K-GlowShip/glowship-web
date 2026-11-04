@@ -1,19 +1,21 @@
-import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 
-import { DELAY_CENTER_CASE_PARAM } from '@/shared/config'
+import { Card, CardContent } from '@/shared/ui/card'
+import { TableTemplate } from '@/shared/ui/table-template'
 
 import {
   countByStatus,
+  DELAY_PAGE_SIZE,
   DELAY_STATUS_OPTIONS,
   type DelayStatusFilter,
   filterDelayCases,
+  LIST_PARAM,
   sortDelayCases,
   STATUS_FILTER_ALL,
 } from '../model/delay-center'
-import { CURRENT_ROLE, DELAY_CASES } from '../model/delay-center-mock'
-import { DelayDetail } from './DelayDetail'
-import { DelayList } from './DelayList'
+import { DELAY_CASES } from '../model/delay-center-mock'
+import { DelayListFilters } from './DelayListFilters'
+import { DelayTable } from './DelayTable'
 
 const SORTED_CASES = sortDelayCases(DELAY_CASES)
 const COUNTS = countByStatus(SORTED_CASES)
@@ -21,26 +23,38 @@ const COUNTS = countByStatus(SORTED_CASES)
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
   value === STATUS_FILTER_ALL || (DELAY_STATUS_OPTIONS as string[]).includes(value)
 
+/** 지연 목록 화면. 검색어·상태·페이지는 주소에 담아서 상세에서 돌아와도 그대로 유지한다. */
 export function DelayCenterPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [keyword, setKeyword] = useState('')
-  const [status, setStatus] = useState<DelayStatusFilter>(STATUS_FILTER_ALL)
 
-  const visibleCases = filterDelayCases(SORTED_CASES, status, keyword)
-  // URL의 id가 없거나 목록에 없으면 첫 번째 항목을 보여 준다. 상세가 비어 있는 상태를 만들지 않기 위해서다.
-  const selected =
-    visibleCases.find((delayCase) => delayCase.id === searchParams.get(DELAY_CENTER_CASE_PARAM)) ??
-    visibleCases[0] ??
-    null
+  const keyword = searchParams.get(LIST_PARAM.KEYWORD) ?? ''
+  const statusParam = searchParams.get(LIST_PARAM.STATUS) ?? STATUS_FILTER_ALL
+  const status = isStatusFilter(statusParam) ? statusParam : STATUS_FILTER_ALL
 
-  const handleSelect = (id: string) => {
-    setSearchParams({ [DELAY_CENTER_CASE_PARAM]: id }, { replace: true })
-  }
+  const filtered = filterDelayCases(SORTED_CASES, status, keyword)
+  const pageCount = Math.max(1, Math.ceil(filtered.length / DELAY_PAGE_SIZE))
+  const page = Math.min(Math.max(1, Number(searchParams.get(LIST_PARAM.PAGE)) || 1), pageCount)
+  const pageCases = filtered.slice((page - 1) * DELAY_PAGE_SIZE, page * DELAY_PAGE_SIZE)
 
-  const handleStatusChange = (next: DelayStatusFilter) => {
-    if (isStatusFilter(next)) {
-      setStatus(next)
-    }
+  /** 값이 빈 문자열이면 주소에서 지운다. 조건이 바뀌면 1페이지로 돌아간다. */
+  const updateParams = (changes: Partial<Record<string, string>>, resetPage = true) => {
+    setSearchParams(
+      (previous) => {
+        const next = new URLSearchParams(previous)
+        for (const [key, value] of Object.entries(changes)) {
+          if (value) {
+            next.set(key, value)
+          } else {
+            next.delete(key)
+          }
+        }
+        if (resetPage) {
+          next.delete(LIST_PARAM.PAGE)
+        }
+        return next
+      },
+      { replace: true },
+    )
   }
 
   return (
@@ -52,26 +66,29 @@ export function DelayCenterPage() {
         </p>
       </header>
 
-      <div className="flex flex-col gap-24pxr lg:flex-row lg:items-start">
-        <DelayList
-          cases={visibleCases}
-          counts={COUNTS}
-          selectedId={selected?.id ?? null}
-          keyword={keyword}
-          status={status}
-          onKeywordChange={setKeyword}
-          onStatusChange={handleStatusChange}
-          onSelect={handleSelect}
-        />
-
-        {selected ? (
-          <DelayDetail key={selected.id} delayCase={selected} role={CURRENT_ROLE} />
-        ) : (
-          <p className="rounded-panel border border-border bg-card px-32pxr py-80pxr text-center text-b1 text-muted-foreground lg:flex-1">
-            표시할 지연 항목이 없습니다.
-          </p>
-        )}
-      </div>
+      <Card className="rounded-panel">
+        <CardContent className="flex flex-col gap-16pxr p-32pxr">
+          <DelayListFilters
+            keyword={keyword}
+            status={status}
+            counts={COUNTS}
+            onKeywordChange={(value) => updateParams({ [LIST_PARAM.KEYWORD]: value })}
+            onStatusChange={(value) =>
+              updateParams({ [LIST_PARAM.STATUS]: value === STATUS_FILTER_ALL ? '' : value })
+            }
+          />
+          <TableTemplate
+            totalCount={filtered.length}
+            page={page}
+            pageCount={pageCount}
+            onPageChange={(next) =>
+              updateParams({ [LIST_PARAM.PAGE]: next > 1 ? String(next) : '' }, false)
+            }
+          >
+            <DelayTable cases={pageCases} listSearch={searchParams.toString()} />
+          </TableTemplate>
+        </CardContent>
+      </Card>
     </div>
   )
 }

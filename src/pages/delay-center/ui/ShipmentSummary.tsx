@@ -73,7 +73,11 @@ export function ShipmentSummary({ delayCase }: ShipmentSummaryProps) {
             previousExpectedInbound ? `이전 ${formatMonthDay(previousExpectedInbound)}` : undefined
           }
         />
-        <SummaryItem label="지연 일수" value={`+${delayCase.delayDays}일`} danger />
+        <SummaryItem
+          label="지연 일수"
+          value={delayCase.delayDays > 0 ? `+${delayCase.delayDays}일` : '없음'}
+          danger={delayCase.delayDays > 0}
+        />
       </dl>
     </section>
   )

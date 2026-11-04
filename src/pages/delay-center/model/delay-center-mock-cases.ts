@@ -106,7 +106,14 @@ const analysis = (overrides: Partial<DelayAnalysis>): DelayAnalysis => ({
 const delayCase = (
   required: Pick<
     DelayCase,
-    'id' | 'shipmentCode' | 'status' | 'stage' | 'delayDays' | 'plannedInbound' | 'expectedInbound'
+    | 'id'
+    | 'detectedAt'
+    | 'shipmentCode'
+    | 'status'
+    | 'stage'
+    | 'delayDays'
+    | 'plannedInbound'
+    | 'expectedInbound'
   > &
     Partial<DelayCase>,
 ): DelayCase => ({
@@ -225,6 +232,7 @@ const MANY_ORDERS: RiskOrder[] = [
 
 const MANY_SKU_CASE = delayCase({
   id: 'de-1013',
+  detectedAt: '2026-10-20T03:00:00Z',
   shipmentCode: 'OCN-20260901',
   productName: 'A Glow Hydra Cream 50ml',
   skuCount: 5,
@@ -316,6 +324,7 @@ const MANY_SKU_CASE = delayCase({
 // ---- 2. 선택 대기: 해상, 항구 도착 후. 한국 창고 항공 보충이 불가 ----
 const PORT_CASE = delayCase({
   id: 'de-1012',
+  detectedAt: '2026-10-20T01:00:00Z',
   shipmentCode: 'OCN-20260902',
   productName: 'A Glow Calming Toner 150ml',
   status: 'ready',
@@ -385,6 +394,7 @@ const PORT_CASE = delayCase({
 // ---- 3. 선택 대기: 항공 출항 전. 계획 유지 말고는 실행 가능한 대응안이 없고 추천도 없음 ----
 const AIR_NO_OPTION_CASE = delayCase({
   id: 'de-1011',
+  detectedAt: '2026-10-19T23:00:00Z',
   shipmentCode: 'AIR-REG-20261010',
   productName: 'A Glow Hydra Mist 100ml',
   status: 'ready',
@@ -445,6 +455,7 @@ const AIR_NO_OPTION_CASE = delayCase({
 // ---- 4. 선택 대기: 항공 운송 중, 예측 부족만 있고 필수 자료가 없는 대응안 ----
 const AIR_FORECAST_CASE = delayCase({
   id: 'de-1010',
+  detectedAt: '2026-10-19T21:00:00Z',
   shipmentCode: 'AIR-REG-20261011',
   productName: 'A Glow Hydra Serum 30ml',
   skuCount: 2,
@@ -505,6 +516,7 @@ const AIR_FORECAST_CASE = delayCase({
 // ---- 5. 선택 대기: 해상 운송 중. 효과 1개 미만, 공여 창고 다음 입고 없음 ----
 const AT_SEA_CASE = delayCase({
   id: 'de-1009',
+  detectedAt: '2026-10-19T19:00:00Z',
   shipmentCode: 'OCN-20260903',
   productName: 'A Glow Cleansing Oil 200ml',
   status: 'ready',
@@ -570,6 +582,7 @@ const AT_SEA_CASE = delayCase({
 // ---- 6. 재분석 필요: AI 설명 생성 실패(계산 결과는 있음) ----
 const EXPLANATION_FAILED_CASE = delayCase({
   id: 'de-1008',
+  detectedAt: '2026-10-19T17:00:00Z',
   shipmentCode: 'OCN-20260904',
   productName: 'A Glow Hydra Lotion 120ml',
   status: 'needs_reanalysis',
@@ -633,6 +646,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
 // ---- 7. 재분석 필요: 도구 실패(결과 없음) ----
 const TOOL_FAILED_CASE = delayCase({
   id: 'de-1007',
+  detectedAt: '2026-10-19T15:00:00Z',
   shipmentCode: 'AIR-REG-20261012',
   productName: 'A Glow Sun Cream 50ml',
   status: 'needs_reanalysis',
@@ -658,6 +672,7 @@ const TOOL_FAILED_CASE = delayCase({
 // ---- 8. 분석 보류: 보류 사유 문구가 없는 경우 ----
 const ON_HOLD_DEFAULT_CASE = delayCase({
   id: 'de-1006',
+  detectedAt: '2026-10-19T13:00:00Z',
   shipmentCode: 'OCN-20260905',
   productName: 'A Glow Body Wash 300ml',
   status: 'on_hold',
@@ -672,6 +687,7 @@ const ON_HOLD_DEFAULT_CASE = delayCase({
 // ---- 9. 분석 중: 선적 상세·실행 ID·기준 시각이 아직 없는 갓 감지된 지연 ----
 const JUST_DETECTED_CASE = delayCase({
   id: 'de-1005',
+  detectedAt: '2026-10-19T11:00:00Z',
   shipmentCode: 'AIR-REG-20261013',
   productName: null,
   skuCount: 0,
@@ -688,6 +704,7 @@ const JUST_DETECTED_CASE = delayCase({
 // ---- 10. 분석 중: 재분석을 요청해 새 버전이 진행 중. 이전 버전은 남아 있음 ----
 const REANALYZING_CASE = delayCase({
   id: 'de-1004',
+  detectedAt: '2026-10-19T09:00:00Z',
   shipmentCode: 'OCN-20260906',
   productName: 'A Glow Hydra Eye Cream 30ml',
   status: 'analyzing',
@@ -754,6 +771,7 @@ const FINALIZED_ANALYSIS = analysis({
 // 팀장이 현재 계획 유지를 선택하고, 이유에 실제 조치를 적은 경우
 const FINALIZED_KEEP_CASE = delayCase({
   id: 'de-1003',
+  detectedAt: '2026-10-19T01:00:00Z',
   shipmentCode: 'OCN-20260907',
   productName: 'A Glow Hydra Cream 50ml',
   status: 'finalized',
@@ -787,6 +805,7 @@ const FINALIZED_KEEP_CASE = delayCase({
 // 입고까지 끝나 종료된 선적. 추천이 아닌 대응안을 선택했다
 const FINALIZED_CLOSED_CASE = delayCase({
   id: 'de-1002',
+  detectedAt: '2026-10-15T01:00:00Z',
   shipmentCode: 'OCN-20260908',
   productName: 'A Glow Calming Cream 50ml',
   skuCount: 2,
@@ -831,6 +850,7 @@ const FINALIZED_CLOSED_CASE = delayCase({
 // ---- 14. 선택 대기였는데 최종 선택 없이 지연이 종료됨 ----
 const CLOSED_WITHOUT_DECISION_CASE = delayCase({
   id: 'de-1001',
+  detectedAt: '2026-10-17T01:00:00Z',
   shipmentCode: 'OCN-20260921',
   productName: 'A Glow Hydra Mask Pack 5ea',
   status: 'ready',
@@ -857,6 +877,7 @@ const CLOSED_WITHOUT_DECISION_CASE = delayCase({
 // ---- 15. 위험 없음: 지연 영향이 없고 보여 줄 재고 영향 행도 없음 ----
 const PURE_NO_RISK_CASE = delayCase({
   id: 'de-1000',
+  detectedAt: '2026-10-19T01:00:00Z',
   shipmentCode: 'OCN-20260922',
   productName: 'A Glow Lip Balm 10g',
   status: 'no_risk',
@@ -875,6 +896,7 @@ const PURE_NO_RISK_CASE = delayCase({
 // ---- 16. 지연 해소: 최종 선택이 이미 있었던 건 ----
 const RECOVERED_AFTER_DECISION_CASE = delayCase({
   id: 'de-0999',
+  detectedAt: '2026-10-18T01:00:00Z',
   shipmentCode: 'OCN-20260923',
   productName: 'A Glow Hydra Toner Pad 60ea',
   status: 'no_delay',
