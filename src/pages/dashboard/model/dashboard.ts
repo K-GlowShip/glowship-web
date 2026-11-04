@@ -1,3 +1,10 @@
+import {
+  DELAY_STATUS,
+  type DelayStatus,
+  type RegionCode,
+  type StageCode,
+} from '@/entities/delay-event'
+
 /** 명세 v6.2 `GET /dashboard/summary` */
 export interface DashboardSummary {
   inTransitShipmentCount: number
@@ -37,42 +44,6 @@ export interface InboundTrendPoint {
   date: string
   plannedCount: number
   actualCount: number
-}
-
-/** 명세 2절 운송 단계 */
-export const SHIPMENT_STAGE = {
-  PRE_DEPARTURE: 'PRE_DEPARTURE',
-  AT_SEA: 'AT_SEA',
-  IN_AIR: 'IN_AIR',
-  AT_PORT: 'AT_PORT',
-  RECEIVED: 'RECEIVED',
-} as const
-
-export type ShipmentStage = (typeof SHIPMENT_STAGE)[keyof typeof SHIPMENT_STAGE]
-
-// TODO: 운송 단계·지연 상태 표시명은 지연 대응 센터(pages/delay-center)에도 같은 값이 있다. 같은 layer끼리 import할 수 없어 두 벌이 됐으니,
-// 명세 2절의 표시명 고정 원칙에 맞게 entities로 올리는 후속 작업이 필요하다.
-export const SHIPMENT_STAGE_LABEL: Record<ShipmentStage, string> = {
-  PRE_DEPARTURE: '출항 전',
-  AT_SEA: '해상 운송',
-  IN_AIR: '항공 운송',
-  AT_PORT: '항구 도착·통관 중',
-  RECEIVED: '입고 완료',
-}
-
-/** 명세 `GET /warehouses`의 `regionCode`. 표시명은 2절 */
-export const REGION_CODE = {
-  KR: 'KR',
-  WEST: 'WEST',
-  EAST: 'EAST',
-} as const
-
-export type RegionCode = (typeof REGION_CODE)[keyof typeof REGION_CODE]
-
-export const REGION_LABEL: Record<RegionCode, string> = {
-  KR: '한국',
-  WEST: '서부(LA)',
-  EAST: '동부(NJ)',
 }
 
 /** 명세 v6.2 `GET /data-sync-runs/latest`의 `status` */
@@ -116,39 +87,15 @@ export interface SyncStatusResult {
   sources: SyncSourceStatus[]
 }
 
-/** 명세 `GET /delay-events` 탭(`status`)과 `counts` 키 중 대시보드가 쓰는 것 */
-export const DELAY_STATUS = {
-  READY_FOR_REVIEW: 'READY_FOR_REVIEW',
-  ANALYZING: 'ANALYZING',
-  ON_HOLD: 'ON_HOLD',
-  NEEDS_REANALYSIS: 'NEEDS_REANALYSIS',
-} as const
-
-export type DelayStatus = (typeof DELAY_STATUS)[keyof typeof DELAY_STATUS]
-
-export const DELAY_STATUS_LABEL: Record<DelayStatus, string> = {
-  READY_FOR_REVIEW: '선택 대기',
-  ANALYZING: '분석 중',
-  ON_HOLD: '분석 보류',
-  NEEDS_REANALYSIS: '재분석 필요',
-}
-
-export const DELAY_STATUS_BADGE_VARIANT = {
-  READY_FOR_REVIEW: 'warning',
-  ANALYZING: 'info',
-  ON_HOLD: 'danger',
-  NEEDS_REANALYSIS: 'neutral',
-} as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral'>
-
-/** 표시 순서. 사용자가 해야 할 일이 있는 상태가 앞이다 */
+/** 대시보드가 보여 주는 지연 상태와 표시 순서. 사용자가 해야 할 일이 있는 상태가 앞이다(`counts` 키 중 일부) */
 export const DELAY_STATUS_ORDER = [
-  DELAY_STATUS.READY_FOR_REVIEW,
+  DELAY_STATUS.READY,
   DELAY_STATUS.NEEDS_REANALYSIS,
   DELAY_STATUS.ON_HOLD,
   DELAY_STATUS.ANALYZING,
 ] as const
 
-export type DelayCounts = Record<DelayStatus, number>
+export type DelayCounts = Record<(typeof DELAY_STATUS_ORDER)[number], number>
 
 /** 대시보드에 보여 주는 지연 수. `GET /delay-events`에 `size`로 보낸다 */
 export const DELAY_PREVIEW_SIZE = 5
@@ -162,7 +109,7 @@ export interface DelayItem {
   skuCount: number
   /** 명세 D13. 예: 'KR → LOS ANGELES' */
   route: string
-  stage: ShipmentStage
+  stage: StageCode
   /** UTC 날짜 'YYYY-MM-DD' */
   planned3plInboundDate: string
   expected3plInboundDate: string

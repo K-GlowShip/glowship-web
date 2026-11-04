@@ -1,11 +1,12 @@
 import { CircleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 
+import { DELAY_STATUS } from '@/entities/delay-event'
 import { delayCenterListPath, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { buttonVariants } from '@/shared/ui/button'
 
-import { DELAY_STATUS, formatMonthDay, type DelayItem } from '../model/dashboard'
+import { formatMonthDay, type DelayItem } from '../model/dashboard'
 
 // buttonVariants의 기본 색(text-primary 등)을 덮어쓰려면 cn(tailwind-merge)으로 합쳐야 한다
 const ACTION_CLASS_NAME = buttonVariants({ variant: 'secondary', size: 'sm' })
@@ -61,7 +62,7 @@ export function DelayAlertBanner({ delay, totalCount }: DelayAlertBannerProps) {
       ) : (
         // TODO: 명세의 새 지연은 '최근 감지·최종 선택 전'(hasFinalDecision=false)인데, 목록은 아직 이 조건을 쿼리로 받지 않아 선택 대기 탭으로 근사한다
         <Link
-          to={delayCenterListPath(DELAY_STATUS.READY_FOR_REVIEW)}
+          to={delayCenterListPath(DELAY_STATUS.READY)}
           className={cn(ACTION_CLASS_NAME, ACTION_COLOR_CLASS_NAME)}
         >
           지연 대응 센터에서 보기 →

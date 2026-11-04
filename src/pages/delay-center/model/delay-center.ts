@@ -1,3 +1,10 @@
+import {
+  DELAY_STATUS_BADGE_VARIANT,
+  DELAY_STATUS_LABEL,
+  REGION_LABEL,
+  STAGE_LABEL,
+  type RegionCode,
+} from '@/entities/delay-event'
 import { DELAY_LIST_STATUS_PARAM } from '@/shared/config'
 
 import { EMPTY_TEXT } from './delay-center-text'
@@ -29,6 +36,8 @@ import {
 } from './delay-center-code'
 
 export * from './delay-center-code'
+
+export { DELAY_STATUS_BADGE_VARIANT, DELAY_STATUS_LABEL, STAGE_LABEL }
 
 export interface DelayOption {
   id: string
@@ -65,7 +74,8 @@ export interface RiskOrder {
   lines: RiskOrderLine[]
 }
 
-export type WarehouseRegion = 'WEST' | 'EAST' | 'KR'
+/** 창고 권역. 대시보드와 같은 값이라 entities/delay-event의 것을 쓴다 */
+export type WarehouseRegion = RegionCode
 
 /** SKU·창고 하나의 재고 영향(`inventory_impact_results` 한 행) */
 export interface SkuImpact {
@@ -181,36 +191,8 @@ export interface DelayCase {
   finalDecision: FinalDecision | null
 }
 
-export const DELAY_STATUS_LABEL: Record<DelayStatus, string> = {
-  [DELAY_STATUS.READY]: '선택 대기',
-  [DELAY_STATUS.ANALYZING]: '분석 중',
-  [DELAY_STATUS.ON_HOLD]: '분석 보류',
-  [DELAY_STATUS.NEEDS_REANALYSIS]: '재분석 필요',
-  [DELAY_STATUS.FINALIZED]: '선택 완료',
-  [DELAY_STATUS.NO_RISK]: '위험 없음',
-  [DELAY_STATUS.NO_DELAY]: '지연 해소',
-}
-
-export const DELAY_STATUS_BADGE_VARIANT = {
-  [DELAY_STATUS.READY]: 'warning',
-  [DELAY_STATUS.ANALYZING]: 'info',
-  [DELAY_STATUS.ON_HOLD]: 'danger',
-  [DELAY_STATUS.NEEDS_REANALYSIS]: 'neutral',
-  [DELAY_STATUS.FINALIZED]: 'success',
-  [DELAY_STATUS.NO_RISK]: 'success',
-  [DELAY_STATUS.NO_DELAY]: 'neutral',
-} as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
-
 /** 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다. */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
-
-export const STAGE_LABEL: Record<StageCode, string> = {
-  [STAGE_CODE.PRE_DEPARTURE]: '출항 전',
-  [STAGE_CODE.AT_SEA]: '해상 운송',
-  [STAGE_CODE.IN_AIR]: '항공 운송',
-  [STAGE_CODE.AT_PORT]: '항구 도착·통관 중',
-  [STAGE_CODE.RECEIVED]: '입고 완료',
-}
 
 /** 운송 수단별로 지나는 단계 순서. 해상은 해상 운송, 항공은 항공 운송을 거친다. */
 export const STAGE_FLOW: Record<TransportMode, StageCode[]> = {
@@ -427,11 +409,7 @@ const MISSING_DATA_REASONS: ReasonCode[] = [
 export const getOptionsMissingData = (options: DelayOption[]) =>
   options.filter((option) => option.reasonCode && MISSING_DATA_REASONS.includes(option.reasonCode))
 
-export const WAREHOUSE_LABEL: Record<WarehouseRegion, string> = {
-  WEST: '서부(LA)',
-  EAST: '동부(NJ)',
-  KR: '한국',
-}
+export const WAREHOUSE_LABEL = REGION_LABEL
 
 const NO_DATE = '9999-12-31'
 

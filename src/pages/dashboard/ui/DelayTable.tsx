@@ -1,6 +1,12 @@
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router'
 
+import {
+  DELAY_STATUS_BADGE_VARIANT,
+  DELAY_STATUS_LABEL,
+  REGION_LABEL,
+  STAGE_LABEL,
+} from '@/entities/delay-event'
 import { delayCenterListPath, delayCenterPath, ROUTES } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -16,12 +22,8 @@ import {
 
 import {
   DELAY_PREVIEW_SIZE,
-  DELAY_STATUS_BADGE_VARIANT,
-  DELAY_STATUS_LABEL,
   DELAY_STATUS_ORDER,
   formatMonthDay,
-  REGION_LABEL,
-  SHIPMENT_STAGE_LABEL,
   type DelayListResult,
 } from '../model/dashboard'
 
@@ -98,9 +100,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                   </TableCell>
                   <TableCell>
                     {delay.route}
-                    <p className="text-caption text-muted-foreground">
-                      {SHIPMENT_STAGE_LABEL[delay.stage]}
-                    </p>
+                    <p className="text-caption text-muted-foreground">{STAGE_LABEL[delay.stage]}</p>
                   </TableCell>
                   <TableCell>{REGION_LABEL[delay.warehouseRegion]}</TableCell>
                   <TableCell>

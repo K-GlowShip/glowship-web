@@ -1,6 +1,7 @@
 import { Info } from 'lucide-react'
 import { useState } from 'react'
 
+import { REGION_LABEL } from '@/entities/delay-event'
 import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -24,7 +25,6 @@ import {
   INVENTORY_STATUS,
   INVENTORY_STATUS_LABEL,
   type InventoryStatus,
-  REGION_LABEL,
   type InventoryItem,
   type InventoryStatusResult,
 } from '../model/dashboard'

@@ -1,17 +1,8 @@
-// 서버 코드값과 화면 구분값. 다른 model 파일이 서로 가져오다 순환하지 않도록 아무것도 가져오지 않는다.
+// 서버 코드값과 화면 구분값. 같은 slice의 다른 model 파일을 가져오지 않아 순환하지 않는다.
+// 지연 상태·운송 단계는 대시보드와 함께 쓰는 값이라 entities/delay-event에서 가져와 다시 내보낸다.
+import { DELAY_STATUS, STAGE_CODE, type DelayStatus, type StageCode } from '@/entities/delay-event'
 
-/** 서버 `GET /delay-events`의 `status` 코드값(API 명세 v6.2 2절, 4.4 탭 표) */
-export const DELAY_STATUS = {
-  READY: 'READY_FOR_REVIEW',
-  ANALYZING: 'ANALYZING',
-  ON_HOLD: 'ON_HOLD',
-  NEEDS_REANALYSIS: 'NEEDS_REANALYSIS',
-  FINALIZED: 'FINALIZED',
-  NO_RISK: 'NO_RISK',
-  NO_DELAY: 'NO_DELAY',
-} as const
-
-export type DelayStatus = (typeof DELAY_STATUS)[keyof typeof DELAY_STATUS]
+export { DELAY_STATUS, STAGE_CODE, type DelayStatus, type StageCode }
 
 /** 상태 필터에서 모든 상태를 보여 주는 값(명세 4.4의 `ALL` 탭) */
 export const STATUS_FILTER_ALL = 'ALL'
@@ -32,16 +23,6 @@ export const TRANSPORT_MODE = {
 } as const
 
 export type TransportMode = (typeof TRANSPORT_MODE)[keyof typeof TRANSPORT_MODE]
-
-export const STAGE_CODE = {
-  PRE_DEPARTURE: 'PRE_DEPARTURE',
-  AT_SEA: 'AT_SEA',
-  IN_AIR: 'IN_AIR',
-  AT_PORT: 'AT_PORT',
-  RECEIVED: 'RECEIVED',
-} as const
-
-export type StageCode = (typeof STAGE_CODE)[keyof typeof STAGE_CODE]
 
 export const OPTION_TYPE = {
   KEEP_PLAN: 'KEEP_PLAN',
