@@ -56,7 +56,7 @@ const summaryText = ({ impacts, resultClass, riskOrders }: DelayAnalysis) => {
     case RESULT_CLASS.FORECAST_ONLY_READY:
       return `실제 지연 유발 위험 주문 없음 · 지연 증분 예측 부족 ${getShortageSkuCount(impacts)}개 상품`
     case RESULT_CLASS.READY_ORDER_RISK:
-      return `지연으로 늘어난 부족 ${getIncreasedShortage(impacts).toLocaleString()}개 · 위험 주문 ${riskOrders.length}건`
+      return `지연으로 인한 부족 증가분 ${getIncreasedShortage(impacts).toLocaleString()}개 · 위험 주문 ${riskOrders.length}건`
     case RESULT_CLASS.PURE_NO_RISK:
     case RESULT_CLASS.WARNING_NO_RISK:
       return RESULT_CLASS_LABEL[resultClass]
@@ -72,7 +72,7 @@ function ImpactTable({ impacts }: { impacts: SkuImpact[] }) {
         <TableHeader>
           <TableRow>
             <TableHead>상품</TableHead>
-            <TableHead className="w-120pxr">늘어난 부족</TableHead>
+            <TableHead className="w-120pxr">부족 증가분</TableHead>
             <TableHead className="w-110pxr">안전재고 하회</TableHead>
             <TableHead className="w-96pxr">재고 소진</TableHead>
             <TableHead className="w-96pxr">품절 기간</TableHead>

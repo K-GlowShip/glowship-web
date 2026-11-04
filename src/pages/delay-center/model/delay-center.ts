@@ -90,7 +90,7 @@ export interface SkuImpact {
   scope: SkuScope
   /** 판정할 수 없는 SKU(`NOT_ESTIMABLE`)면 false이고 아래 값은 모두 null */
   estimable: boolean
-  /** 지연으로 늘어난 부족 수량(지연 반영 부족 − 계획 기준 부족) */
+  /** 지연으로 인한 부족 증가분(지연 반영 부족 − 계획 기준 부족) */
   increasedShortage: number | null
   /** 'YYYY-MM-DD'. 안전재고 아래로 내려가는 날 */
   safetyStockBreachDate: string | null
@@ -449,7 +449,7 @@ export const getVisibleImpacts = (impacts: SkuImpact[]) =>
 const sumShortage = (impacts: SkuImpact[]) =>
   impacts.reduce((sum, impact) => sum + (impact.increasedShortage ?? 0), 0)
 
-/** 지연으로 늘어난 부족 수량. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
+/** 지연으로 인한 부족 증가분. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
 export const getIncreasedShortage = (impacts: SkuImpact[]) =>
   sumShortage(impacts.filter((impact) => impact.scope === SKU_SCOPE.IMPACTED))
 
