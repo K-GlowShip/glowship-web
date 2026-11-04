@@ -13,10 +13,10 @@ import { AnalysisInfo } from './AnalysisInfo'
 import { AtRiskOrders } from './AtRiskOrders'
 import { DecisionSection } from './DecisionSection'
 import { DelayDetailHeader } from './DelayDetailHeader'
+import { DelayOverview } from './DelayOverview'
 import { ImpactSection } from './ImpactSection'
 import { OptionTable } from './OptionTable'
 import { RunHistory } from './RunHistory'
-import { ShipmentSummary } from './ShipmentSummary'
 import { StatusNotice } from './StatusNotice'
 
 interface DelayDetailProps {
@@ -25,7 +25,7 @@ interface DelayDetailProps {
 }
 
 /**
- * 지연 상세. 위에서부터 어떤 건인가(머리·선적 요약) → 이 분석을 믿을 수 있는가(분석 정보·상태 안내)
+ * 지연 상세. 위에서부터 어떤 건인가(머리·지연 개요) → 이 분석을 믿을 수 있는가(분석 정보·상태 안내)
  * → 무엇이 위험한가(재고 영향·위험 주문) → 무엇을 할 수 있는가(대응안·설명) → 누가 무엇을 골랐는가(선택) → 이전 분석(이력) 순서다.
  * 상태마다 보여 줄 섹션은 `getDetailSections`가 정한다.
  */
@@ -36,15 +36,13 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   return (
     <article className="flex min-w-0 flex-col gap-24pxr rounded-panel border border-border bg-card p-32pxr">
       <DelayDetailHeader delayCase={delayCase} />
-      <ShipmentSummary delayCase={delayCase} />
+      <DelayOverview delayCase={delayCase} />
       <AnalysisInfo delayCase={delayCase} />
       <StatusNotice delayCase={delayCase} />
 
       {analysis && (
         <>
-          {sections.includes(DETAIL_SECTION.IMPACT) && (
-            <ImpactSection analysis={analysis} expectedInbound={delayCase.expectedInbound} />
-          )}
+          {sections.includes(DETAIL_SECTION.IMPACT) && <ImpactSection analysis={analysis} />}
           {sections.includes(DETAIL_SECTION.RISK_ORDERS) && (
             <AtRiskOrders orders={analysis.riskOrders} />
           )}
