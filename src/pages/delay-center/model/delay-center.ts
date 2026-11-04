@@ -1,84 +1,32 @@
 import { EMPTY_TEXT } from './delay-center-text'
+import {
+  DELAY_STATUS,
+  CLIENT_ROLE,
+  TRANSPORT_MODE,
+  STAGE_CODE,
+  OPTION_TYPE,
+  FEASIBILITY,
+  REASON_CODE,
+  RESULT_CLASS,
+  RISK_ATTRIBUTION,
+  SKU_SCOPE,
+  DETAIL_SECTION,
+  STATUS_FILTER_ALL,
+  type DelayStatus,
+  type DelayStatusFilter,
+  type ClientRole,
+  type TransportMode,
+  type StageCode,
+  type OptionType,
+  type Feasibility,
+  type ReasonCode,
+  type ResultClass,
+  type RiskAttribution,
+  type SkuScope,
+  type DetailSection,
+} from './delay-center-code'
 
-/**
- * 서버 `GET /delay-events` 탭(현재 실행 상태)에 최종 선택 완료, 위험 없음(`NO_RISK`), 지연 해소(`NO_DELAY`)를 더한 구분.
- * 위험 없음·지연 해소는 서버 탭 표(4.4)에 없는 제안이다. 서버 연동 때 `status` 값을 맞춰야 한다.
- */
-export const DELAY_STATUS = {
-  READY: 'ready',
-  ANALYZING: 'analyzing',
-  ON_HOLD: 'on_hold',
-  NEEDS_REANALYSIS: 'needs_reanalysis',
-  FINALIZED: 'finalized',
-  NO_RISK: 'no_risk',
-  NO_DELAY: 'no_delay',
-} as const
-
-export type DelayStatus = (typeof DELAY_STATUS)[keyof typeof DELAY_STATUS]
-
-/** 상태 필터에서 모든 상태를 보여 주는 값 */
-export const STATUS_FILTER_ALL = 'all'
-
-export type DelayStatusFilter = DelayStatus | typeof STATUS_FILTER_ALL
-
-/** 로그인 사용자의 역할. 초안은 팀원, 최종 선택은 팀장만 한다. */
-export const CLIENT_ROLE = {
-  MEMBER: 'member',
-  LEAD: 'lead',
-} as const
-
-export type ClientRole = (typeof CLIENT_ROLE)[keyof typeof CLIENT_ROLE]
-
-export type TransportMode = 'OCEAN' | 'AIR'
-
-export type StageCode = 'PRE_DEPARTURE' | 'AT_SEA' | 'IN_AIR' | 'AT_PORT' | 'RECEIVED'
-
-export const OPTION_TYPE = {
-  KEEP_PLAN: 'KEEP_PLAN',
-  PRE_DEPARTURE_AIR: 'PRE_DEPARTURE_AIR',
-  KR_AIR_REPLENISH: 'KR_AIR_REPLENISH',
-  OTHER_REGION_FULFILL: 'OTHER_REGION_FULFILL',
-} as const
-
-export type OptionType = (typeof OPTION_TYPE)[keyof typeof OPTION_TYPE]
-
-export const FEASIBILITY = {
-  FEASIBLE: 'FEASIBLE',
-  NOT_FEASIBLE: 'NOT_FEASIBLE',
-  NEEDS_CHECK: 'NEEDS_CHECK',
-} as const
-
-export type Feasibility = (typeof FEASIBILITY)[keyof typeof FEASIBILITY]
-
-export const REASON_CODE = {
-  ARRIVES_AFTER_DELAYED_SHIPMENT: 'ARRIVES_AFTER_DELAYED_SHIPMENT',
-  NO_KR_ELIGIBLE_STOCK: 'NO_KR_ELIGIBLE_STOCK',
-  NO_TRANSFERABLE_STOCK: 'NO_TRANSFERABLE_STOCK',
-  PROMISE_UNREACHABLE_LEADTIME: 'PROMISE_UNREACHABLE_LEADTIME',
-  DONOR_NO_NEXT_INBOUND: 'DONOR_NO_NEXT_INBOUND',
-  FORECAST_EFFECT_BELOW_ONE_UNIT: 'FORECAST_EFFECT_BELOW_ONE_UNIT',
-  NO_RECOVERY_EFFECT: 'NO_RECOVERY_EFFECT',
-  MISSING_OPERATING_RULE: 'MISSING_OPERATING_RULE',
-  MISSING_REQUIRED_DATA: 'MISSING_REQUIRED_DATA',
-} as const
-
-export type ReasonCode = (typeof REASON_CODE)[keyof typeof REASON_CODE]
-
-export const RESULT_CLASS = {
-  READY_ORDER_RISK: 'READY_ORDER_RISK',
-  FORECAST_ONLY_READY: 'FORECAST_ONLY_READY',
-  PURE_NO_RISK: 'PURE_NO_RISK',
-  WARNING_NO_RISK: 'WARNING_NO_RISK',
-} as const
-
-export type ResultClass = (typeof RESULT_CLASS)[keyof typeof RESULT_CLASS]
-
-export const RISK_ATTRIBUTION = {
-  DELAY_INDUCED: 'delay_induced',
-  PRE_EXISTING: 'pre_existing',
-} as const
-
-export type RiskAttribution = (typeof RISK_ATTRIBUTION)[keyof typeof RISK_ATTRIBUTION]
+export * from './delay-center-code'
 
 export interface DelayOption {
   id: string
@@ -114,15 +62,6 @@ export interface RiskOrder {
   expectedDate: string
   lines: RiskOrderLine[]
 }
-
-/** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
-export const SKU_SCOPE = {
-  IMPACTED: 'IMPACTED',
-  WATCH: 'WATCH',
-  SHIPMENT_ONLY: 'SHIPMENT_ONLY',
-} as const
-
-export type SkuScope = (typeof SKU_SCOPE)[keyof typeof SKU_SCOPE]
 
 export type WarehouseRegion = 'WEST' | 'EAST' | 'KR'
 
@@ -180,6 +119,21 @@ export interface FinalDecision {
   reason: string
 }
 
+/** 분석 버전 하나(`GET /delay-events/{id}`의 `runs[]`). 의사결정 이력(사람의 판단)과 다른, 시스템의 분석 기록이다. */
+export interface AnalysisRunSummary {
+  /** 서버가 아직 값을 만들지 않았으면 null */
+  runCode: string | null
+  versionNo: number
+  /** 화면 상태로 바꾼 실행 상태 */
+  status: DelayStatus
+  /** 가장 최신 버전인지 */
+  isLatest: boolean
+  /** ISO 8601 UTC */
+  startedAt: string
+  /** ISO 8601 UTC. 진행 중이면 null */
+  finishedAt: string | null
+}
+
 export interface DelayCase {
   id: string
   shipmentCode: string
@@ -199,6 +153,10 @@ export interface DelayCase {
   plannedInbound: string
   /** 'YYYY-MM-DD' */
   expectedInbound: string
+  /** 'YYYY-MM-DD'. 직전에 관측한 예상 입고일. 처음 감지한 지연이면 null */
+  previousExpectedInbound: string | null
+  /** ISO 8601 UTC. 지연이 종료된 시각(입고 완료·지연 해소). 열려 있으면 null */
+  closedAt: string | null
   /** ISO 8601 UTC. 사용한 수집 중 가장 오래된 시각. 입력이 확정되기 전에는 null */
   baseDataAt: string | null
   /** 입력 확정 때 마지막 수집이 실패·지연이던 원천 안내 */
@@ -211,6 +169,8 @@ export interface DelayCase {
   staleReason: string | null
   /** 결과가 없으면(분석 중·보류·실패·지연 해소) null */
   analysis: DelayAnalysis | null
+  /** 분석 버전 이력. 최신 버전 먼저 */
+  runs: AnalysisRunSummary[]
   opinions: MemberOpinion[]
   finalDecision: FinalDecision | null
 }
@@ -235,20 +195,40 @@ export const DELAY_STATUS_BADGE_VARIANT = {
   [DELAY_STATUS.NO_DELAY]: 'neutral',
 } as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
 
+/**
+ * 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다.
+ * API 명세 4.4의 `status` 값에는 선택 완료·위험 없음·지연 해소가 없어서, 서버 연동 때 서버가 이 값을 받도록 맞춰야 한다.
+ */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
 
 export const STAGE_LABEL: Record<StageCode, string> = {
-  PRE_DEPARTURE: '출항 전',
-  AT_SEA: '해상 운송',
-  IN_AIR: '항공 운송',
-  AT_PORT: '항구 도착·통관 중',
-  RECEIVED: '입고 완료',
+  [STAGE_CODE.PRE_DEPARTURE]: '출항 전',
+  [STAGE_CODE.AT_SEA]: '해상 운송',
+  [STAGE_CODE.IN_AIR]: '항공 운송',
+  [STAGE_CODE.AT_PORT]: '항구 도착·통관 중',
+  [STAGE_CODE.RECEIVED]: '입고 완료',
+}
+
+/** 운송 수단별로 지나는 단계 순서. 해상은 해상 운송, 항공은 항공 운송을 거친다. */
+export const STAGE_FLOW: Record<TransportMode, StageCode[]> = {
+  [TRANSPORT_MODE.OCEAN]: [
+    STAGE_CODE.PRE_DEPARTURE,
+    STAGE_CODE.AT_SEA,
+    STAGE_CODE.AT_PORT,
+    STAGE_CODE.RECEIVED,
+  ],
+  [TRANSPORT_MODE.AIR]: [
+    STAGE_CODE.PRE_DEPARTURE,
+    STAGE_CODE.IN_AIR,
+    STAGE_CODE.AT_PORT,
+    STAGE_CODE.RECEIVED,
+  ],
 }
 
 /** 한국 출발 항구. 인천은 항공, 부산은 해상 선적이 출발한다. */
 const ORIGIN_PORT_LABEL: Record<TransportMode, string> = {
-  AIR: '인천',
-  OCEAN: '부산',
+  [TRANSPORT_MODE.AIR]: '인천',
+  [TRANSPORT_MODE.OCEAN]: '부산',
 }
 
 /** 경로의 출발 'KR'을 운송 수단에 맞는 출발 항구로 바꿔 보여 준다. 예: '부산 → LOS ANGELES' */
@@ -355,9 +335,14 @@ export const formatExtraSkus = (skuCount: number) => (skuCount > 1 ? `외 ${skuC
 /** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. */
 export const formatMonthDay = (date: string) => date.slice(5).replace('-', '.')
 
+/** 종료된 지연(입고 완료·지연 해소). 닫힌 지연의 초안·최종 선택·재분석은 서버가 `EPISODE_CLOSED`로 거부한다. */
+export const isClosed = ({ closedAt }: DelayCase) => closedAt !== null
+
 /** 최종 선택이 가능한 상태인지. 선택 대기이고, 설명이 있어야 한다. */
 export const canDecide = (delayCase: DelayCase) =>
-  delayCase.status === DELAY_STATUS.READY && delayCase.analysis?.explanation != null
+  !isClosed(delayCase) &&
+  delayCase.status === DELAY_STATUS.READY &&
+  delayCase.analysis?.explanation != null
 
 /** 상태별 재분석 요청 가능 여부. 분석 중이거나 선택이 끝났으면 요청할 수 없다. 상태를 추가하면 여기도 적어야 컴파일된다. */
 const CAN_REANALYZE: Record<DelayStatus, boolean> = {
@@ -370,7 +355,8 @@ const CAN_REANALYZE: Record<DelayStatus, boolean> = {
   [DELAY_STATUS.NO_DELAY]: false,
 }
 
-export const canReanalyze = (delayCase: DelayCase) => CAN_REANALYZE[delayCase.status]
+export const canReanalyze = (delayCase: DelayCase) =>
+  !isClosed(delayCase) && CAN_REANALYZE[delayCase.status]
 
 // 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)과 상태별 고정 문구를 그대로 쓴다.
 export const RESULT_CLASS_LABEL: Record<ResultClass, string> = {
@@ -379,6 +365,13 @@ export const RESULT_CLASS_LABEL: Record<ResultClass, string> = {
   [RESULT_CLASS.PURE_NO_RISK]: '지연 영향 없음',
   [RESULT_CLASS.WARNING_NO_RISK]: '지연 영향 없음(기존 부족 있음)',
 }
+
+export const RESULT_CLASS_BADGE_VARIANT = {
+  [RESULT_CLASS.READY_ORDER_RISK]: 'danger',
+  [RESULT_CLASS.FORECAST_ONLY_READY]: 'warning',
+  [RESULT_CLASS.PURE_NO_RISK]: 'success',
+  [RESULT_CLASS.WARNING_NO_RISK]: 'neutral',
+} as const satisfies Record<ResultClass, 'danger' | 'warning' | 'success' | 'neutral'>
 
 export const NO_RISK_MESSAGE: Record<'PURE_NO_RISK' | 'WARNING_NO_RISK', string> = {
   [RESULT_CLASS.PURE_NO_RISK]: '지연으로 늘어나는 부족이 없습니다.',
@@ -408,11 +401,25 @@ export const WAREHOUSE_LABEL: Record<WarehouseRegion, string> = {
   KR: '한국',
 }
 
-/** 화면에 보여 줄 재고 영향 행. 지연 선적에만 있는 SKU는 빼고, 영향이 있는 SKU를 먼저 둔다. */
+const NO_DATE = '9999-12-31'
+
+/** 가장 먼저 문제가 생기는 날. 소진일이 있으면 소진일, 없으면 안전재고 하회일 */
+const getFirstTroubleDate = (impact: SkuImpact) =>
+  impact.stockoutDate ?? impact.safetyStockBreachDate ?? NO_DATE
+
+/**
+ * 화면에 보여 줄 재고 영향 행. 지연 선적에만 있는 SKU는 빼고, 영향이 있는 SKU, 판정 가능한 SKU,
+ * 문제가 먼저 생기는 SKU 순서로 둔다. 맨 앞이 대표 상품이다.
+ */
 export const getVisibleImpacts = (impacts: SkuImpact[]) =>
   impacts
     .filter((impact) => impact.scope !== SKU_SCOPE.SHIPMENT_ONLY)
-    .sort((a, b) => Number(b.scope === SKU_SCOPE.IMPACTED) - Number(a.scope === SKU_SCOPE.IMPACTED))
+    .sort(
+      (a, b) =>
+        Number(b.scope === SKU_SCOPE.IMPACTED) - Number(a.scope === SKU_SCOPE.IMPACTED) ||
+        Number(b.estimable) - Number(a.estimable) ||
+        getFirstTroubleDate(a).localeCompare(getFirstTroubleDate(b)),
+    )
 
 const sumShortage = (impacts: SkuImpact[]) =>
   impacts.reduce((sum, impact) => sum + (impact.increasedShortage ?? 0), 0)
@@ -427,24 +434,15 @@ export const getShortageSkuCount = (impacts: SkuImpact[]) =>
     (impact) => impact.scope === SKU_SCOPE.IMPACTED && (impact.increasedShortage ?? 0) > 0,
   ).length
 
-export const DETAIL_SECTION = {
-  IMPACT: 'impact',
-  RISK_ORDERS: 'riskOrders',
-  OPTIONS: 'options',
-  EXPLANATION: 'explanation',
-  DECISION: 'decision',
-} as const
-
-export type DetailSection = (typeof DETAIL_SECTION)[keyof typeof DETAIL_SECTION]
-
-export const NO_SECTIONS: DetailSection[] = []
-export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT]
+export const NO_SECTIONS: DetailSection[] = [DETAIL_SECTION.HISTORY]
+export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT, DETAIL_SECTION.HISTORY]
 export const FULL_SECTIONS: DetailSection[] = [
   DETAIL_SECTION.IMPACT,
   DETAIL_SECTION.RISK_ORDERS,
   DETAIL_SECTION.OPTIONS,
   DETAIL_SECTION.EXPLANATION,
   DETAIL_SECTION.DECISION,
+  DETAIL_SECTION.HISTORY,
 ]
 
 /**

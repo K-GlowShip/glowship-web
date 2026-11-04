@@ -13,12 +13,14 @@ import {
   FEASIBILITY,
   FEASIBILITY_LABEL,
   getSelectableOptions,
+  OPTION_TYPE,
   OPTION_TYPE_LABEL,
 } from '../model/delay-center'
 import {
   DECISION_FORM_TEXT,
   DRAFT_SAVED_MESSAGE,
   NO_OPTION_LABEL,
+  ONLY_KEEP_PLAN_GUIDE,
 } from '../model/delay-center-text'
 import { validateDecision } from '../model/validate-decision'
 
@@ -39,6 +41,7 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
   const isLead = role === CLIENT_ROLE.LEAD
   const labels = DECISION_FORM_TEXT[role]
   const selectable = getSelectableOptions(role, options)
+  const onlyKeepPlan = isLead && selectable.every((option) => option.type === OPTION_TYPE.KEEP_PLAN)
   const recommendedId = selectable.find((option) => option.recommended)?.id ?? NO_OPTION
 
   const [optionId, setOptionId] = useState(isLead ? recommendedId : NO_OPTION)
@@ -96,6 +99,9 @@ export function DecisionForm({ role, options }: DecisionFormProps) {
             clearFeedback()
           }}
         />
+        {onlyKeepPlan && (
+          <p className="text-caption text-muted-foreground">{ONLY_KEEP_PLAN_GUIDE}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-8pxr">

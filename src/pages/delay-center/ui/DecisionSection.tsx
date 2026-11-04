@@ -7,6 +7,7 @@ import {
   type ClientRole,
   type DelayAnalysis,
   type DelayCase,
+  isClosed,
   OPTION_TYPE_LABEL,
 } from '../model/delay-center'
 import { ANALYSIS_NOTICE } from '../model/delay-center-text'
@@ -58,11 +59,19 @@ export function DecisionSection({ delayCase, analysis, role }: DecisionSectionPr
           role="status"
           className="rounded-card bg-warning-bg px-16pxr py-12pxr text-b1 text-warning"
         >
-          {delayCase.analysis?.explanation
-            ? ANALYSIS_NOTICE.STALE
-            : ANALYSIS_NOTICE.EXPLANATION_FAILED}
+          {getBlockedMessage(delayCase)}
         </p>
       )}
     </section>
   )
+}
+
+/** 선택할 수 없는 이유. 종료된 지연, 자료 변경, 설명 생성 실패 순서로 먼저 해당하는 것을 보여 준다. */
+const getBlockedMessage = (delayCase: DelayCase) => {
+  if (isClosed(delayCase)) {
+    return ANALYSIS_NOTICE.CLOSED
+  }
+  return delayCase.analysis?.explanation
+    ? ANALYSIS_NOTICE.STALE
+    : ANALYSIS_NOTICE.EXPLANATION_FAILED
 }

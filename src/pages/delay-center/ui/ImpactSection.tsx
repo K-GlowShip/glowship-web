@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-
 import { cn } from '@/shared/lib/cn'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 
 import {
   type DelayAnalysis,
@@ -33,9 +32,14 @@ interface ImpactSectionProps {
   expectedInbound: string
 }
 
-/** 재고 영향을 상품(SKU·창고)별로 나눠 보여 준다. 상품마다 안전재고 하회일과 실제 소진일을 구분한다. */
+const EMPTY = '—'
+
+/**
+ * 재고 영향을 보여 준다. 가장 먼저 문제가 생기는 대표 상품은 안전재고 하회일과 실제 소진일을 구분한 타임라인으로,
+ * 나머지 상품은 작은 표로 보여 줘서 상품이 많아도 상세가 길어지지 않게 한다.
+ */
 export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps) {
-  const impacts = getVisibleImpacts(analysis.impacts)
+  const [leadImpact, ...otherImpacts] = getVisibleImpacts(analysis.impacts)
 
   return (
     <section aria-labelledby="impact-title" className="flex flex-col gap-16pxr">
@@ -56,15 +60,8 @@ export function ImpactSection({ analysis, expectedInbound }: ImpactSectionProps)
         </p>
       </div>
 
-      <ul className="flex flex-col gap-12pxr">
-        {impacts.map((impact) => (
-          <SkuImpactItem
-            key={`${impact.skuCode}-${impact.region}`}
-            impact={impact}
-            visual={<ImpactTimeline impact={impact} expectedInbound={expectedInbound} />}
-          />
-        ))}
-      </ul>
+      {leadImpact && <SkuImpactCard impact={leadImpact} expectedInbound={expectedInbound} />}
+      {otherImpacts.length > 0 && <OtherImpactsTable impacts={otherImpacts} />}
     </section>
   )
 }
@@ -81,15 +78,17 @@ const summaryText = ({ impacts, resultClass, riskOrders }: DelayAnalysis) => {
   }
 }
 
-interface SkuImpactItemProps {
-  impact: SkuImpact
-  /** 상품의 재고 영향을 그리는 영역. 지금은 타임라인이고, 지도로 바꿀 수 있게 슬롯으로 둔다. */
-  visual: ReactNode
-}
+const getImpactKey = ({ skuCode, region }: SkuImpact) => `${skuCode}-${region}`
 
-function SkuImpactItem({ impact, visual }: SkuImpactItemProps) {
+function SkuImpactCard({
+  impact,
+  expectedInbound,
+}: {
+  impact: SkuImpact
+  expectedInbound: string
+}) {
   return (
-    <li className="flex flex-col gap-16pxr rounded-card border border-border p-20pxr">
+    <div className="flex flex-col gap-16pxr rounded-card border border-border p-20pxr">
       <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
         <p className="flex min-w-0 items-baseline gap-8pxr">
           <span className="truncate text-b1 font-bold">{impact.productName}</span>
@@ -106,8 +105,59 @@ function SkuImpactItem({ impact, visual }: SkuImpactItemProps) {
           </p>
         )}
       </div>
-      {impact.estimable ? visual : <p className="text-b2 text-warning">{NOT_ESTIMABLE_TEXT}</p>}
-    </li>
+      {impact.estimable ? (
+        <ImpactTimeline impact={impact} expectedInbound={expectedInbound} />
+      ) : (
+        <p className="text-b2 text-warning">{NOT_ESTIMABLE_TEXT}</p>
+      )}
+    </div>
+  )
+}
+
+/** 대표 상품 말고 영향을 받는 상품들. 판정할 수 없는 값은 '—'로 표시한다. */
+function OtherImpactsTable({ impacts }: { impacts: SkuImpact[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <Table density="compact" className="min-w-560pxr">
+        <TableHeader>
+          <TableRow>
+            <TableHead>그 밖의 상품</TableHead>
+            <TableHead className="w-120pxr">늘어난 부족</TableHead>
+            <TableHead className="w-110pxr">안전재고 하회</TableHead>
+            <TableHead className="w-96pxr">재고 소진</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {impacts.map((impact) => (
+            <TableRow key={getImpactKey(impact)}>
+              <TableCell>
+                <span className="font-bold">{impact.productName}</span>{' '}
+                <span className="text-muted-foreground">
+                  {impact.skuCode} · {WAREHOUSE_LABEL[impact.region]}
+                </span>
+              </TableCell>
+              {impact.estimable ? (
+                <>
+                  <TableCell>{(impact.increasedShortage ?? 0).toLocaleString()}개</TableCell>
+                  <TableCell>
+                    {impact.safetyStockBreachDate
+                      ? formatMonthDay(impact.safetyStockBreachDate)
+                      : EMPTY}
+                  </TableCell>
+                  <TableCell>
+                    {impact.stockoutDate ? formatMonthDay(impact.stockoutDate) : EMPTY}
+                  </TableCell>
+                </>
+              ) : (
+                <TableCell colSpan={3} className="text-warning">
+                  {NOT_ESTIMABLE_TEXT}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 

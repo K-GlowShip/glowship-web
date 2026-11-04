@@ -1,4 +1,4 @@
-import { CLIENT_ROLE, type ClientRole } from './delay-center'
+import { CLIENT_ROLE, type ClientRole } from './delay-center-code'
 
 const DECISION_ERROR_MESSAGE = {
   OPTION_REQUIRED: '대응안을 선택해주세요.',

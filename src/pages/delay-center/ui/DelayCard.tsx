@@ -29,14 +29,14 @@ export function DelayCard({ delayCase, selected, onSelect }: DelayCardProps) {
       onClick={() => onSelect(delayCase.id)}
       className={cn(
         'flex w-full cursor-pointer flex-col gap-8pxr rounded-card border bg-card p-16pxr text-left outline-none',
-        'hover:bg-primary-50 focus-visible:ring-[3px] focus-visible:ring-primary/30',
+        'hover:bg-background focus-visible:ring-[3px] focus-visible:ring-primary/30',
         selected
           ? 'border-primary bg-primary-50 shadow-[inset_0_0_0_1px_var(--color-primary)]'
           : 'border-border',
       )}
     >
       <span className="flex items-center justify-between gap-8pxr">
-        <span className="text-b1 font-bold text-primary">{delayCase.shipmentCode}</span>
+        <span className="text-b1 font-bold">{delayCase.shipmentCode}</span>
         <span className="text-b2 font-bold text-danger">+{delayCase.delayDays}일</span>
       </span>
       <span className="flex min-w-0 items-baseline gap-4pxr text-b1 text-foreground">

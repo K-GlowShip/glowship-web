@@ -1,4 +1,5 @@
 import type {
+  AnalysisRunSummary,
   ClientRole,
   DelayAnalysis,
   DelayCase,
@@ -6,6 +7,7 @@ import type {
   RiskOrder,
   SkuImpact,
 } from './delay-center'
+import { MORE_DELAY_CASES } from './delay-center-mock-cases'
 
 // TODO: GET /delay-events, GET /analysis-runs/{runId} 연동 후 서버 응답으로 교체
 // TODO: GET /me가 생기면 역할을 서버 응답에서 읽는다 (지금은 헤더의 예시 값 '김민지 · 팀장'과 맞춘 값)
@@ -134,6 +136,9 @@ const BASE = {
   transportMode: 'OCEAN',
   stage: 'AT_SEA',
   skuCount: 1,
+  previousExpectedInbound: null,
+  closedAt: null,
+  runs: [] as AnalysisRunSummary[],
   baseDataAt: '2026-10-21T00:30:00Z',
   dataNotice: null,
   progressStep: null,
@@ -142,7 +147,7 @@ const BASE = {
   finalDecision: null,
 } as const
 
-export const DELAY_CASES: DelayCase[] = [
+const BASE_DELAY_CASES: DelayCase[] = [
   {
     ...BASE,
     id: 'de-1024',
@@ -151,6 +156,25 @@ export const DELAY_CASES: DelayCase[] = [
     skuCount: 3,
     runCode: 'AN-261021-042',
     status: 'ready',
+    previousExpectedInbound: '2026-10-26',
+    runs: [
+      {
+        runCode: 'AN-261021-042',
+        versionNo: 2,
+        status: 'ready',
+        isLatest: true,
+        startedAt: '2026-10-21T00:31:00Z',
+        finishedAt: '2026-10-21T00:36:00Z',
+      },
+      {
+        runCode: 'AN-261020-018',
+        versionNo: 1,
+        status: 'needs_reanalysis',
+        isLatest: false,
+        startedAt: '2026-10-20T01:02:00Z',
+        finishedAt: '2026-10-20T01:07:00Z',
+      },
+    ],
     delayDays: 4,
     plannedInbound: '2026-10-24',
     expectedInbound: '2026-10-28',
@@ -377,6 +401,7 @@ export const DELAY_CASES: DelayCase[] = [
     productName: 'A Glow Hydra Lotion 120ml',
     runCode: 'AN-261021-041',
     status: 'no_delay',
+    closedAt: '2026-10-21T00:40:00Z',
     delayDays: 0,
     plannedInbound: '2026-10-28',
     expectedInbound: '2026-10-27',
@@ -438,3 +463,5 @@ export const DELAY_CASES: DelayCase[] = [
     opinions: [],
   },
 ]
+
+export const DELAY_CASES: DelayCase[] = [...BASE_DELAY_CASES, ...MORE_DELAY_CASES]

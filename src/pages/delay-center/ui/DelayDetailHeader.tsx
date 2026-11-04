@@ -10,6 +10,8 @@ import {
   DELAY_STATUS_LABEL,
   type DelayCase,
   formatProductLabel,
+  RESULT_CLASS_BADGE_VARIANT,
+  RESULT_CLASS_LABEL,
 } from '../model/delay-center'
 import { useReanalysis } from '../model/use-reanalysis'
 
@@ -17,7 +19,7 @@ interface DelayDetailHeaderProps {
   delayCase: DelayCase
 }
 
-/** 지연 상세의 제목 줄. 선적 번호와 상태, 대표 상품·분석 실행 ID, 재분석 버튼을 보여 준다. */
+/** 지연 상세의 제목 줄. 선적 번호와 상태·결과 분류, 대표 상품, 재분석 버튼을 보여 준다. */
 export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
   const { mutate: reanalyze, isPending: isReanalyzing } = useReanalysis()
 
@@ -29,12 +31,13 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
           <Badge variant={DELAY_STATUS_BADGE_VARIANT[delayCase.status]}>
             {DELAY_STATUS_LABEL[delayCase.status]}
           </Badge>
+          {delayCase.analysis && (
+            <Badge variant={RESULT_CLASS_BADGE_VARIANT[delayCase.analysis.resultClass]} dot={false}>
+              {RESULT_CLASS_LABEL[delayCase.analysis.resultClass]}
+            </Badge>
+          )}
         </div>
-        <p className="text-b1 text-muted-foreground">
-          {[formatProductLabel(delayCase), delayCase.runCode && `분석 ${delayCase.runCode}`]
-            .filter(Boolean)
-            .join(' · ')}
-        </p>
+        <p className="text-b1 text-muted-foreground">{formatProductLabel(delayCase)}</p>
       </div>
       {canReanalyze(delayCase) && (
         <Button
