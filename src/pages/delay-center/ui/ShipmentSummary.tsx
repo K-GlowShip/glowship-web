@@ -7,6 +7,7 @@ import {
   STAGE_FLOW,
   STAGE_LABEL,
 } from '../model/delay-center'
+import { TimelineTrack } from './TimelineTrack'
 
 interface ShipmentSummaryProps {
   delayCase: DelayCase
@@ -31,30 +32,26 @@ export function ShipmentSummary({ delayCase }: ShipmentSummaryProps) {
         {formatRoute({ route, transportMode })}
       </h3>
 
-      <ol className="grid grid-cols-2 gap-16pxr md:grid-cols-4">
+      <ol className="grid grid-cols-4">
         {flow.map((code, index) => (
           <li
             key={code}
             aria-current={index === currentIndex ? 'step' : undefined}
-            className="flex flex-col gap-6pxr"
+            className="flex flex-col gap-10pxr"
           >
+            <TimelineTrack
+              dotClassName={getStepDotClass(index, currentIndex)}
+              lineClassName={
+                index === flow.length - 1
+                  ? undefined
+                  : index < currentIndex
+                    ? 'bg-muted-foreground'
+                    : 'bg-border'
+              }
+            />
             <span
               className={cn(
-                'relative h-2pxr',
-                index < currentIndex ? 'bg-muted-foreground' : 'bg-border',
-              )}
-              aria-hidden="true"
-            >
-              <span
-                className={cn(
-                  'absolute -top-4pxr left-0 size-10pxr rounded-full',
-                  getStepDotClass(index, currentIndex),
-                )}
-              />
-            </span>
-            <span
-              className={cn(
-                'pt-4pxr text-b2',
+                'pr-8pxr text-b2',
                 index === currentIndex ? 'font-bold text-primary' : 'text-muted-foreground',
               )}
             >

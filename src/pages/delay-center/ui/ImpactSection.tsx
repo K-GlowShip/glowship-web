@@ -12,6 +12,7 @@ import {
   type SkuImpact,
   WAREHOUSE_LABEL,
 } from '../model/delay-center'
+import { TimelineTrack } from './TimelineTrack'
 
 interface Milestone {
   label: string
@@ -193,21 +194,17 @@ function ImpactTimeline({
   milestones.push({ label: '예상 입고', value: formatMonthDay(expectedInbound), tone: 'info' })
 
   return (
-    <ol className="grid grid-cols-2 gap-16pxr md:grid-cols-4">
-      {milestones.map((milestone) => (
+    <ol className="grid auto-cols-fr grid-flow-col">
+      {milestones.map((milestone, index) => (
         <li key={milestone.label} className="flex flex-col gap-6pxr">
-          <span className={cn('text-b1 font-bold', TONE_CLASS[milestone.tone].text)}>
+          <span className={cn('pr-8pxr text-b1 font-bold', TONE_CLASS[milestone.tone].text)}>
             {milestone.value}
           </span>
-          <span className="relative h-2pxr bg-border" aria-hidden="true">
-            <span
-              className={cn(
-                'absolute -top-4pxr left-0 size-10pxr rounded-full',
-                TONE_CLASS[milestone.tone].dot,
-              )}
-            />
-          </span>
-          <span className="pt-4pxr text-b2 text-muted-foreground">{milestone.label}</span>
+          <TimelineTrack
+            dotClassName={TONE_CLASS[milestone.tone].dot}
+            lineClassName={index === milestones.length - 1 ? undefined : 'bg-border'}
+          />
+          <span className="pr-8pxr text-b2 text-muted-foreground">{milestone.label}</span>
         </li>
       ))}
     </ol>
