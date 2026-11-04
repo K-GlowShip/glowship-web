@@ -47,13 +47,13 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
   const state: DelayListLocationState = { listSearch }
 
   return (
-    <Table className="min-w-1040pxr">
+    <Table className="min-w-1070pxr">
       <TableHeader>
         <TableRow>
           <TableHead>선적 / 상품</TableHead>
           <TableHead className="w-140pxr">상태</TableHead>
           <TableHead className="w-80pxr">지연</TableHead>
-          <TableHead className="w-160pxr">운송 단계</TableHead>
+          <TableHead className="w-190pxr">운송 단계</TableHead>
           <TableHead className="w-170pxr">입고 (계획 → 예상)</TableHead>
           <TableHead className="w-90pxr">위험 주문</TableHead>
           <TableHead className="w-140pxr">감지 시각</TableHead>
@@ -91,7 +91,9 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
             <TableCell>
               <div className="flex flex-col">
                 <span className="font-bold">{STAGE_LABEL[delayCase.stage]}</span>
-                <span className="text-caption text-muted-foreground">{formatRoute(delayCase)}</span>
+                <span className="text-caption whitespace-nowrap text-muted-foreground">
+                  {formatRoute(delayCase)}
+                </span>
               </div>
             </TableCell>
             <TableCell>
