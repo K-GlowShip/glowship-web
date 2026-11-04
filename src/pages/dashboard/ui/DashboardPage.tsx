@@ -1,5 +1,3 @@
-import { Sparkles } from 'lucide-react'
-
 import { formatHHmm, formatKoreanLongDate } from '@/shared/lib/kst-date'
 
 import {
@@ -30,10 +28,7 @@ export function DashboardPage() {
     <div className="flex flex-col gap-24pxr">
       <header className="flex flex-wrap items-end justify-between gap-12pxr">
         <div>
-          <h1 className="flex items-center gap-8pxr text-h1 font-bold">
-            안녕하세요, {USER_NAME}님
-            <Sparkles className="size-24pxr text-primary" aria-hidden="true" />
-          </h1>
+          <h1 className="text-h1 font-bold">안녕하세요, {USER_NAME}님</h1>
           <p className="text-b1 text-muted-foreground">
             오늘의 물류 흐름과 확인이 필요한 변화를 살펴보세요.
           </p>
