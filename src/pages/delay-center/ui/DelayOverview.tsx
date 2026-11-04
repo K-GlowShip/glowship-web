@@ -21,16 +21,8 @@ interface DelayOverviewProps {
  * 경로와 단계 표시줄은 지도로 바꿀 자리다. 지도에는 출발·도착 좌표와 단계별 일정이 필요한데 API 명세에 아직 없다.
  */
 export function DelayOverview({ delayCase }: DelayOverviewProps) {
-  const {
-    route,
-    transportMode,
-    stage,
-    delayDays,
-    plannedInbound,
-    expectedInbound,
-    previousExpectedInbound,
-    analysis,
-  } = delayCase
+  const { route, transportMode, stage, delayDays, plannedInbound, expectedInbound, analysis } =
+    delayCase
   const flow = STAGE_FLOW[transportMode]
   const currentIndex = flow.indexOf(stage)
   const lastIndex = flow.length - 1
@@ -107,7 +99,6 @@ export function DelayOverview({ delayCase }: DelayOverviewProps) {
             impacts={impacts}
             plannedInbound={plannedInbound}
             expectedInbound={expectedInbound}
-            previousExpectedInbound={previousExpectedInbound}
           />
         </div>
       )}

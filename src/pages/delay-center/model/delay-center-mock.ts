@@ -204,7 +204,6 @@ const BASE = {
   transportMode: 'OCEAN',
   stage: 'AT_SEA',
   skuCount: 1,
-  previousExpectedInbound: null,
   closedAt: null,
   runs: [] as AnalysisRunSummary[],
   baseDataAt: '2026-10-21T00:30:00Z',
@@ -225,7 +224,6 @@ const BASE_DELAY_CASES: MockDelayCase[] = [
     skuCount: 3,
     runCode: 'AN-261021-042',
     status: 'READY_FOR_REVIEW',
-    previousExpectedInbound: '2026-10-26',
     runs: [
       {
         runCode: 'AN-261021-042',

@@ -9,9 +9,9 @@ const ROW_HEIGHT = 32
 const BAND_HEIGHT = 14
 const DOT_SIZE = 10
 const TICK_HEIGHT = 22
-// 입고 줄은 점 이름을 선 아래에 적어서 상품 줄보다 높다
+// 입고 줄은 점의 날짜와 이름을 선 아래에 적어서 상품 줄보다 높다
 const INBOUND_Y = 14
-const INBOUND_HEIGHT = 92
+const INBOUND_HEIGHT = 76
 /** 날짜 눈금이 이 개수 안팎이 되도록 간격을 정한다 */
 const TARGET_TICKS = 8
 
@@ -26,7 +26,6 @@ interface ImpactAxisProps {
   impacts: SkuImpact[]
   plannedInbound: string
   expectedInbound: string
-  previousExpectedInbound: string | null
 }
 
 /**
@@ -35,12 +34,7 @@ interface ImpactAxisProps {
  * 품절 구간·지연 구간의 길이를 한눈에 비교한다. 정확한 날짜는 아래 표에 있어서 상품 줄에는 날짜 글자를 달지 않는다.
  * 운송 단계별 날짜는 API에 없어서 이 축에는 단계가 아니라 날짜만 놓는다.
  */
-export function ImpactAxis({
-  impacts,
-  plannedInbound,
-  expectedInbound,
-  previousExpectedInbound,
-}: ImpactAxisProps) {
+export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactAxisProps) {
   const rows = impacts.slice(0, MAX_AXIS_ROWS)
   const hiddenCount = impacts.length - rows.length
 
@@ -159,11 +153,6 @@ export function ImpactAxis({
             <InboundMarker
               date={expectedInbound}
               label="예상 입고"
-              caption={
-                previousExpectedInbound
-                  ? `이전 ${formatMonthDay(previousExpectedInbound)}`
-                  : undefined
-              }
               left={toPercent(expectedInbound)}
             />
           </div>
@@ -270,13 +259,12 @@ function Dot({ className, left, title }: { className: string; left: number; titl
 interface InboundMarkerProps {
   date: string
   label: string
-  caption?: string
   left: number
   hollow?: boolean
 }
 
 /** 입고 줄의 점과, 그 아래에 적는 날짜·이름 */
-function InboundMarker({ date, label, caption, left, hollow }: InboundMarkerProps) {
+function InboundMarker({ date, label, left, hollow }: InboundMarkerProps) {
   return (
     <>
       <span
@@ -294,7 +282,6 @@ function InboundMarker({ date, label, caption, left, hollow }: InboundMarkerProp
           {formatMonthDay(date)}
         </span>
         <span className="text-caption text-muted-foreground">{label}</span>
-        {caption && <span className="text-caption text-muted-foreground">{caption}</span>}
       </span>
     </>
   )

@@ -174,8 +174,6 @@ export interface DelayCase {
   expectedInbound: string
   /** ISO 8601 UTC. 이 지연을 처음 감지한 시각 */
   detectedAt: string
-  /** 'YYYY-MM-DD'. 직전에 관측한 예상 입고일. 처음 감지한 지연이면 null */
-  previousExpectedInbound: string | null
   /** ISO 8601 UTC. 지연이 종료된 시각(입고 완료·지연 해소). 열려 있으면 null */
   closedAt: string | null
   /** ISO 8601 UTC. 사용한 수집 중 가장 오래된 시각. 입력이 확정되기 전에는 null */

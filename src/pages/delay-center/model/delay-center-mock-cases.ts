@@ -157,7 +157,6 @@ const delayCase = (
   runCode: null,
   route: 'KR → LOS ANGELES',
   transportMode: 'OCEAN',
-  previousExpectedInbound: null,
   closedAt: null,
   baseDataAt: '2026-10-21T00:30:00Z',
   dataNotice: null,
@@ -277,7 +276,6 @@ const MANY_SKU_CASE = delayCase({
   delayDays: 4,
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-30',
-  previousExpectedInbound: '2026-10-28',
   runCode: 'AN-261021-051',
   dataNotice: 'TMS 수집이 지연되어 선적 정보가 오래되었을 수 있습니다.',
   runs: [
@@ -376,7 +374,6 @@ const PORT_CASE = delayCase({
   delayDays: 3,
   plannedInbound: '2026-10-25',
   expectedInbound: '2026-10-28',
-  previousExpectedInbound: '2026-10-27',
   runCode: 'AN-261021-049',
   runs: [
     run(
@@ -1022,7 +1019,6 @@ const RECOVERED_AFTER_DECISION_CASE = delayCase({
   delayDays: 0,
   plannedInbound: '2026-10-27',
   expectedInbound: '2026-10-26',
-  previousExpectedInbound: '2026-10-29',
   closedAt: '2026-10-21T00:40:00Z',
   runCode: 'AN-261021-037',
   runs: [
