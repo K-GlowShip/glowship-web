@@ -126,6 +126,11 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
             <dt className="text-muted-foreground">판매량 기간</dt>
             <dd>최근 {inventory.salesBasisDays}일</dd>
           </div>
+          {/* 명세 4.4: 이 값이 입고 예정을 반영하지 않은 참고값임을 기준과 함께 화면에 보여 준다 */}
+          <div className="flex gap-6pxr">
+            <dt className="text-muted-foreground">입고 예정</dt>
+            <dd>미반영</dd>
+          </div>
         </dl>
       </CardHeader>
       <CardContent className="flex flex-col gap-16pxr pt-16pxr">
