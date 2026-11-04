@@ -48,7 +48,8 @@ export function DelayOverview({ delayCase }: DelayOverviewProps) {
         </p>
       </div>
 
-      <ol className="grid grid-cols-4">
+      {/* 마지막 칸은 내용 너비만큼만 차지하고 오른쪽 끝에 붙여, 입고 완료 점이 아래 날짜 축의 끝과 맞는다 */}
+      <ol className="grid grid-cols-[1fr_1fr_1fr_auto]">
         {flow.map((code, index) => (
           <li
             key={code}
@@ -57,15 +58,13 @@ export function DelayOverview({ delayCase }: DelayOverviewProps) {
           >
             <TimelineTrack
               dotClassName={getStepDotClass(index, currentIndex)}
-              lineClassName={
-                index === lastIndex
-                  ? undefined
-                  : index < currentIndex
-                    ? 'bg-muted-foreground'
-                    : 'bg-border'
-              }
+              lineClassName={getStepLineClass(
+                index === lastIndex ? index - 1 : index,
+                currentIndex,
+              )}
+              alignEnd={index === lastIndex}
             />
-            <div className="flex flex-col pr-8pxr">
+            <div className={cn('flex flex-col pr-8pxr', index === lastIndex && 'items-end pr-0')}>
               <span
                 className={cn(
                   'text-b2',
@@ -78,10 +77,22 @@ export function DelayOverview({ delayCase }: DelayOverviewProps) {
                 <span className="text-caption text-primary">현재</span>
               )}
               {index === lastIndex && (
-                <span className="text-caption text-muted-foreground">
-                  예상 {formatMonthDay(expectedInbound)}
-                  {plannedInbound !== expectedInbound &&
-                    ` · 계획 ${formatMonthDay(plannedInbound)}`}
+                <span className="flex flex-wrap items-center justify-end gap-x-6pxr text-caption">
+                  {plannedInbound !== expectedInbound && (
+                    <>
+                      <span className="text-muted-foreground line-through">
+                        {formatMonthDay(plannedInbound)}
+                      </span>
+                      <span aria-hidden="true" className="text-muted-foreground">
+                        →
+                      </span>
+                    </>
+                  )}
+                  <span
+                    className={cn('font-bold', delayDays > 0 ? 'text-danger' : 'text-foreground')}
+                  >
+                    예상 {formatMonthDay(expectedInbound)}
+                  </span>
                 </span>
               )}
             </div>
@@ -105,6 +116,10 @@ export function DelayOverview({ delayCase }: DelayOverviewProps) {
     </section>
   )
 }
+
+/** 단계 index에서 다음 단계로 잇는 선. 현재 단계 앞까지만 진하게 칠한다. */
+const getStepLineClass = (index: number, currentIndex: number) =>
+  index < currentIndex ? 'bg-muted-foreground' : 'bg-border'
 
 /** 지난 단계는 회색, 현재 단계만 보라색, 남은 단계는 옅은 색으로 구분한다. */
 const getStepDotClass = (index: number, currentIndex: number) => {
