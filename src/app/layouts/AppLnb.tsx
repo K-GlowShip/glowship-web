@@ -1,13 +1,22 @@
-import { NavLink } from 'react-router'
+import { Link, NavLink } from 'react-router'
 
+import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 
 import { NAV_ITEMS } from './nav-items'
 
 export function AppLnb() {
   return (
-    <aside className="w-200pxr shrink-0 overflow-y-auto border-r border-border bg-card p-16pxr">
-      <nav aria-label="주 메뉴" className="flex flex-col gap-8pxr">
+    <aside className="flex w-200pxr shrink-0 flex-col border-r border-border bg-card">
+      {/* 높이를 오른쪽 헤더(AppGnb)와 맞춘다 */}
+      <Link
+        to={ROUTES.DASHBOARD}
+        className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
+      >
+        <img src="/favicon.svg" alt="" className="h-28pxr w-auto" />
+        <span className="text-h3 font-bold text-primary">GlowShip</span>
+      </Link>
+      <nav aria-label="주 메뉴" className="flex flex-col gap-8pxr overflow-y-auto p-16pxr">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
