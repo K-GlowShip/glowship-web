@@ -28,8 +28,8 @@ const EMPTY = '—'
 const ACCENT_CLASS = 'shadow-[inset_3px_0_0_var(--color-primary)]'
 
 /**
- * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. 정해진 사유(`reasonCode`) 라벨은 배지 아래에 항상 보여 주고,
- * AI의 대응안별 설명은 행 아래에 덧붙인다. 설명 생성이 실패했으면 설명 줄은 없다.
+ * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. AI의 대응안별 설명을 행 아래에 보여 주고,
+ * 설명 생성이 실패했으면 정해진 사유(`reasonCode`) 라벨을 대신 보여 준다. 배지 아래에는 사유를 따로 적지 않는다.
  * 추천 대응안은 설명 뒤에 순위 기준(추천 근거)이 이어진다.
  * 불가·확인 필요인 대응안도 숨기지 않으며, 판정할 수 없는 값은 '—'로 표시한다.
  */
@@ -61,16 +61,9 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col items-start gap-4pxr">
-                      <Badge variant={FEASIBILITY_BADGE_VARIANT[option.feasibility]} dot={false}>
-                        {FEASIBILITY_LABEL[option.feasibility]}
-                      </Badge>
-                      {option.reasonCode && (
-                        <span className="text-caption text-muted-foreground">
-                          {REASON_LABEL[option.reasonCode]}
-                        </span>
-                      )}
-                    </div>
+                    <Badge variant={FEASIBILITY_BADGE_VARIANT[option.feasibility]} dot={false}>
+                      {FEASIBILITY_LABEL[option.feasibility]}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {option.expectedArrival ? formatMonthDay(option.expectedArrival) : EMPTY}
@@ -142,7 +135,10 @@ const getEvidence = (
   explanation: AiExplanation | null,
 ): OptionEvidence | null => {
   const evidence = {
-    explanation: explanation?.optionExplanations[option.type] ?? null,
+    // AI 설명이 없을 때만 정해진 사유(`reasonCode`) 라벨로 대신한다. 둘 다 있으면 설명이 사유를 풀어 쓴 것이라 설명만 보여 준다.
+    explanation:
+      explanation?.optionExplanations[option.type] ??
+      (option.reasonCode ? REASON_LABEL[option.reasonCode] : null),
     recommendation: option.recommended ? (explanation?.recommendation ?? null) : null,
   }
   return evidence.explanation || evidence.recommendation ? evidence : null
