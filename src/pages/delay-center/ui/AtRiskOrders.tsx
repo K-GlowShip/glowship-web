@@ -4,28 +4,45 @@ import { Badge } from '@/shared/ui/badge'
 
 import {
   ATTRIBUTION_LABEL,
+  countRiskOrdersByAttribution,
   formatMonthDay,
   RISK_ATTRIBUTION,
   type RiskOrder,
+  sortRiskOrders,
 } from '../model/delay-center'
 
 interface AtRiskOrdersProps {
   orders: RiskOrder[]
 }
 
-/** 위험 주문은 주문 단위로 묶고, 품목(상세)은 펼쳐서 본다. 주문마다 지연 유발·기존 위험을 표시한다. */
+/**
+ * 위험 주문은 하나도 숨기지 않고 모두 보여 준다. 주문 단위로 묶고, 품목(상세)은 펼쳐서 본다.
+ * 급한 순서(지연 유발 먼저, 약속일 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
+ */
 export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
   if (orders.length === 0) {
     return null
   }
 
+  const { delayInduced, preExisting } = countRiskOrdersByAttribution(orders)
+  const summary = [
+    delayInduced > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} ${delayInduced}건`,
+    preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} ${preExisting}건`,
+    '약속일 빠른 순',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <section aria-labelledby="risk-orders-title" className="flex flex-col gap-12pxr">
-      <h3 id="risk-orders-title" className="text-h3 font-bold">
-        위험 주문 <span className="text-muted-foreground">{orders.length}</span>
-      </h3>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
+        <h3 id="risk-orders-title" className="text-h3 font-bold">
+          위험 주문 <span className="text-muted-foreground">{orders.length}</span>
+        </h3>
+        <p className="text-b2 text-muted-foreground">{summary}</p>
+      </div>
       <ul className="flex flex-col gap-8pxr">
-        {orders.map((order) => (
+        {sortRiskOrders(orders).map((order) => (
           <li key={order.orderCode}>
             <details className="group rounded-card border border-border bg-card">
               <summary className="flex cursor-pointer list-none items-center gap-12pxr px-16pxr py-12pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 [&::-webkit-details-marker]:hidden">

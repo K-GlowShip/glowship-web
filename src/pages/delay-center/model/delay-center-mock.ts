@@ -86,6 +86,35 @@ const RISK_ORDERS: RiskOrder[] = [
   },
 ]
 
+const addDays = (date: string, days: number) => {
+  const result = new Date(`${date}T00:00:00Z`)
+  result.setUTCDate(result.getUTCDate() + days)
+  return result.toISOString().slice(0, 10)
+}
+
+/** 위험 주문이 많은 건을 보여 주기 위한 더미. 약속일은 10/24부터 4건마다 하루씩 늦어지고, 예상 배송일은 약속일보다 3~4일 늦다. */
+const generateRiskOrders = (count: number): RiskOrder[] =>
+  Array.from({ length: count }, (_, index) => {
+    const promisedDate = addDays('2026-10-24', Math.floor(index / 4))
+    return {
+      orderCode: `A-ORD-2026101${5 + (index % 4)}-${String(100 + index).padStart(4, '0')}`,
+      riskReason: 'SKU-003 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
+      attribution: 'delay_induced',
+      promisedDate,
+      expectedDate: addDays(promisedDate, 3 + (index % 2)),
+      lines:
+        index % 3 === 0
+          ? [
+              { lineNo: 1, skuCode: 'SKU-003', openQuantity: 20 + index },
+              { lineNo: 2, skuCode: 'SKU-002', openQuantity: 10 + (index % 5) * 5 },
+            ]
+          : [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 20 + index }],
+    }
+  })
+
+// 지연 유발 위험 주문 42건. 대응안 표와 AI 설명의 '위험 주문 42건'과 맞춘다
+const MANY_RISK_ORDERS = generateRiskOrders(42)
+
 const EXPLANATION = {
   runSummary:
     '선적 OCN-20260910의 3PL 입고가 10월 24일에서 10월 28일로 4일 밀렸고, 실주문 납기 위험이 있습니다.',
@@ -126,7 +155,7 @@ const WATCH_IMPACT: SkuImpact = {
 const READY_ANALYSIS: DelayAnalysis = {
   resultClass: 'READY_ORDER_RISK',
   impacts: [HYDRA_CREAM_IMPACT, WATCH_IMPACT],
-  riskOrders: RISK_ORDERS,
+  riskOrders: MANY_RISK_ORDERS,
   options: [KR_AIR, OTHER_REGION, KEEP_PLAN],
   explanation: EXPLANATION,
 }

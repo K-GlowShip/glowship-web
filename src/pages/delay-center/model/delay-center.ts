@@ -278,6 +278,29 @@ export const REASON_LABEL: Record<ReasonCode, string> = {
   [REASON_CODE.MISSING_REQUIRED_DATA]: '필수 자료 없음',
 }
 
+/**
+ * 급한 위험 주문이 위로 오게 정렬한다. 지연 유발 위험을 먼저 두고(대응안으로 회복할 수 있는 대상),
+ * 약속일이 빠른 순, 같으면 예상 배송일이 더 늦은 순, 그래도 같으면 주문 코드순이다.
+ * 정렬 기준은 API 명세에 없는 화면 규칙이다.
+ */
+export const sortRiskOrders = (orders: RiskOrder[]) =>
+  [...orders].sort(
+    (a, b) =>
+      Number(b.attribution === RISK_ATTRIBUTION.DELAY_INDUCED) -
+        Number(a.attribution === RISK_ATTRIBUTION.DELAY_INDUCED) ||
+      a.promisedDate.localeCompare(b.promisedDate) ||
+      b.expectedDate.localeCompare(a.expectedDate) ||
+      a.orderCode.localeCompare(b.orderCode),
+  )
+
+/** 귀속별 위험 주문 수 */
+export const countRiskOrdersByAttribution = (orders: RiskOrder[]) => ({
+  delayInduced: orders.filter(({ attribution }) => attribution === RISK_ATTRIBUTION.DELAY_INDUCED)
+    .length,
+  preExisting: orders.filter(({ attribution }) => attribution === RISK_ATTRIBUTION.PRE_EXISTING)
+    .length,
+})
+
 export const ATTRIBUTION_LABEL = {
   [RISK_ATTRIBUTION.DELAY_INDUCED]: '지연 유발',
   [RISK_ATTRIBUTION.PRE_EXISTING]: '기존 위험',
