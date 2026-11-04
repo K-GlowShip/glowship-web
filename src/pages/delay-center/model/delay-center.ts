@@ -351,7 +351,7 @@ export const formatProductLabel = ({ productName, skuCount }: DelayCase) => {
 }
 
 /** 대표 상품 외에 담긴 상품 수. 하나뿐이면 빈 문자열. */
-export const formatExtraSkus = (skuCount: number) => (skuCount > 1 ? `외 ${skuCount - 1}개` : '')
+const formatExtraSkus = (skuCount: number) => (skuCount > 1 ? `외 ${skuCount - 1}개` : '')
 
 /** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. */
 export const formatMonthDay = (date: string) => date.slice(5).replace('-', '.')

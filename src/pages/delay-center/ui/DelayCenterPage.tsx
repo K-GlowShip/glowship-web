@@ -18,7 +18,6 @@ import { DelayListFilters } from './DelayListFilters'
 import { DelayTable } from './DelayTable'
 
 const SORTED_CASES = sortDelayCases(DELAY_CASES)
-const COUNTS = countByStatus(SORTED_CASES)
 
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
   value === STATUS_FILTER_ALL || (DELAY_STATUS_OPTIONS as string[]).includes(value)
@@ -32,6 +31,8 @@ export function DelayCenterPage() {
   const status = isStatusFilter(statusParam) ? statusParam : STATUS_FILTER_ALL
 
   const filtered = filterDelayCases(SORTED_CASES, status, keyword)
+  // 상태별 건수는 API 명세 4.4의 `counts`처럼 검색어는 반영하고 상태 선택은 반영하지 않는다
+  const counts = countByStatus(filterDelayCases(SORTED_CASES, STATUS_FILTER_ALL, keyword))
   const pageCount = Math.max(1, Math.ceil(filtered.length / DELAY_PAGE_SIZE))
   const page = Math.min(Math.max(1, Number(searchParams.get(LIST_PARAM.PAGE)) || 1), pageCount)
   const pageCases = filtered.slice((page - 1) * DELAY_PAGE_SIZE, page * DELAY_PAGE_SIZE)
@@ -71,7 +72,7 @@ export function DelayCenterPage() {
           <DelayListFilters
             keyword={keyword}
             status={status}
-            counts={COUNTS}
+            counts={counts}
             onSearch={({ keyword: nextKeyword, status: nextStatus }) =>
               updateParams({
                 [LIST_PARAM.KEYWORD]: nextKeyword,
