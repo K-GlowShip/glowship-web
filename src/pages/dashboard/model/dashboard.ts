@@ -5,6 +5,7 @@ import {
   type StageCode,
   type TransportMode,
 } from '@/entities/delay-event'
+import { EMPTY_VALUE } from '@/shared/config'
 
 /** 명세 v6.2 `GET /dashboard/summary` */
 export interface DashboardSummary {
@@ -182,11 +183,11 @@ export const addDays = (date: string, days: number) =>
 export const diffDays = (from: string, to: string) =>
   Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / MS_PER_DAY)
 
-/** 'YYYY-MM-DD' -> 'MM.DD'. 값이 없으면 '-' */
+/** 'YYYY-MM-DD' -> 'MM.DD'. 값이 없으면 `EMPTY_VALUE` */
 export const formatMonthDay = (date: string | null) => {
   if (!date) {
-    return '-'
+    return EMPTY_VALUE
   }
   const [, month, day] = date.split('-')
-  return month && day ? `${month}.${day}` : '-'
+  return month && day ? `${month}.${day}` : EMPTY_VALUE
 }

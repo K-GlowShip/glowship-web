@@ -91,36 +91,7 @@ export function DelayCenterPage() {
       </header>
 
       <Card className="rounded-panel">
-        <CardContent className="flex flex-col gap-16pxr p-32pxr">
-          <div className="flex min-h-24pxr flex-wrap items-center gap-12pxr">
-            {hasExtraCondition && (
-              <p role="status" className="text-b2 text-muted-foreground">
-                {extraConditionLabel} 건만 보고 있습니다.
-              </p>
-            )}
-            <div className="ml-auto flex items-center gap-8pxr">
-              <Switch
-                id="new-delay-toggle"
-                checked={isNewDelayView}
-                onCheckedChange={(checked) =>
-                  updateParams(
-                    checked
-                      ? {
-                          [LIST_PARAM.FROM]: NEW_DELAY_FROM,
-                          [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
-                        }
-                      : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
-                  )
-                }
-              />
-              <Label
-                htmlFor="new-delay-toggle"
-                className={isNewDelayView ? 'text-primary' : 'font-normal'}
-              >
-                새 지연 보기
-              </Label>
-            </div>
-          </div>
+        <CardContent className="flex flex-col gap-16pxr p-24pxr">
           <DelayListFilters
             keyword={keyword}
             status={status}
@@ -132,8 +103,37 @@ export function DelayCenterPage() {
               })
             }
           />
+          {hasExtraCondition && (
+            <p role="status" className="text-b2 text-muted-foreground">
+              {extraConditionLabel} 건만 보고 있습니다.
+            </p>
+          )}
           <TableTemplate
             totalCount={filtered.length}
+            Controls={
+              <>
+                <Switch
+                  id="new-delay-toggle"
+                  checked={isNewDelayView}
+                  onCheckedChange={(checked) =>
+                    updateParams(
+                      checked
+                        ? {
+                            [LIST_PARAM.FROM]: NEW_DELAY_FROM,
+                            [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
+                          }
+                        : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
+                    )
+                  }
+                />
+                <Label
+                  htmlFor="new-delay-toggle"
+                  className={isNewDelayView ? 'text-primary' : 'font-normal'}
+                >
+                  새 지연 보기
+                </Label>
+              </>
+            }
             page={page}
             pageCount={pageCount}
             onPageChange={(next) =>

@@ -52,7 +52,12 @@ export function DecisionSection({ delayCase, analysis, role }: DecisionSectionPr
           </p>
         </div>
       ) : canDecide(delayCase) ? (
-        <DecisionForm key={delayCase.id} role={role} options={analysis.options} />
+        <DecisionForm
+          key={delayCase.id}
+          role={role}
+          options={analysis.options}
+          opinions={delayCase.opinions}
+        />
       ) : (
         <p className="rounded-card bg-background px-16pxr py-12pxr text-b2 text-muted-foreground">
           {ANALYSIS_NOTICE.CANNOT_DECIDE}

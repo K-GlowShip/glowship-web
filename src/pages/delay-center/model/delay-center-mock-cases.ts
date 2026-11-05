@@ -99,7 +99,6 @@ const impact = (
   increasedShortage: 0,
   safetyStockBreachDate: null,
   stockoutDate: null,
-  stockoutEndDate: null,
   stockoutDays: null,
   ...overrides,
 })
@@ -127,7 +126,16 @@ const run = (
   isLatest: boolean,
   startedAt: string,
   finishedAt: string | null,
-): AnalysisRunSummary => ({ versionNo, runCode, status, isLatest, startedAt, finishedAt })
+  failureCode: string | null = null,
+): AnalysisRunSummary => ({
+  versionNo,
+  runCode,
+  status,
+  failureCode,
+  isLatest,
+  startedAt,
+  finishedAt,
+})
 
 const analysis = (overrides: Partial<MockAnalysis>): MockAnalysis => ({
   resultClass: 'READY_ORDER_RISK',
@@ -157,11 +165,11 @@ const delayCase = (
   runCode: null,
   route: 'KR → LOS ANGELES',
   transportMode: 'OCEAN',
-  previousExpectedInbound: null,
   closedAt: null,
   baseDataAt: '2026-10-21T00:30:00Z',
   dataNotice: null,
   progressStep: null,
+  failureCode: null,
   failureMessage: null,
   staleReason: null,
   analysis: null,
@@ -208,9 +216,9 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-30',
     'SKU-101 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
     [
-      { lineNo: 1, skuCode: 'SKU-101', openQuantity: 200 },
-      { lineNo: 2, skuCode: 'SKU-102', openQuantity: 90 },
-      { lineNo: 3, skuCode: 'SKU-103', openQuantity: 30 },
+      { lineNo: 1, skuCode: 'SKU-101', productName: 'A Glow Hydra Cream 50ml', openQuantity: 200 },
+      { lineNo: 2, skuCode: 'SKU-102', productName: 'A Glow Hydra Toner 150ml', openQuantity: 90 },
+      { lineNo: 3, skuCode: 'SKU-103', productName: 'A Glow Calming Serum 30ml', openQuantity: 30 },
     ],
   ),
   order(
@@ -219,7 +227,7 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-26',
     '2026-10-30',
     'SKU-101 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-    [{ lineNo: 1, skuCode: 'SKU-101', openQuantity: 150 }],
+    [{ lineNo: 1, skuCode: 'SKU-101', productName: 'A Glow Hydra Cream 50ml', openQuantity: 150 }],
   ),
   order(
     'A-ORD-20261017-0110',
@@ -227,7 +235,7 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-27',
     '2026-10-31',
     'SKU-102 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-    [{ lineNo: 1, skuCode: 'SKU-102', openQuantity: 120 }],
+    [{ lineNo: 1, skuCode: 'SKU-102', productName: 'A Glow Hydra Toner 150ml', openQuantity: 120 }],
   ),
   order(
     'A-ORD-20261017-0118',
@@ -236,8 +244,8 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-31',
     'SKU-101 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
     [
-      { lineNo: 1, skuCode: 'SKU-101', openQuantity: 80 },
-      { lineNo: 2, skuCode: 'SKU-104', openQuantity: 40 },
+      { lineNo: 1, skuCode: 'SKU-101', productName: 'A Glow Hydra Cream 50ml', openQuantity: 80 },
+      { lineNo: 2, skuCode: 'SKU-104', productName: 'A Glow Mask Pack 5ea', openQuantity: 40 },
     ],
   ),
   order(
@@ -246,7 +254,7 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-28',
     '2026-11-01',
     'SKU-103 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-    [{ lineNo: 1, skuCode: 'SKU-103', openQuantity: 60 }],
+    [{ lineNo: 1, skuCode: 'SKU-103', productName: 'A Glow Calming Serum 30ml', openQuantity: 60 }],
   ),
   order(
     'A-ORD-20261014-0090',
@@ -254,7 +262,7 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-24',
     '2026-10-27',
     '계획 입고일 기준으로도 SKU-101 재고가 부족합니다.',
-    [{ lineNo: 1, skuCode: 'SKU-101', openQuantity: 70 }],
+    [{ lineNo: 1, skuCode: 'SKU-101', productName: 'A Glow Hydra Cream 50ml', openQuantity: 70 }],
   ),
   order(
     'A-ORD-20261014-0095',
@@ -262,7 +270,7 @@ const MANY_ORDERS: RiskOrder[] = [
     '2026-10-25',
     '2026-10-28',
     '계획 입고일 기준으로도 SKU-104 재고가 부족합니다.',
-    [{ lineNo: 1, skuCode: 'SKU-104', openQuantity: 55 }],
+    [{ lineNo: 1, skuCode: 'SKU-104', productName: 'A Glow Mask Pack 5ea', openQuantity: 55 }],
   ),
 ]
 
@@ -277,7 +285,6 @@ const MANY_SKU_CASE = delayCase({
   delayDays: 4,
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-30',
-  previousExpectedInbound: '2026-10-28',
   runCode: 'AN-261021-051',
   dataNotice: 'TMS 수집이 지연되어 선적 정보가 오래되었을 수 있습니다.',
   runs: [
@@ -312,22 +319,20 @@ const MANY_SKU_CASE = delayCase({
         increasedShortage: 2100,
         safetyStockBreachDate: '2026-10-22',
         stockoutDate: '2026-10-24',
-        stockoutEndDate: '2026-10-30',
-        stockoutDays: 7,
+        stockoutDays: 6,
       }),
       impact('SKU-102', 'A Glow Hydra Toner 150ml', 'WEST', 'IMPACTED', {
         increasedShortage: 640,
         safetyStockBreachDate: '2026-10-23',
         stockoutDate: '2026-10-27',
-        stockoutEndDate: '2026-10-30',
-        stockoutDays: 4,
+        // 중간에 다른 선적이 입고되어 품절이 끊기는 경우. 10.27~10.29 중 이틀만 품절이다
+        stockoutDays: 2,
       }),
       impact('SKU-103', 'A Glow Calming Serum 30ml', 'EAST', 'IMPACTED', {
         estimable: false,
         increasedShortage: null,
         safetyStockBreachDate: null,
         stockoutDate: null,
-        stockoutEndDate: null,
         stockoutDays: null,
       }),
       impact('SKU-104', 'A Glow Mask Pack 5ea', 'KR', 'WATCH', {
@@ -376,7 +381,6 @@ const PORT_CASE = delayCase({
   delayDays: 3,
   plannedInbound: '2026-10-25',
   expectedInbound: '2026-10-28',
-  previousExpectedInbound: '2026-10-27',
   runCode: 'AN-261021-049',
   runs: [
     run(
@@ -394,8 +398,7 @@ const PORT_CASE = delayCase({
         increasedShortage: 380,
         safetyStockBreachDate: '2026-10-25',
         stockoutDate: '2026-10-27',
-        stockoutEndDate: '2026-10-29',
-        stockoutDays: 3,
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -405,7 +408,14 @@ const PORT_CASE = delayCase({
         '2026-10-27',
         '2026-10-30',
         'SKU-201 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-        [{ lineNo: 1, skuCode: 'SKU-201', openQuantity: 110 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-201',
+            productName: 'A Glow Calming Toner 150ml',
+            openQuantity: 110,
+          },
+        ],
       ),
       order(
         'A-ORD-20261018-0204',
@@ -413,7 +423,14 @@ const PORT_CASE = delayCase({
         '2026-10-27',
         '2026-10-30',
         'SKU-201 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-        [{ lineNo: 1, skuCode: 'SKU-201', openQuantity: 90 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-201',
+            productName: 'A Glow Calming Toner 150ml',
+            openQuantity: 90,
+          },
+        ],
       ),
     ],
     options: [
@@ -471,9 +488,8 @@ const AIR_NO_OPTION_CASE = delayCase({
       impact('SKU-301', 'A Glow Hydra Mist 100ml', 'WEST', 'IMPACTED', {
         increasedShortage: 150,
         safetyStockBreachDate: '2026-10-26',
-        stockoutDate: '2026-10-28',
-        stockoutEndDate: '2026-10-29',
-        stockoutDays: 2,
+        stockoutDate: '2026-10-27',
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -483,7 +499,14 @@ const AIR_NO_OPTION_CASE = delayCase({
         '2026-10-27',
         '2026-10-29',
         'SKU-301 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-        [{ lineNo: 1, skuCode: 'SKU-301', openQuantity: 75 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-301',
+            productName: 'A Glow Hydra Mist 100ml',
+            openQuantity: 75,
+          },
+        ],
       ),
     ],
     options: [
@@ -610,9 +633,8 @@ const AT_SEA_CASE = delayCase({
       impact('SKU-501', 'A Glow Cleansing Oil 200ml', 'WEST', 'IMPACTED', {
         increasedShortage: 60,
         safetyStockBreachDate: '2026-10-26',
-        stockoutDate: '2026-10-28',
-        stockoutEndDate: '2026-10-29',
-        stockoutDays: 2,
+        stockoutDate: '2026-10-27',
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -622,7 +644,14 @@ const AT_SEA_CASE = delayCase({
         '2026-10-27',
         '2026-10-29',
         'SKU-501 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-        [{ lineNo: 1, skuCode: 'SKU-501', openQuantity: 30 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-501',
+            productName: 'A Glow Cleansing Oil 200ml',
+            openQuantity: 30,
+          },
+        ],
       ),
       order(
         'A-ORD-20261016-0488',
@@ -630,7 +659,14 @@ const AT_SEA_CASE = delayCase({
         '2026-10-25',
         '2026-10-27',
         '계획 입고일 기준으로도 SKU-501 재고가 부족합니다.',
-        [{ lineNo: 1, skuCode: 'SKU-501', openQuantity: 20 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-501',
+            productName: 'A Glow Cleansing Oil 200ml',
+            openQuantity: 20,
+          },
+        ],
       ),
     ],
     options: [
@@ -670,6 +706,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
   plannedInbound: '2026-10-25',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-043',
+  failureCode: 'EXPLANATION_GENERATION_FAILED',
   failureMessage: '설명을 만들지 못해 이 분석은 선택할 수 없습니다. 재분석이 필요합니다.',
   runs: [
     run(
@@ -679,6 +716,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
       true,
       '2026-10-21T00:36:00Z',
       '2026-10-21T00:44:00Z',
+      'EXPLANATION_GENERATION_FAILED',
     ),
   ],
   analysis: analysis({
@@ -687,8 +725,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
         increasedShortage: 500,
         safetyStockBreachDate: '2026-10-25',
         stockoutDate: '2026-10-27',
-        stockoutEndDate: '2026-10-29',
-        stockoutDays: 3,
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -698,7 +735,14 @@ const EXPLANATION_FAILED_CASE = delayCase({
         '2026-10-27',
         '2026-10-30',
         'SKU-601 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-        [{ lineNo: 1, skuCode: 'SKU-601', openQuantity: 100 }],
+        [
+          {
+            lineNo: 1,
+            skuCode: 'SKU-601',
+            productName: 'A Glow Hydra Lotion 120ml',
+            openQuantity: 100,
+          },
+        ],
       ),
     ],
     options: [
@@ -735,6 +779,7 @@ const TOOL_FAILED_CASE = delayCase({
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-041',
+  failureCode: 'UPSTREAM_TIMEOUT',
   failureMessage: '분석 도구가 시간 안에 응답하지 않았습니다. 재시도를 모두 사용했습니다.',
   runs: [
     run(
@@ -744,6 +789,7 @@ const TOOL_FAILED_CASE = delayCase({
       true,
       '2026-10-21T00:37:00Z',
       '2026-10-21T00:52:00Z',
+      'UPSTREAM_TIMEOUT',
     ),
   ],
 })
@@ -760,7 +806,18 @@ const ON_HOLD_DEFAULT_CASE = delayCase({
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-040',
-  runs: [run(1, 'AN-261021-040', 'ON_HOLD', true, '2026-10-21T00:38:00Z', '2026-10-21T00:39:00Z')],
+  failureCode: 'REQUIRED_DATA_INVALID',
+  runs: [
+    run(
+      1,
+      'AN-261021-040',
+      'ON_HOLD',
+      true,
+      '2026-10-21T00:38:00Z',
+      '2026-10-21T00:39:00Z',
+      'REQUIRED_DATA_INVALID',
+    ),
+  ],
 })
 
 // ---- 9. 분석 중: 선적 상세·실행 ID·기준 시각이 아직 없는 갓 감지된 지연 ----
@@ -795,7 +852,15 @@ const REANALYZING_CASE = delayCase({
   progressStep: '재고 영향 분석 중',
   runs: [
     run(2, 'AN-261021-052', 'ANALYZING', true, '2026-10-21T01:10:00Z', null),
-    run(1, 'AN-261020-040', 'ON_HOLD', false, '2026-10-20T02:00:00Z', '2026-10-20T02:02:00Z'),
+    run(
+      1,
+      'AN-261020-040',
+      'ON_HOLD',
+      false,
+      '2026-10-20T02:00:00Z',
+      '2026-10-20T02:02:00Z',
+      'REQUIRED_DATA_INVALID',
+    ),
   ],
 })
 
@@ -826,7 +891,6 @@ const FINALIZED_ANALYSIS = analysis({
       increasedShortage: 700,
       safetyStockBreachDate: '2026-10-22',
       stockoutDate: '2026-10-24',
-      stockoutEndDate: '2026-10-27',
       stockoutDays: 4,
     }),
   ],
@@ -837,7 +901,14 @@ const FINALIZED_ANALYSIS = analysis({
       '2026-10-25',
       '2026-10-28',
       'SKU-701 재고가 소진되어 약속일 안에 출고할 수 없습니다.',
-      [{ lineNo: 1, skuCode: 'SKU-701', openQuantity: 140 }],
+      [
+        {
+          lineNo: 1,
+          skuCode: 'SKU-701',
+          productName: 'A Glow Hydra Cream 50ml',
+          openQuantity: 140,
+        },
+      ],
     ),
   ],
   options: FINALIZED_OPTIONS,
@@ -1022,7 +1093,6 @@ const RECOVERED_AFTER_DECISION_CASE = delayCase({
   delayDays: 0,
   plannedInbound: '2026-10-27',
   expectedInbound: '2026-10-26',
-  previousExpectedInbound: '2026-10-29',
   closedAt: '2026-10-21T00:40:00Z',
   runCode: 'AN-261021-037',
   runs: [

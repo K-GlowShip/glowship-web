@@ -71,19 +71,23 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                   <p className="border-t border-border px-16pxr pt-12pxr text-b2 text-foreground">
                     {order.riskReason}
                   </p>
-                  <ul className="flex flex-col gap-4pxr px-16pxr py-12pxr">
-                    {order.lines.map((line) => (
-                      <li
-                        key={line.lineNo}
-                        className="flex justify-between gap-8pxr text-b2 text-muted-foreground"
-                      >
-                        <span>
-                          {line.lineNo}번 줄 · {line.skuCode}
-                        </span>
-                        <span>미출고 {line.openQuantity.toLocaleString()}개</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex flex-col gap-4pxr px-16pxr py-12pxr">
+                    <p className="text-caption font-bold text-muted-foreground">주문 상품</p>
+                    <ul className="flex flex-col gap-4pxr">
+                      {order.lines.map((line) => (
+                        <li
+                          key={line.lineNo}
+                          className="flex justify-between gap-8pxr text-b2 text-muted-foreground"
+                        >
+                          <span>
+                            <span className="font-bold text-foreground">{line.productName}</span>{' '}
+                            {line.skuCode}
+                          </span>
+                          <span>미출고 {line.openQuantity.toLocaleString()}개</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </details>
               </li>
             ))}

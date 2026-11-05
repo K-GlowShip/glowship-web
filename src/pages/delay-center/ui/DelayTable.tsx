@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router'
 
-import { delayCenterPath } from '@/shared/config'
+import { EMPTY_VALUE, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
@@ -33,12 +33,10 @@ interface DelayTableProps {
 }
 
 const COLUMN_COUNT = 7
-const EMPTY = '—'
-
-/** 계산 결과가 없는 건은 '—'로 표시한다. 결과가 있으면 0건도 숫자다. */
+/** 계산 결과가 없는 건은 '–'로 표시한다. 결과가 있으면 0건도 숫자다. */
 const formatAtRiskOrders = (delayCase: DelayCase) => {
   const count = getAtRiskOrderCount(delayCase)
-  return count === null ? EMPTY : `${count}건`
+  return count === null ? EMPTY_VALUE : `${count}건`
 }
 
 /** 지연 목록. 행을 누르면 그 지연 건의 상세 화면으로 이동한다. */
@@ -86,7 +84,7 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
               </Badge>
             </TableCell>
             <TableCell className={cn(delayCase.delayDays > 0 && 'font-bold text-danger')}>
-              {delayCase.delayDays > 0 ? `+${delayCase.delayDays}일` : EMPTY}
+              {delayCase.delayDays > 0 ? `+${delayCase.delayDays}일` : EMPTY_VALUE}
             </TableCell>
             <TableCell>
               <div className="flex flex-col">

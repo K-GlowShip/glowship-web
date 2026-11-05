@@ -56,3 +56,33 @@ export const EMPTY_TEXT = {
   DATA_BASIS: '데이터 기준 시각 확인 불가',
   RUN_CODE: '분석 ID 없음',
 } as const
+
+/** 상품별 재고 영향 표의 안내 문구 */
+export const IMPACT_TEXT = {
+  // 명세 4.5 "재고 영향 읽는 법": 지연 증분 = 전체(예상 입고일) 부족 − 기준선(계획 입고일) 부족
+  SHORTAGE_DESCRIPTION: [
+    '지연 때문에 원래 계획보다 부족해진 수량입니다.',
+    '계획대로 입고되어도 있었을 부족은 포함하지 않습니다.',
+    '재고·미출고 확정 수량·최근 28일 평균 판매량으로 계산한 예측값입니다.',
+    '산출식: (예상 입고일 기준 부족 수량) - (계획 입고일 기준 부족 수량)',
+  ].join('\n'),
+  // 명세 4.5: 일부 SKU만 판정 불가여도 실행은 계속되고, 판정 불가 SKU만 계산에서 빠진다. 자료를 보완한 뒤 재분석을 요청해야 반영된다
+  NOT_ESTIMABLE:
+    '재고·판매 자료가 부족해 판정할 수 없습니다. 자료를 보완한 뒤 재분석하면 반영됩니다.',
+  NOT_ESTIMABLE_DESCRIPTION: [
+    '이 상품은 계산에서 제외되어 요약의 부족 수량에도 들어가지 않습니다.',
+    '나머지 상품의 결과로 대응안을 비교할 수 있습니다.',
+  ].join('\n'),
+} as const
+
+/** 재고·입고 날짜 축 범례의 설명 문구 */
+export const AXIS_LEGEND_TEXT = {
+  SAFETY_STOCK_BREACH: (safetyStockDays: number) =>
+    `안전재고는 평균 일 판매량의 ${safetyStockDays}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다.`,
+  STOCKOUT: '가용 재고가 0이 되는 날',
+  STOCKOUT_SPAN:
+    '소진일부터 예상 입고 전까지의 구간. 그 사이 다른 선적이 입고되면 일부 날짜는 품절이 해소됩니다.',
+} as const
+
+/** 선택할 수 없는데 사유 코드도 없는 대응안에 보여 주는 문구 */
+export const OPTION_NOT_SELECTABLE = '선택할 수 없는 대응안입니다.'

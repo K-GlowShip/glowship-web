@@ -23,6 +23,14 @@ export const STATUS_FILTER_ALL = 'ALL'
 
 export type DelayStatusFilter = DelayStatus | typeof STATUS_FILTER_ALL
 
+/**
+ * 분석 실행의 실패 코드(`failureCode`, 보류·실패일 때만 값이 있다). 값은 엔진이 정하는 열린 목록이라 화면이 구분해야 하는 것만 둔다.
+ * 설명 생성만 실패한 경우는 계산 결과가 있고, 그 밖의 실패는 결과가 없다(명세 4.5).
+ */
+export const FAILURE_CODE = {
+  EXPLANATION_GENERATION_FAILED: 'EXPLANATION_GENERATION_FAILED',
+} as const
+
 /** 로그인 사용자의 역할(명세 6절). 초안은 팀원, 최종 선택은 팀장만 한다. */
 export const CLIENT_ROLE = {
   MEMBER: 'CLIENT_MEMBER',

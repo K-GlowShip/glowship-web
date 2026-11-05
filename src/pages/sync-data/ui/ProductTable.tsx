@@ -15,6 +15,7 @@ import {
   VALIDATION_STATUS_LABEL,
   type Product,
 } from '../model/products'
+import { EMPTY_VALUE } from '@/shared/config'
 
 interface ProductTableProps {
   products: Product[]
@@ -67,7 +68,7 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
                       <span className="text-muted-foreground">
                         {EXTERNAL_CODE_SOURCE_LABEL[code.sourceDomain]}:{' '}
                       </span>
-                      {code.externalCode ?? '—'}
+                      {code.externalCode ?? EMPTY_VALUE}
                     </span>
                   ))}
                 </div>

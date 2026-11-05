@@ -64,6 +64,7 @@ export interface DelayOption {
 export interface RiskOrderLine {
   lineNo: number
   skuCode: string
+  productName: string
   openQuantity: number
 }
 
@@ -90,14 +91,13 @@ export interface SkuImpact {
   scope: SkuScope
   /** 판정할 수 없는 SKU(`NOT_ESTIMABLE`)면 false이고 아래 값은 모두 null */
   estimable: boolean
-  /** 지연으로 늘어난 부족 수량(지연 반영 부족 − 계획 기준 부족) */
+  /** 지연으로 인한 부족 증가분(지연 반영 부족 − 계획 기준 부족) */
   increasedShortage: number | null
   /** 'YYYY-MM-DD'. 안전재고 아래로 내려가는 날 */
   safetyStockBreachDate: string | null
   /** 'YYYY-MM-DD'. 재고가 바닥나는 날 */
   stockoutDate: string | null
-  /** 'YYYY-MM-DD'. 품절 상태가 끝나는 날 */
-  stockoutEndDate: string | null
+  /** 품절 일수. 품절 구간은 `stockoutDate`부터 이 일수만큼이다. */
   stockoutDays: number | null
 }
 
@@ -145,6 +145,8 @@ export interface AnalysisRunSummary {
   versionNo: number
   /** 화면 상태로 바꾼 실행 상태 */
   status: DelayStatus
+  /** 보류·실패한 실행의 실패 코드. 그 밖에는 null */
+  failureCode: string | null
   /** 가장 최신 버전인지 */
   isLatest: boolean
   /** ISO 8601 UTC */
@@ -174,8 +176,6 @@ export interface DelayCase {
   expectedInbound: string
   /** ISO 8601 UTC. 이 지연을 처음 감지한 시각 */
   detectedAt: string
-  /** 'YYYY-MM-DD'. 직전에 관측한 예상 입고일. 처음 감지한 지연이면 null */
-  previousExpectedInbound: string | null
   /** ISO 8601 UTC. 지연이 종료된 시각(입고 완료·지연 해소). 열려 있으면 null */
   closedAt: string | null
   /** ISO 8601 UTC. 사용한 수집 중 가장 오래된 시각. 입력이 확정되기 전에는 null */
@@ -184,6 +184,8 @@ export interface DelayCase {
   dataNotice: string | null
   /** 분석이 진행 중이면 현재 단계 이름 */
   progressStep: string | null
+  /** 현재 실행의 실패 코드. 보류·실패일 때만 값이 있고, 설명 생성만 실패했는지 가르는 데 쓴다 */
+  failureCode: string | null
   /** 분석 보류·실패 사유 */
   failureMessage: string | null
   /** 자료 변경으로 재분석이 필요할 때 사유 */
@@ -451,15 +453,9 @@ export const getVisibleImpacts = (impacts: SkuImpact[]) =>
 const sumShortage = (impacts: SkuImpact[]) =>
   impacts.reduce((sum, impact) => sum + (impact.increasedShortage ?? 0), 0)
 
-/** 지연으로 늘어난 부족 수량. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
+/** 지연으로 인한 부족 증가분. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
 export const getIncreasedShortage = (impacts: SkuImpact[]) =>
   sumShortage(impacts.filter((impact) => impact.scope === SKU_SCOPE.IMPACTED))
-
-/** 지연 증분 예측 부족이 있는 SKU 수 */
-export const getShortageSkuCount = (impacts: SkuImpact[]) =>
-  impacts.filter(
-    (impact) => impact.scope === SKU_SCOPE.IMPACTED && (impact.increasedShortage ?? 0) > 0,
-  ).length
 
 export const NO_SECTIONS: DetailSection[] = [DETAIL_SECTION.HISTORY]
 export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT, DETAIL_SECTION.HISTORY]

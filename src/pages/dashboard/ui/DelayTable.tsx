@@ -8,7 +8,7 @@ import {
   REGION_LABEL,
   STAGE_LABEL,
 } from '@/entities/delay-event'
-import { delayCenterListPath, delayCenterPath, ROUTES } from '@/shared/config'
+import { EMPTY_VALUE, ROUTES, delayCenterListPath, delayCenterPath } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import {
@@ -94,7 +94,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {delay.productName ?? '-'}
+                    {delay.productName ?? EMPTY_VALUE}
                     {delay.skuCount > 1 && (
                       <span className="text-muted-foreground"> 외 {delay.skuCount - 1}개</span>
                     )}
@@ -110,7 +110,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                   </TableCell>
                   <TableCell className="whitespace-nowrap">+{delay.delayDays}일</TableCell>
                   <TableCell>
-                    {delay.atRiskOrderCount === null ? '-' : `${delay.atRiskOrderCount}건`}
+                    {delay.atRiskOrderCount === null ? EMPTY_VALUE : `${delay.atRiskOrderCount}건`}
                   </TableCell>
                   <TableCell>
                     {delay.status ? (
@@ -118,7 +118,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                         {DELAY_STATUS_LABEL[delay.status]}
                       </Badge>
                     ) : (
-                      '-'
+                      EMPTY_VALUE
                     )}
                   </TableCell>
                 </TableRow>
