@@ -71,8 +71,8 @@ const RISK_ORDERS: RiskOrder[] = [
     promisedDate: '2026-10-26',
     expectedDate: '2026-10-29',
     lines: [
-      { lineNo: 1, skuCode: 'SKU-003', openQuantity: 120 },
-      { lineNo: 2, skuCode: 'SKU-002', openQuantity: 40 },
+      { lineNo: 1, skuCode: 'SKU-003', productName: 'A Glow Hydra Cream 50ml', openQuantity: 120 },
+      { lineNo: 2, skuCode: 'SKU-002', productName: 'A Glow Hydra Toner 150ml', openQuantity: 40 },
     ],
   },
   {
@@ -81,7 +81,9 @@ const RISK_ORDERS: RiskOrder[] = [
     attribution: 'DELAY_INDUCED',
     promisedDate: '2026-10-27',
     expectedDate: '2026-10-30',
-    lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 80 }],
+    lines: [
+      { lineNo: 1, skuCode: 'SKU-003', productName: 'A Glow Hydra Cream 50ml', openQuantity: 80 },
+    ],
   },
   {
     orderCode: 'A-ORD-20261015-0302',
@@ -89,9 +91,20 @@ const RISK_ORDERS: RiskOrder[] = [
     attribution: 'PRE_EXISTING',
     promisedDate: '2026-10-25',
     expectedDate: '2026-10-28',
-    lines: [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 60 }],
+    lines: [
+      { lineNo: 1, skuCode: 'SKU-003', productName: 'A Glow Hydra Cream 50ml', openQuantity: 60 },
+    ],
   },
 ]
+
+/** 케이스마다 SKU-003의 상품명을 바꿔 쓰므로, 위험 주문 줄의 상품명도 그 케이스의 상품명에 맞춘다 */
+const withSku003Name = (orders: RiskOrder[], productName: string): RiskOrder[] =>
+  orders.map((order) => ({
+    ...order,
+    lines: order.lines.map((line) =>
+      line.skuCode === 'SKU-003' ? { ...line, productName } : line,
+    ),
+  }))
 
 const addDays = (date: string, days: number) => {
   const result = new Date(`${date}T00:00:00Z`)
@@ -112,10 +125,27 @@ const generateRiskOrders = (count: number): RiskOrder[] =>
       lines:
         index % 3 === 0
           ? [
-              { lineNo: 1, skuCode: 'SKU-003', openQuantity: 20 + index },
-              { lineNo: 2, skuCode: 'SKU-002', openQuantity: 10 + (index % 5) * 5 },
+              {
+                lineNo: 1,
+                skuCode: 'SKU-003',
+                productName: 'A Glow Hydra Cream 50ml',
+                openQuantity: 20 + index,
+              },
+              {
+                lineNo: 2,
+                skuCode: 'SKU-002',
+                productName: 'A Glow Hydra Toner 150ml',
+                openQuantity: 10 + (index % 5) * 5,
+              },
             ]
-          : [{ lineNo: 1, skuCode: 'SKU-003', openQuantity: 20 + index }],
+          : [
+              {
+                lineNo: 1,
+                skuCode: 'SKU-003',
+                productName: 'A Glow Hydra Cream 50ml',
+                openQuantity: 20 + index,
+              },
+            ],
     }
   })
 
@@ -324,7 +354,7 @@ const BASE_DELAY_CASES: MockDelayCase[] = [
           increasedShortage: 420,
         },
       ],
-      riskOrders: RISK_ORDERS.slice(0, 2),
+      riskOrders: withSku003Name(RISK_ORDERS.slice(0, 2), 'A Glow Hydra Toner Pad 60ea'),
       options: [
         {
           id: 'pre-air',
@@ -373,7 +403,8 @@ const BASE_DELAY_CASES: MockDelayCase[] = [
       resultClass: 'FORECAST_ONLY_READY',
       impacts: [
         { ...HYDRA_CREAM_IMPACT, productName: 'A Glow Hydra Serum 30ml', increasedShortage: 410 },
-        { ...WATCH_IMPACT, scope: 'IMPACTED', increasedShortage: 200, stockoutDate: null },
+        // 안전재고 하회일(10.29)이 예상 입고일(10.28) 이후라 지연으로 늘어난 부족은 없다
+        WATCH_IMPACT,
         {
           ...WATCH_IMPACT,
           skuCode: 'SKU-009',
@@ -508,7 +539,7 @@ const BASE_DELAY_CASES: MockDelayCase[] = [
           increasedShortage: 300,
         },
       ],
-      riskOrders: RISK_ORDERS.slice(0, 1),
+      riskOrders: withSku003Name(RISK_ORDERS.slice(0, 1), 'A Glow Cleansing Foam 150ml'),
       options: [
         {
           id: 'pre-air',

@@ -26,8 +26,12 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
   return (
     <header className="flex items-start justify-between gap-16pxr">
       <div className="flex flex-col gap-4pxr">
-        <div className="flex items-center gap-12pxr">
-          <h2 className="text-h1 font-bold">{delayCase.shipmentCode}</h2>
+        <div className="flex items-end gap-12pxr">
+          {/* 라벨도 제목 안에 두어, 스크린 리더가 "선적 번호 OCN-…"으로 함께 읽게 한다 */}
+          <h2 className="text-h1 font-bold">
+            <span className="block text-caption font-normal text-muted-foreground">선적 번호</span>
+            {delayCase.shipmentCode}
+          </h2>
           <Badge variant={DELAY_STATUS_BADGE_VARIANT[delayCase.status]}>
             {DELAY_STATUS_LABEL[delayCase.status]}
           </Badge>

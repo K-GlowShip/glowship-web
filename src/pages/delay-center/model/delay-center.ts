@@ -64,6 +64,7 @@ export interface DelayOption {
 export interface RiskOrderLine {
   lineNo: number
   skuCode: string
+  productName: string
   openQuantity: number
 }
 
@@ -455,12 +456,6 @@ const sumShortage = (impacts: SkuImpact[]) =>
 /** 지연으로 인한 부족 증가분. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
 export const getIncreasedShortage = (impacts: SkuImpact[]) =>
   sumShortage(impacts.filter((impact) => impact.scope === SKU_SCOPE.IMPACTED))
-
-/** 지연 증분 예측 부족이 있는 SKU 수 */
-export const getShortageSkuCount = (impacts: SkuImpact[]) =>
-  impacts.filter(
-    (impact) => impact.scope === SKU_SCOPE.IMPACTED && (impact.increasedShortage ?? 0) > 0,
-  ).length
 
 export const NO_SECTIONS: DetailSection[] = [DETAIL_SECTION.HISTORY]
 export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT, DETAIL_SECTION.HISTORY]
