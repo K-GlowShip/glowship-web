@@ -88,7 +88,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                   <TableCell className="whitespace-nowrap">
                     <Link
                       to={delayCenterPath(delay.delayEventId)}
-                      className="hover:underline focus-visible:underline"
+                      className="underline underline-offset-2"
                     >
                       {delay.shipmentCode}
                     </Link>
