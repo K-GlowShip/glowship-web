@@ -10,6 +10,8 @@ export const MAX_AXIS_ROWS = 5
 
 // TODO: 서버 연동 후 재고 영향 응답의 `safetyStockDays`로 바꾼다 (명세 4.5, 안전재고 기준 14일)
 const SAFETY_STOCK_DAYS = 14
+/** 축 오른쪽 끝의 라벨은 가운데 정렬하면 박스 밖으로 나가서, 오른쪽 끝을 위치에 맞춘다 */
+const isAxisEnd = (percent: number) => percent >= 98
 /** 날짜 눈금이 이 개수 안팎이 되도록 간격을 정한다 */
 const TARGET_TICKS = 8
 
@@ -20,7 +22,7 @@ const formatDay = (day: number) =>
   new Date(day * DAY_MS).toISOString().slice(5, 10).replace('-', '.')
 
 interface ImpactAxisProps {
-  /** 보여 줄 상품 순서대로. 재고가 소진되는 상품만 `MAX_AXIS_ROWS`개까지 그린다. */
+  /** 보여 줄 상품 순서대로. 예상 입고 전에 안전재고 아래로 내려가는 상품만 `MAX_AXIS_ROWS`개까지 그린다. */
   impacts: SkuImpact[]
   plannedInbound: string
   expectedInbound: string
@@ -35,15 +37,18 @@ interface ImpactAxisProps {
  * `stockoutDays`는 연속 일수가 아니라 구간 안 품절일의 총합이다. 이 정의가 바뀌면 띠와 목업을 함께 확인한다.
  */
 export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactAxisProps) {
-  // 입고 전에 재고가 소진되는 상품만 그린다. 안전재고만 내려가는 상품과 판정 불가 상품은 아래 상품별 표에서 본다.
-  const stockoutRows = impacts.filter(({ estimable, stockoutDate }) => estimable && stockoutDate)
-  const rows = stockoutRows.slice(0, MAX_AXIS_ROWS)
+  // 예상 입고 전에 안전재고 아래로 내려가는 상품만 그린다. 하회일이 입고일 이후인 상품과 판정 불가 상품은 아래 상품별 표에서 본다.
+  const beforeInboundRows = impacts.filter(({ estimable, safetyStockBreachDate, stockoutDate }) => {
+    const firstDate = safetyStockBreachDate ?? stockoutDate
+    return estimable && firstDate !== null && toDay(firstDate) < toDay(expectedInbound)
+  })
+  const rows = beforeInboundRows.slice(0, MAX_AXIS_ROWS)
   const hiddenCount = impacts.length - rows.length
 
   if (rows.length === 0) {
     return (
       <p className="text-b2 text-muted-foreground">
-        예상 입고 전에 재고가 소진되는 상품이 없습니다. 안전재고 아래로 내려가는 상품은 아래 표에서
+        예상 입고 전에 안전재고 아래로 내려가는 상품이 없습니다. 상품별 영향은 아래 표에서
         확인하세요.
       </p>
     )
@@ -88,31 +93,35 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
 
   return (
     <div className="flex flex-col gap-12pxr [--axis-label:96px] lg:[--axis-label:224px]">
-      <div role="img" aria-label={`재고와 입고 일정: ${summary}`} className="relative pr-40pxr">
+      <div role="img" aria-label={`재고와 입고 일정: ${summary}`} className="relative">
         {/* 날짜 눈금 */}
         <div className="flex h-22pxr" aria-hidden="true">
           <div className="w-(--axis-label) shrink-0" />
           <div className="relative flex-1">
-            {ticks.map((day, index) => (
-              <span
-                key={day}
-                className={cn(
-                  'absolute top-0 -translate-x-1/2 text-caption text-muted-foreground',
-                  // 좁은 화면에서는 글자가 겹치지 않게 눈금을 하나 걸러서 보여 준다
-                  index % 2 === 1 && 'max-lg:hidden',
-                )}
-                style={{ left: `${((day - min) / (max - min)) * 100}%` }}
-              >
-                {formatDay(day)}
-              </span>
-            ))}
+            {ticks.map((day, index) => {
+              const percent = ((day - min) / (max - min)) * 100
+              return (
+                <span
+                  key={day}
+                  className={cn(
+                    'absolute top-0 text-caption text-muted-foreground',
+                    isAxisEnd(percent) ? '-translate-x-full' : '-translate-x-1/2',
+                    // 좁은 화면에서는 글자가 겹치지 않게 눈금을 하나 걸러서 보여 준다
+                    index % 2 === 1 && 'max-lg:hidden',
+                  )}
+                  style={{ left: `${percent}%` }}
+                >
+                  {formatDay(day)}
+                </span>
+              )
+            })}
           </div>
         </div>
 
         {/* 계획·예상 입고일에서 모든 상품 줄을 가로질러 입고 줄의 점까지 내려오는 점선 */}
         {/* 위는 눈금 줄 높이(22), 아래는 입고 줄 높이(76)에서 점의 위치(14)를 뺀 값(62)이다 */}
         <div
-          className="pointer-events-none absolute top-22pxr right-40pxr bottom-62pxr left-(--axis-label)"
+          className="pointer-events-none absolute top-22pxr right-0 bottom-62pxr left-(--axis-label)"
           aria-hidden="true"
         >
           {(isDelayed ? [plannedInbound, expectedInbound] : [expectedInbound]).map((date) => (
@@ -144,9 +153,10 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
             {isDelayed && (
               <span
                 className="absolute top-14pxr flex h-18pxr -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-warning-bg px-16pxr text-caption font-bold whitespace-nowrap text-warning"
+                // 띠 끝이 둥글어서 점 중심까지만 그리면 점 앞에서 끊겨 보인다. 끝 반원(높이 18px의 절반 = 9px = 0.5625rem)만큼 더 늘려 점 안으로 넣는다
                 style={{
                   left: `${toPercent(plannedInbound)}%`,
-                  width: `${toPercent(expectedInbound) - toPercent(plannedInbound)}%`,
+                  width: `calc(${toPercent(expectedInbound) - toPercent(plannedInbound)}% + 0.5625rem)`,
                 }}
               >
                 +{delayDays}일 지연
@@ -171,7 +181,7 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
 
       <div className="flex flex-wrap items-center gap-x-16pxr gap-y-4pxr text-caption text-muted-foreground">
         <LegendDot
-          className="bg-warning"
+          className="bg-warning-mark"
           label="안전재고 하회"
           description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다.`}
         />
@@ -272,7 +282,7 @@ function StockRow({ impact, toPercent, expectedInbound }: StockRowProps) {
         )}
         {safetyStockBreachDate && (
           <Dot
-            className="bg-warning"
+            className="bg-warning-mark"
             left={toPercent(safetyStockBreachDate)}
             title={`안전재고 하회 ${formatMonthDay(safetyStockBreachDate)}`}
           />
@@ -321,7 +331,13 @@ function InboundMarker({ date, label, left, hollow }: InboundMarkerProps) {
         style={{ left: `${left}%` }}
       />
       <span
-        className="absolute top-30pxr flex -translate-x-1/2 flex-col items-center text-center whitespace-nowrap"
+        className={cn(
+          'absolute top-30pxr flex flex-col whitespace-nowrap',
+          // 축 오른쪽 끝의 라벨은 박스 밖으로 나가지 않게 오른쪽 끝을 점 위치에 맞춘다
+          isAxisEnd(left)
+            ? '-translate-x-full items-end text-right'
+            : '-translate-x-1/2 items-center text-center',
+        )}
         style={{ left: `${left}%` }}
       >
         <span className={cn('text-b2 font-bold', hollow ? 'text-muted-foreground' : 'text-info')}>
