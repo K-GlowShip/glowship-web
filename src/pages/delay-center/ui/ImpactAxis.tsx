@@ -8,13 +8,6 @@ import { formatMonthDay, type SkuImpact } from '../model/delay-center'
 /** 날짜 축에 상품별 줄로 그리는 최대 개수. 더 많으면 나머지는 아래 표에서 본다. */
 export const MAX_AXIS_ROWS = 5
 
-const ROW_HEIGHT = 32
-const BAND_HEIGHT = 14
-const DOT_SIZE = 10
-const TICK_HEIGHT = 22
-// 입고 줄은 점의 날짜와 이름을 선 아래에 적어서 상품 줄보다 높다
-const INBOUND_Y = 14
-const INBOUND_HEIGHT = 76
 // TODO: 서버 연동 후 재고 영향 응답의 `safetyStockDays`로 바꾼다 (명세 4.5, 안전재고 기준 14일)
 const SAFETY_STOCK_DAYS = 14
 /** 날짜 눈금이 이 개수 안팎이 되도록 간격을 정한다 */
@@ -27,7 +20,7 @@ const formatDay = (day: number) =>
   new Date(day * DAY_MS).toISOString().slice(5, 10).replace('-', '.')
 
 interface ImpactAxisProps {
-  /** 보여 줄 상품 순서대로. `MAX_AXIS_ROWS`개까지만 그린다. */
+  /** 보여 줄 상품 순서대로. 재고가 소진되는 상품만 `MAX_AXIS_ROWS`개까지 그린다. */
   impacts: SkuImpact[]
   plannedInbound: string
   expectedInbound: string
@@ -42,14 +35,23 @@ interface ImpactAxisProps {
  * `stockoutDays`는 연속 일수가 아니라 구간 안 품절일의 총합이다. 이 정의가 바뀌면 띠와 목업을 함께 확인한다.
  */
 export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactAxisProps) {
-  const rows = impacts.slice(0, MAX_AXIS_ROWS)
+  // 입고 전에 재고가 소진되는 상품만 그린다. 안전재고만 내려가는 상품과 판정 불가 상품은 아래 상품별 표에서 본다.
+  const stockoutRows = impacts.filter(({ estimable, stockoutDate }) => estimable && stockoutDate)
+  const rows = stockoutRows.slice(0, MAX_AXIS_ROWS)
   const hiddenCount = impacts.length - rows.length
 
-  const estimableRows = rows.filter(({ estimable }) => estimable)
+  if (rows.length === 0) {
+    return (
+      <p className="text-b2 text-muted-foreground">
+        예상 입고 전에 재고가 소진되는 상품이 없습니다. 안전재고 아래로 내려가는 상품은 아래 표에서
+        확인하세요.
+      </p>
+    )
+  }
   const days = [
     toDay(plannedInbound),
     toDay(expectedInbound),
-    ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate }) =>
+    ...rows.flatMap(({ safetyStockBreachDate, stockoutDate }) =>
       [safetyStockBreachDate, stockoutDate]
         .filter((date): date is string => date !== null)
         .map(toDay),
@@ -88,7 +90,7 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
     <div className="flex flex-col gap-12pxr [--axis-label:96px] lg:[--axis-label:224px]">
       <div role="img" aria-label={`재고와 입고 일정: ${summary}`} className="relative pr-40pxr">
         {/* 날짜 눈금 */}
-        <div className="flex" style={{ height: TICK_HEIGHT }} aria-hidden="true">
+        <div className="flex h-22pxr" aria-hidden="true">
           <div className="w-(--axis-label) shrink-0" />
           <div className="relative flex-1">
             {ticks.map((day, index) => (
@@ -108,9 +110,9 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
         </div>
 
         {/* 계획·예상 입고일에서 모든 상품 줄을 가로질러 입고 줄의 점까지 내려오는 점선 */}
+        {/* 위는 눈금 줄 높이(22), 아래는 입고 줄 높이(76)에서 점의 위치(14)를 뺀 값(62)이다 */}
         <div
-          className="pointer-events-none absolute right-40pxr left-(--axis-label)"
-          style={{ top: TICK_HEIGHT, bottom: INBOUND_HEIGHT - INBOUND_Y }}
+          className="pointer-events-none absolute top-22pxr right-40pxr bottom-62pxr left-(--axis-label)"
           aria-hidden="true"
         >
           {(isDelayed ? [plannedInbound, expectedInbound] : [expectedInbound]).map((date) => (
@@ -132,21 +134,17 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
         ))}
 
         {/* 입고 */}
-        <div className="flex" style={{ height: INBOUND_HEIGHT }} aria-hidden="true">
+        {/* 입고 줄은 점의 날짜와 이름을 선 아래에 적어서 상품 줄(32)보다 높다. 점은 줄 위에서 14 내려온 곳에 놓는다 */}
+        <div className="flex h-76pxr" aria-hidden="true">
           <span className="flex w-(--axis-label) shrink-0 items-start pt-6pxr text-b2 font-bold">
             입고
           </span>
           <div className="relative flex-1">
-            <span
-              className="absolute inset-x-0 h-2pxr -translate-y-1/2 bg-border"
-              style={{ top: INBOUND_Y }}
-            />
+            <span className="absolute inset-x-0 top-14pxr h-2pxr -translate-y-1/2 bg-border" />
             {isDelayed && (
               <span
-                className="absolute flex -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-warning-bg px-16pxr text-caption font-bold whitespace-nowrap text-warning"
+                className="absolute top-14pxr flex h-18pxr -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-warning-bg px-16pxr text-caption font-bold whitespace-nowrap text-warning"
                 style={{
-                  top: INBOUND_Y,
-                  height: BAND_HEIGHT + 4,
                   left: `${toPercent(plannedInbound)}%`,
                   width: `${toPercent(expectedInbound) - toPercent(plannedInbound)}%`,
                 }}
@@ -241,14 +239,13 @@ interface StockRowProps {
 
 /** 상품 하나의 재고 줄. 안전재고 하회와 재고 소진 점, 품절 구간 띠를 그린다. */
 function StockRow({ impact, toPercent, expectedInbound }: StockRowProps) {
-  const { productName, skuCode, estimable, safetyStockBreachDate, stockoutDate, stockoutDays } =
-    impact
+  const { productName, skuCode, safetyStockBreachDate, stockoutDate, stockoutDays } = impact
   // 품절 구간은 첫 품절일부터 예상 입고 전날까지다. 일수(stockoutDays)는 그 안 품절일의 총합이라,
   // 중간에 다른 입고가 있으면 구간보다 작다(명세 4.5 재고 영향)
   const spanDays = stockoutDate ? toDay(expectedInbound) - toDay(stockoutDate) : 0
 
   return (
-    <div className="flex items-center" style={{ height: ROW_HEIGHT }} aria-hidden="true">
+    <div className="flex h-32pxr items-center" aria-hidden="true">
       {/* 좁은 화면에서는 이름이 잘려 상품을 구분할 수 없어서 짧은 상품 코드를 보여 준다 */}
       <span
         className="w-(--axis-label) shrink-0 truncate pr-12pxr text-b2 font-bold"
@@ -258,43 +255,34 @@ function StockRow({ impact, toPercent, expectedInbound }: StockRowProps) {
         <span className="max-lg:hidden">{productName}</span>
       </span>
       <div className="relative h-full flex-1">
-        {estimable ? (
-          <>
-            <span className="absolute inset-x-0 top-1/2 h-2pxr -translate-y-1/2 bg-border" />
-            {stockoutDate && !!stockoutDays && spanDays > 0 && (
-              <span
-                className="absolute top-1/2 -translate-y-1/2 rounded-full bg-danger-bg"
-                style={{
-                  height: BAND_HEIGHT,
-                  left: `${toPercent(stockoutDate)}%`,
-                  width: `${toPercent(expectedInbound) - toPercent(stockoutDate)}%`,
-                }}
-                title={
-                  stockoutDays < spanDays
-                    ? `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터 입고 전까지 ${spanDays}일 중)`
-                    : `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터)`
-                }
-              />
-            )}
-            {safetyStockBreachDate && (
-              <Dot
-                className="bg-warning"
-                left={toPercent(safetyStockBreachDate)}
-                title={`안전재고 하회 ${formatMonthDay(safetyStockBreachDate)}`}
-              />
-            )}
-            {stockoutDate && (
-              <Dot
-                className="bg-danger"
-                left={toPercent(stockoutDate)}
-                title={`재고 소진 ${formatMonthDay(stockoutDate)}`}
-              />
-            )}
-          </>
-        ) : (
-          <span className="absolute inset-y-0 left-0 flex items-center text-caption text-warning">
-            판정 불가
-          </span>
+        <span className="absolute inset-x-0 top-1/2 h-2pxr -translate-y-1/2 bg-border" />
+        {stockoutDate && !!stockoutDays && spanDays > 0 && (
+          <span
+            className="absolute top-1/2 h-14pxr -translate-y-1/2 rounded-full bg-danger-bg"
+            style={{
+              left: `${toPercent(stockoutDate)}%`,
+              width: `${toPercent(expectedInbound) - toPercent(stockoutDate)}%`,
+            }}
+            title={
+              stockoutDays < spanDays
+                ? `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터 입고 전까지 ${spanDays}일 중)`
+                : `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터)`
+            }
+          />
+        )}
+        {safetyStockBreachDate && (
+          <Dot
+            className="bg-warning"
+            left={toPercent(safetyStockBreachDate)}
+            title={`안전재고 하회 ${formatMonthDay(safetyStockBreachDate)}`}
+          />
+        )}
+        {stockoutDate && (
+          <Dot
+            className="bg-danger"
+            left={toPercent(stockoutDate)}
+            title={`재고 소진 ${formatMonthDay(stockoutDate)}`}
+          />
         )}
       </div>
     </div>
@@ -305,10 +293,10 @@ function Dot({ className, left, title }: { className: string; left: number; titl
   return (
     <span
       className={cn(
-        'absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
+        'absolute top-1/2 z-10 size-12pxr -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
         className,
       )}
-      style={{ left: `${left}%`, width: DOT_SIZE + 2, height: DOT_SIZE + 2 }}
+      style={{ left: `${left}%` }}
       title={title}
     />
   )
@@ -327,14 +315,14 @@ function InboundMarker({ date, label, left, hollow }: InboundMarkerProps) {
     <>
       <span
         className={cn(
-          'absolute z-10 size-12pxr -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
+          'absolute top-14pxr z-10 size-12pxr -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
           hollow ? 'border-2 border-muted-foreground bg-card' : 'bg-info',
         )}
-        style={{ left: `${left}%`, top: INBOUND_Y }}
+        style={{ left: `${left}%` }}
       />
       <span
-        className="absolute flex -translate-x-1/2 flex-col items-center text-center whitespace-nowrap"
-        style={{ left: `${left}%`, top: INBOUND_Y + 16 }}
+        className="absolute top-30pxr flex -translate-x-1/2 flex-col items-center text-center whitespace-nowrap"
+        style={{ left: `${left}%` }}
       >
         <span className={cn('text-b2 font-bold', hollow ? 'text-muted-foreground' : 'text-info')}>
           {formatMonthDay(date)}
