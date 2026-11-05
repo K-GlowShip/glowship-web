@@ -1,3 +1,17 @@
+import {
+  DELAY_STATUS_BADGE_VARIANT,
+  DELAY_STATUS_LABEL,
+  formatRoute,
+  REGION_LABEL,
+  STAGE_LABEL,
+  type RegionCode,
+} from '@/entities/delay-event'
+import {
+  DELAY_LIST_FROM_PARAM,
+  DELAY_LIST_HAS_FINAL_DECISION_PARAM,
+  DELAY_LIST_STATUS_PARAM,
+} from '@/shared/config'
+
 import { EMPTY_TEXT } from './delay-center-text'
 import {
   DELAY_STATUS,
@@ -27,6 +41,8 @@ import {
 } from './delay-center-code'
 
 export * from './delay-center-code'
+
+export { DELAY_STATUS_BADGE_VARIANT, DELAY_STATUS_LABEL, STAGE_LABEL }
 
 export interface DelayOption {
   id: string
@@ -63,7 +79,8 @@ export interface RiskOrder {
   lines: RiskOrderLine[]
 }
 
-export type WarehouseRegion = 'WEST' | 'EAST' | 'KR'
+/** 창고 권역. 대시보드와 같은 값이라 entities/delay-event의 것을 쓴다 */
+export type WarehouseRegion = RegionCode
 
 /** SKU·창고 하나의 재고 영향(`inventory_impact_results` 한 행) */
 export interface SkuImpact {
@@ -179,36 +196,8 @@ export interface DelayCase {
   finalDecision: FinalDecision | null
 }
 
-export const DELAY_STATUS_LABEL: Record<DelayStatus, string> = {
-  [DELAY_STATUS.READY]: '선택 대기',
-  [DELAY_STATUS.ANALYZING]: '분석 중',
-  [DELAY_STATUS.ON_HOLD]: '분석 보류',
-  [DELAY_STATUS.NEEDS_REANALYSIS]: '재분석 필요',
-  [DELAY_STATUS.FINALIZED]: '선택 완료',
-  [DELAY_STATUS.NO_RISK]: '위험 없음',
-  [DELAY_STATUS.NO_DELAY]: '지연 해소',
-}
-
-export const DELAY_STATUS_BADGE_VARIANT = {
-  [DELAY_STATUS.READY]: 'warning',
-  [DELAY_STATUS.ANALYZING]: 'info',
-  [DELAY_STATUS.ON_HOLD]: 'danger',
-  [DELAY_STATUS.NEEDS_REANALYSIS]: 'neutral',
-  [DELAY_STATUS.FINALIZED]: 'success',
-  [DELAY_STATUS.NO_RISK]: 'success',
-  [DELAY_STATUS.NO_DELAY]: 'neutral',
-} as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
-
 /** 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다. */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
-
-export const STAGE_LABEL: Record<StageCode, string> = {
-  [STAGE_CODE.PRE_DEPARTURE]: '출항 전',
-  [STAGE_CODE.AT_SEA]: '해상 운송',
-  [STAGE_CODE.IN_AIR]: '항공 운송',
-  [STAGE_CODE.AT_PORT]: '항구 도착·통관 중',
-  [STAGE_CODE.RECEIVED]: '입고 완료',
-}
 
 /** 운송 수단별로 지나는 단계 순서. 해상은 해상 운송, 항공은 항공 운송을 거친다. */
 export const STAGE_FLOW: Record<TransportMode, StageCode[]> = {
@@ -226,15 +215,7 @@ export const STAGE_FLOW: Record<TransportMode, StageCode[]> = {
   ],
 }
 
-/** 한국 출발 항구. 인천은 항공, 부산은 해상 선적이 출발한다. */
-const ORIGIN_PORT_LABEL: Record<TransportMode, string> = {
-  [TRANSPORT_MODE.AIR]: '인천',
-  [TRANSPORT_MODE.OCEAN]: '부산',
-}
-
-/** 경로의 출발 'KR'을 운송 수단에 맞는 출발 항구로 바꿔 보여 준다. 예: '부산 → LOS ANGELES' */
-export const formatRoute = ({ route, transportMode }: Pick<DelayCase, 'route' | 'transportMode'>) =>
-  route.replace(/^KR/, ORIGIN_PORT_LABEL[transportMode])
+export { formatRoute }
 
 // 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)을 그대로 쓴다.
 export const OPTION_TYPE_LABEL: Record<OptionType, string> = {
@@ -329,20 +310,40 @@ export const countByStatus = (cases: DelayCase[]): Record<DelayStatusFilter, num
   return counts
 }
 
+/** 상태·검색어 밖의 목록 조건. 대시보드의 새 지연 알림이 쓴다(명세 4.4 `from`, `hasFinalDecision`). */
+export interface DelayListConditions {
+  /** 이 시각(UTC ISO 8601) 이후에 감지된 건만 */
+  from?: string
+  /** 최종 선택이 있는 건만(true), 없는 건만(false) */
+  hasFinalDecision?: boolean
+}
+
 export const filterDelayCases = (
   cases: DelayCase[],
   status: DelayStatusFilter,
   keyword: string,
+  { from, hasFinalDecision }: DelayListConditions = {},
 ) => {
   const query = keyword.trim().toLowerCase()
+  const fromTime = from === undefined ? undefined : Date.parse(from)
   return cases.filter(
     (delayCase) =>
       (status === STATUS_FILTER_ALL || delayCase.status === status) &&
       (!query ||
         delayCase.shipmentCode.toLowerCase().includes(query) ||
-        delayCase.productName?.toLowerCase().includes(query)),
+        delayCase.productName?.toLowerCase().includes(query)) &&
+      (fromTime === undefined || Date.parse(delayCase.detectedAt) >= fromTime) &&
+      (hasFinalDecision === undefined || (delayCase.finalDecision !== null) === hasFinalDecision),
   )
 }
+
+/** 주소의 `from` 값. UTC 시각으로 읽을 수 없으면 조건을 쓰지 않는다. */
+export const parseFromParam = (value: string | null) =>
+  value !== null && !Number.isNaN(Date.parse(value)) ? value : undefined
+
+/** 주소의 `hasFinalDecision` 값. 'true'·'false'가 아니면 조건을 쓰지 않는다. */
+export const parseHasFinalDecisionParam = (value: string | null) =>
+  value === 'true' ? true : value === 'false' ? false : undefined
 
 /** 대표 상품명. 상품이 여러 개면 '외 N개'를 붙인다. */
 export const formatProductLabel = ({ productName, skuCount }: DelayCase) => {
@@ -425,11 +426,7 @@ const MISSING_DATA_REASONS: ReasonCode[] = [
 export const getOptionsMissingData = (options: DelayOption[]) =>
   options.filter((option) => option.reasonCode && MISSING_DATA_REASONS.includes(option.reasonCode))
 
-export const WAREHOUSE_LABEL: Record<WarehouseRegion, string> = {
-  WEST: '서부(LA)',
-  EAST: '동부(NJ)',
-  KR: '한국',
-}
+export const WAREHOUSE_LABEL = REGION_LABEL
 
 const NO_DATE = '9999-12-31'
 
@@ -489,7 +486,9 @@ export const getDetailSections = ({ status, analysis }: DelayCase) => {
 /** 목록의 검색 조건을 담는 주소 파라미터 이름. 상세에서 돌아올 때 조건이 유지되도록 주소에 담는다. */
 export const LIST_PARAM = {
   KEYWORD: 'q',
-  STATUS: 'status',
+  STATUS: DELAY_LIST_STATUS_PARAM,
+  FROM: DELAY_LIST_FROM_PARAM,
+  HAS_FINAL_DECISION: DELAY_LIST_HAS_FINAL_DECISION_PARAM,
   PAGE: 'page',
 } as const
 
