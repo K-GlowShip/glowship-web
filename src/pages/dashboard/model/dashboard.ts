@@ -9,14 +9,14 @@ import {
 export interface DashboardSummary {
   inTransitShipmentCount: number
   /** 7일 전 같은 시각 대비 증감 건수 */
-  inTransitWeekOverWeek: number | null
+  weekOverWeek: number | null
   delayedShipmentCount: number
   /** 하루 전 대비 증감 건수 */
-  delayedDayOverDay: number | null
+  dayOverDay: number | null
   /** 0~1. 최근 30일 입고 완료 선적이 0건이면 null */
   onTimeInboundRate: number | null
   /** 직전 30일 대비 차이(0~1 단위). 비교할 값이 없으면 null */
-  onTimeInboundMonthOverMonth: number | null
+  monthOverMonth: number | null
   atRiskOrderCount: number
   /** 미출고 주문 대비 비율(0~1). 미출고 주문이 0건이면 null */
   atRiskOrderRate: number | null

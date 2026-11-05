@@ -18,11 +18,11 @@ import {
 
 export const MOCK_SUMMARY: DashboardSummary = {
   inTransitShipmentCount: 248,
-  inTransitWeekOverWeek: 12,
+  weekOverWeek: 12,
   delayedShipmentCount: 20,
-  delayedDayOverDay: 3,
+  dayOverDay: 3,
   onTimeInboundRate: 0.964,
-  onTimeInboundMonthOverMonth: 0.021,
+  monthOverMonth: 0.021,
   atRiskOrderCount: 186,
   atRiskOrderRate: 0.038,
   lastSyncedAt: '2026-10-21T00:30:00Z',
