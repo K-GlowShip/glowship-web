@@ -38,6 +38,8 @@ interface ImpactAxisProps {
  * 날짜에 비례해 위치를 잡고 계획·예상 입고일에 세로 점선을 내려서, 어느 상품이 입고 전에 바닥나는지와
  * 품절 구간·지연 구간의 길이를 한눈에 비교한다. 정확한 날짜는 아래 표에 있어서 상품 줄에는 날짜 글자를 달지 않는다.
  * 운송 단계별 날짜는 API에 없어서 이 축에는 단계가 아니라 날짜만 놓는다.
+ * 품절 구간은 명세 4.5 재고 영향의 정의에 기대고 있다: 계산 구간이 [분석 기준일, 예상 입고일)이라 품절은 입고일 전에 끝나고,
+ * `stockoutDays`는 연속 일수가 아니라 구간 안 품절일의 총합이다. 이 정의가 바뀌면 띠와 목업을 함께 확인한다.
  */
 export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactAxisProps) {
   const rows = impacts.slice(0, MAX_AXIS_ROWS)
@@ -47,19 +49,16 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
   const days = [
     toDay(plannedInbound),
     toDay(expectedInbound),
-    ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate, stockoutDays }) =>
+    ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate }) =>
       [safetyStockBreachDate, stockoutDate]
         .filter((date): date is string => date !== null)
-        .map(toDay)
-        // 품절 구간은 마지막 품절일이 끝나는 지점(다음 날 눈금)까지 그린다
-        .concat(stockoutDate && stockoutDays ? [toDay(stockoutDate) + stockoutDays] : []),
+        .map(toDay),
     ),
   ]
   const min = Math.min(...days)
   // 날짜가 하나뿐이어도 축이 0으로 나뉘지 않게 하루 폭을 준다
   const max = Math.max(Math.max(...days), min + 1)
-  const dayToPercent = (day: number) => ((day - min) / (max - min)) * 100
-  const toPercent = (date: string) => dayToPercent(toDay(date))
+  const toPercent = (date: string) => ((toDay(date) - min) / (max - min)) * 100
 
   const tickStep = Math.max(1, Math.ceil((max - min) / TARGET_TICKS))
   const ticks: number[] = []
@@ -128,7 +127,7 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
             key={`${row.skuCode}-${row.region}`}
             impact={row}
             toPercent={toPercent}
-            dayToPercent={dayToPercent}
+            expectedInbound={expectedInbound}
           />
         ))}
 
@@ -176,12 +175,12 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
         <LegendDot
           className="bg-warning"
           label="안전재고 하회"
-          description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다(소진일이 있으면 그날 0이 됩니다).`}
+          description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다.`}
         />
         <LegendDot className="bg-danger" label="재고 소진" description="가용 재고가 0이 되는 날" />
         <LegendItem
           label="품절 구간"
-          description="소진일부터 예상 입고 전까지, 재고가 0인 날이 있는 구간. 중간에 다른 입고가 있으면 일부 날짜는 품절이 아닐 수 있습니다."
+          description="소진일부터 예상 입고 전까지의 구간. 그 사이 다른 선적이 입고되면 일부 날짜는 품절이 해소됩니다."
           mark={<span className="h-10pxr w-20pxr rounded-full bg-danger-bg" aria-hidden="true" />}
         />
         {hiddenCount > 0 && (
@@ -237,13 +236,16 @@ function LegendDot({
 interface StockRowProps {
   impact: SkuImpact
   toPercent: (date: string) => number
-  dayToPercent: (day: number) => number
+  expectedInbound: string
 }
 
 /** 상품 하나의 재고 줄. 안전재고 하회와 재고 소진 점, 품절 구간 띠를 그린다. */
-function StockRow({ impact, toPercent, dayToPercent }: StockRowProps) {
+function StockRow({ impact, toPercent, expectedInbound }: StockRowProps) {
   const { productName, skuCode, estimable, safetyStockBreachDate, stockoutDate, stockoutDays } =
     impact
+  // 품절 구간은 첫 품절일부터 예상 입고 전날까지다. 일수(stockoutDays)는 그 안 품절일의 총합이라,
+  // 중간에 다른 입고가 있으면 구간보다 작다(명세 4.5 재고 영향)
+  const spanDays = stockoutDate ? toDay(expectedInbound) - toDay(stockoutDate) : 0
 
   return (
     <div className="flex items-center" style={{ height: ROW_HEIGHT }} aria-hidden="true">
@@ -259,15 +261,19 @@ function StockRow({ impact, toPercent, dayToPercent }: StockRowProps) {
         {estimable ? (
           <>
             <span className="absolute inset-x-0 top-1/2 h-2pxr -translate-y-1/2 bg-border" />
-            {stockoutDate && !!stockoutDays && (
+            {stockoutDate && !!stockoutDays && spanDays > 0 && (
               <span
                 className="absolute top-1/2 -translate-y-1/2 rounded-full bg-danger-bg"
                 style={{
                   height: BAND_HEIGHT,
                   left: `${toPercent(stockoutDate)}%`,
-                  width: `${dayToPercent(toDay(stockoutDate) + stockoutDays) - toPercent(stockoutDate)}%`,
+                  width: `${toPercent(expectedInbound) - toPercent(stockoutDate)}%`,
                 }}
-                title={`품절 ${formatMonthDay(stockoutDate)}부터 ${stockoutDays}일`}
+                title={
+                  stockoutDays < spanDays
+                    ? `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터 입고 전까지 ${spanDays}일 중)`
+                    : `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터)`
+                }
               />
             )}
             {safetyStockBreachDate && (
