@@ -8,6 +8,7 @@ import {
   NO_RISK_MESSAGE,
   RESULT_CLASS,
 } from '../model/delay-center'
+import { FAILURE_CODE } from '../model/delay-center-code'
 import { ANALYSIS_NOTICE, DEFAULT_PROGRESS_STEP } from '../model/delay-center-text'
 
 interface StatusNoticeProps {
@@ -84,16 +85,16 @@ const getNotice = (delayCase: DelayCase): Notice | null => {
             : undefined,
       }
     case DELAY_STATUS.NEEDS_REANALYSIS:
-      // 자료 변경(STALE)이면 저장된 결과가 있고, 도구 실패(FAILED)면 결과가 없다.
-      // 설명 생성만 실패한 FAILED는 계산 결과는 있지만 설명이 없다.
-      if (analysis && analysis.explanation === null) {
+      // 실패 코드가 있으면 실패다. 설명 생성만 실패했으면 계산 결과는 있지만 설명이 없고, 그 밖의 실패는 결과가 없다.
+      // 실패 코드가 없으면 자료 변경(STALE)이라 저장된 결과가 있다.
+      if (delayCase.failureCode === FAILURE_CODE.EXPLANATION_GENERATION_FAILED) {
         return {
           tone: 'danger',
           title: ANALYSIS_NOTICE.EXPLANATION_FAILED,
           detail: ANALYSIS_NOTICE.REANALYZE_GUIDE,
         }
       }
-      return analysis
+      return delayCase.failureCode === null && analysis
         ? {
             tone: 'warning',
             title: ANALYSIS_NOTICE.STALE,

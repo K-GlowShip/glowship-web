@@ -126,7 +126,16 @@ const run = (
   isLatest: boolean,
   startedAt: string,
   finishedAt: string | null,
-): AnalysisRunSummary => ({ versionNo, runCode, status, isLatest, startedAt, finishedAt })
+  failureCode: string | null = null,
+): AnalysisRunSummary => ({
+  versionNo,
+  runCode,
+  status,
+  failureCode,
+  isLatest,
+  startedAt,
+  finishedAt,
+})
 
 const analysis = (overrides: Partial<MockAnalysis>): MockAnalysis => ({
   resultClass: 'READY_ORDER_RISK',
@@ -160,6 +169,7 @@ const delayCase = (
   baseDataAt: '2026-10-21T00:30:00Z',
   dataNotice: null,
   progressStep: null,
+  failureCode: null,
   failureMessage: null,
   staleReason: null,
   analysis: null,
@@ -660,6 +670,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
   plannedInbound: '2026-10-25',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-043',
+  failureCode: 'EXPLANATION_GENERATION_FAILED',
   failureMessage: '설명을 만들지 못해 이 분석은 선택할 수 없습니다. 재분석이 필요합니다.',
   runs: [
     run(
@@ -669,6 +680,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
       true,
       '2026-10-21T00:36:00Z',
       '2026-10-21T00:44:00Z',
+      'EXPLANATION_GENERATION_FAILED',
     ),
   ],
   analysis: analysis({
@@ -724,6 +736,7 @@ const TOOL_FAILED_CASE = delayCase({
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-041',
+  failureCode: 'UPSTREAM_TIMEOUT',
   failureMessage: '분석 도구가 시간 안에 응답하지 않았습니다. 재시도를 모두 사용했습니다.',
   runs: [
     run(
@@ -733,6 +746,7 @@ const TOOL_FAILED_CASE = delayCase({
       true,
       '2026-10-21T00:37:00Z',
       '2026-10-21T00:52:00Z',
+      'UPSTREAM_TIMEOUT',
     ),
   ],
 })
@@ -749,7 +763,18 @@ const ON_HOLD_DEFAULT_CASE = delayCase({
   plannedInbound: '2026-10-26',
   expectedInbound: '2026-10-28',
   runCode: 'AN-261021-040',
-  runs: [run(1, 'AN-261021-040', 'ON_HOLD', true, '2026-10-21T00:38:00Z', '2026-10-21T00:39:00Z')],
+  failureCode: 'REQUIRED_DATA_INVALID',
+  runs: [
+    run(
+      1,
+      'AN-261021-040',
+      'ON_HOLD',
+      true,
+      '2026-10-21T00:38:00Z',
+      '2026-10-21T00:39:00Z',
+      'REQUIRED_DATA_INVALID',
+    ),
+  ],
 })
 
 // ---- 9. 분석 중: 선적 상세·실행 ID·기준 시각이 아직 없는 갓 감지된 지연 ----
@@ -784,7 +809,15 @@ const REANALYZING_CASE = delayCase({
   progressStep: '재고 영향 분석 중',
   runs: [
     run(2, 'AN-261021-052', 'ANALYZING', true, '2026-10-21T01:10:00Z', null),
-    run(1, 'AN-261020-040', 'ON_HOLD', false, '2026-10-20T02:00:00Z', '2026-10-20T02:02:00Z'),
+    run(
+      1,
+      'AN-261020-040',
+      'ON_HOLD',
+      false,
+      '2026-10-20T02:00:00Z',
+      '2026-10-20T02:02:00Z',
+      'REQUIRED_DATA_INVALID',
+    ),
   ],
 })
 

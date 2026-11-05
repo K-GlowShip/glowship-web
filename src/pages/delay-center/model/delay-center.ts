@@ -144,6 +144,8 @@ export interface AnalysisRunSummary {
   versionNo: number
   /** 화면 상태로 바꾼 실행 상태 */
   status: DelayStatus
+  /** 보류·실패한 실행의 실패 코드. 그 밖에는 null */
+  failureCode: string | null
   /** 가장 최신 버전인지 */
   isLatest: boolean
   /** ISO 8601 UTC */
@@ -181,6 +183,8 @@ export interface DelayCase {
   dataNotice: string | null
   /** 분석이 진행 중이면 현재 단계 이름 */
   progressStep: string | null
+  /** 현재 실행의 실패 코드. 보류·실패일 때만 값이 있고, 설명 생성만 실패했는지 가르는 데 쓴다 */
+  failureCode: string | null
   /** 분석 보류·실패 사유 */
   failureMessage: string | null
   /** 자료 변경으로 재분석이 필요할 때 사유 */
