@@ -14,6 +14,7 @@ import {
   REASON_LABEL,
 } from '../model/delay-center'
 import { RecommendedBadge } from './RecommendedBadge'
+import { EMPTY_VALUE } from '@/shared/config'
 
 interface OptionTableProps {
   options: DelayOption[]
@@ -22,8 +23,6 @@ interface OptionTableProps {
 }
 
 const COLUMN_COUNT = 6
-const EMPTY = '—'
-
 /** 추천 대응안은 배경색 대신 행 왼쪽의 가는 선으로 구분한다. 이름 줄과 추천 근거 줄에 같이 붙여 한 덩어리로 보이게 한다. */
 const ACCENT_CLASS = 'shadow-[inset_3px_0_0_var(--color-primary)]'
 
@@ -31,7 +30,7 @@ const ACCENT_CLASS = 'shadow-[inset_3px_0_0_var(--color-primary)]'
  * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. AI의 대응안별 설명을 행 아래에 보여 주고,
  * 설명 생성이 실패했으면 정해진 사유(`reasonCode`) 라벨을 대신 보여 준다. 배지 아래에는 사유를 따로 적지 않는다.
  * 추천 대응안은 설명 뒤에 순위 기준(추천 근거)이 이어진다.
- * 불가·확인 필요인 대응안도 숨기지 않으며, 판정할 수 없는 값은 '—'로 표시한다.
+ * 불가·확인 필요인 대응안도 숨기지 않으며, 판정할 수 없는 값은 '–'로 표시한다.
  */
 export function OptionTable({ options, explanation }: OptionTableProps) {
   return (
@@ -66,21 +65,21 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {option.expectedArrival ? formatMonthDay(option.expectedArrival) : EMPTY}
+                    {option.expectedArrival ? formatMonthDay(option.expectedArrival) : EMPTY_VALUE}
                   </TableCell>
                   <TableCell>
                     {option.securableQuantity === null
-                      ? EMPTY
+                      ? EMPTY_VALUE
                       : `${option.securableQuantity.toLocaleString()}개`}
                   </TableCell>
                   <TableCell>
                     {option.delayInducedRecoveredOrders === null
-                      ? EMPTY
+                      ? EMPTY_VALUE
                       : `${option.delayInducedRecoveredOrders}건`}
                   </TableCell>
                   <TableCell>
                     {option.notRecoveredOrders === null ? (
-                      EMPTY
+                      EMPTY_VALUE
                     ) : (
                       <div className="flex flex-col items-start gap-4pxr">
                         <span>{option.notRecoveredOrders}건</span>
