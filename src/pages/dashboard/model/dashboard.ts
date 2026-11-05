@@ -3,6 +3,7 @@ import {
   type DelayStatus,
   type RegionCode,
   type StageCode,
+  type TransportMode,
 } from '@/entities/delay-event'
 
 /** 명세 v6.2 `GET /dashboard/summary` */
@@ -107,8 +108,9 @@ export interface DelayItem {
   /** 선적에서 수량이 가장 많은 SKU. 상세가 없으면 null */
   productName: string | null
   skuCount: number
-  /** 명세 D13. 예: 'KR → LOS ANGELES' */
+  /** 명세 D13. 예: 'KR → LOS ANGELES'. 출발 'KR'은 `formatRoute`로 출발 항구로 바꿔 보여 준다 */
   route: string
+  transportMode: TransportMode
   stage: StageCode
   /** UTC 날짜 'YYYY-MM-DD' */
   planned3plInboundDate: string

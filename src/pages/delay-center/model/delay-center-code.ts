@@ -1,8 +1,22 @@
 // 서버 코드값과 화면 구분값. 같은 slice의 다른 model 파일을 가져오지 않아 순환하지 않는다.
-// 지연 상태·운송 단계는 대시보드와 함께 쓰는 값이라 entities/delay-event에서 가져와 다시 내보낸다.
-import { DELAY_STATUS, STAGE_CODE, type DelayStatus, type StageCode } from '@/entities/delay-event'
+// 지연 상태·운송 단계·운송 수단은 대시보드와 함께 쓰는 값이라 entities/delay-event에서 가져와 다시 내보낸다.
+import {
+  DELAY_STATUS,
+  STAGE_CODE,
+  TRANSPORT_MODE,
+  type DelayStatus,
+  type StageCode,
+  type TransportMode,
+} from '@/entities/delay-event'
 
-export { DELAY_STATUS, STAGE_CODE, type DelayStatus, type StageCode }
+export {
+  DELAY_STATUS,
+  STAGE_CODE,
+  TRANSPORT_MODE,
+  type DelayStatus,
+  type StageCode,
+  type TransportMode,
+}
 
 /** 상태 필터에서 모든 상태를 보여 주는 값(명세 4.4의 `ALL` 탭) */
 export const STATUS_FILTER_ALL = 'ALL'
@@ -16,13 +30,6 @@ export const CLIENT_ROLE = {
 } as const
 
 export type ClientRole = (typeof CLIENT_ROLE)[keyof typeof CLIENT_ROLE]
-
-export const TRANSPORT_MODE = {
-  OCEAN: 'OCEAN',
-  AIR: 'AIR',
-} as const
-
-export type TransportMode = (typeof TRANSPORT_MODE)[keyof typeof TRANSPORT_MODE]
 
 export const OPTION_TYPE = {
   KEEP_PLAN: 'KEEP_PLAN',

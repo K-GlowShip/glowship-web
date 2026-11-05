@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import {
   DELAY_STATUS_BADGE_VARIANT,
   DELAY_STATUS_LABEL,
+  formatRoute,
   REGION_LABEL,
   STAGE_LABEL,
 } from '@/entities/delay-event'
@@ -99,7 +100,7 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                     )}
                   </TableCell>
                   <TableCell>
-                    {delay.route}
+                    {formatRoute(delay)}
                     <p className="text-caption text-muted-foreground">{STAGE_LABEL[delay.stage]}</p>
                   </TableCell>
                   <TableCell>{REGION_LABEL[delay.warehouseRegion]}</TableCell>

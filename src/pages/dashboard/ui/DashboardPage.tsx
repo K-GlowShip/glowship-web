@@ -1,3 +1,4 @@
+import { NEW_DELAY_FROM } from '@/entities/delay-event'
 import { formatHHmm, formatKoreanLongDate } from '@/shared/lib/kst-date'
 
 import {
@@ -48,14 +49,18 @@ export function DashboardPage() {
       </header>
 
       {/* TODO: 서버 연동 시 지연 목록의 첫 항목이 아니라 GET /delay-events를 from(최근 감지)·hasFinalDecision=false로 따로 조회한다 */}
-      <DelayAlertBanner delay={MOCK_DELAYS.items[0]} totalCount={MOCK_NEW_DELAY_ALERT_COUNT} />
+      <DelayAlertBanner
+        delay={MOCK_DELAYS.items[0]}
+        totalCount={MOCK_NEW_DELAY_ALERT_COUNT}
+        detectedFrom={NEW_DELAY_FROM}
+      />
       <KpiCards summary={summary} />
 
       <DelayTable delays={MOCK_DELAYS} />
 
       <div className="grid items-start gap-24pxr xl:grid-cols-[minmax(0,1fr)_22rem]">
         <InboundTrendCard />
-        <SyncStatusCard syncStatus={MOCK_SYNC_STATUS} />
+        <SyncStatusCard syncStatus={MOCK_SYNC_STATUS} referenceAt={lastSyncedAt} />
       </div>
 
       <InventoryTable inventory={MOCK_INVENTORY} />

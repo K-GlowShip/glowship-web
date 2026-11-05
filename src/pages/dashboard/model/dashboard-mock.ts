@@ -1,4 +1,4 @@
-import { DELAY_STATUS, REGION_CODE, STAGE_CODE } from '@/entities/delay-event'
+import { DELAY_STATUS, REGION_CODE, STAGE_CODE, TRANSPORT_MODE } from '@/entities/delay-event'
 
 import {
   addDays,
@@ -78,6 +78,7 @@ export const MOCK_DELAYS: DelayListResult = {
       productName: 'A Glow Hydra Cream 50ml',
       skuCount: 3,
       route: 'KR → LOS ANGELES',
+      transportMode: TRANSPORT_MODE.OCEAN,
       stage: STAGE_CODE.AT_SEA,
       planned3plInboundDate: '2026-10-24',
       expected3plInboundDate: '2026-10-28',
@@ -92,6 +93,7 @@ export const MOCK_DELAYS: DelayListResult = {
       productName: 'A Glow Calming Serum 30ml',
       skuCount: 1,
       route: 'KR → LOS ANGELES',
+      transportMode: TRANSPORT_MODE.OCEAN,
       stage: STAGE_CODE.AT_PORT,
       planned3plInboundDate: '2026-10-25',
       expected3plInboundDate: '2026-10-28',
@@ -106,6 +108,7 @@ export const MOCK_DELAYS: DelayListResult = {
       productName: 'A Glow Hydra Mask Pack 5ea',
       skuCount: 1,
       route: 'KR → LOS ANGELES',
+      transportMode: TRANSPORT_MODE.AIR,
       stage: STAGE_CODE.IN_AIR,
       planned3plInboundDate: '2026-10-25',
       expected3plInboundDate: '2026-10-28',
@@ -120,6 +123,7 @@ export const MOCK_DELAYS: DelayListResult = {
       productName: 'A Glow Hydra Toner Pad 60ea',
       skuCount: 2,
       route: 'KR → LOS ANGELES',
+      transportMode: TRANSPORT_MODE.OCEAN,
       stage: STAGE_CODE.PRE_DEPARTURE,
       planned3plInboundDate: '2026-10-26',
       expected3plInboundDate: '2026-10-28',
@@ -134,6 +138,7 @@ export const MOCK_DELAYS: DelayListResult = {
       productName: 'A Glow Hydra Serum 30ml',
       skuCount: 1,
       route: 'KR → LOS ANGELES',
+      transportMode: TRANSPORT_MODE.AIR,
       stage: STAGE_CODE.IN_AIR,
       planned3plInboundDate: '2026-10-26',
       expected3plInboundDate: '2026-10-28',

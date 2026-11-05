@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 
 import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
-import { formatHHmm } from '@/shared/lib/kst-date'
+import { formatHHmm, formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -19,7 +19,19 @@ import {
 // TODO: 서버 연동 후에는 GET /data-sync-runs/latest를 다시 조회하고 끝나면 멈춘다. 지금은 동작만 보여 주는 시간이다
 const MOCK_REFRESH_MS = 1000
 
-export function SyncStatusCard({ syncStatus }: { syncStatus: SyncStatusResult }) {
+/** 기준 시각과 같은 날이면 시각만, 다른 날이면 날짜를 붙여서 어제 수집한 값이 오늘 시각처럼 읽히지 않게 한다 */
+const formatFinishedAt = (finishedAt: string, referenceAt: string | null) =>
+  referenceAt === null || formatYYYYMMDD(finishedAt) === formatYYYYMMDD(referenceAt)
+    ? formatHHmm(finishedAt)
+    : formatYYYYMMDDHHmm(finishedAt).slice('YYYY.'.length)
+
+interface SyncStatusCardProps {
+  syncStatus: SyncStatusResult
+  /** 화면의 기준 시각(`lastSyncedAt`). 수집 시각이 이 날이 아니면 날짜를 함께 보여 준다 */
+  referenceAt: string | null
+}
+
+export function SyncStatusCard({ syncStatus, referenceAt }: SyncStatusCardProps) {
   const { sources, syncIntervalMinutes } = syncStatus
   const [isRefreshing, setIsRefreshing] = useState(false)
   const timerRef = useRef<number>(undefined)
@@ -67,7 +79,7 @@ export function SyncStatusCard({ syncStatus }: { syncStatus: SyncStatusResult })
                   </p>
                   <p className="text-caption text-muted-foreground">
                     {source.finishedAt
-                      ? `마지막 수집 ${formatHHmm(source.finishedAt)} KST`
+                      ? `마지막 수집 ${formatFinishedAt(source.finishedAt, referenceAt)} KST`
                       : '수집 기록 없음'}
                     {source.openIssueCount > 0 && ` · 오류 항목 ${source.openIssueCount}건`}
                   </p>

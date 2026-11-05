@@ -1,8 +1,7 @@
 import { CircleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 
-import { DELAY_STATUS } from '@/entities/delay-event'
-import { delayCenterListPath, delayCenterPath } from '@/shared/config'
+import { delayCenterNewDelaysPath, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { buttonVariants } from '@/shared/ui/button'
 
@@ -17,13 +16,15 @@ interface DelayAlertBannerProps {
   delay: DelayItem | undefined
   /** 새 지연의 전체 건수 */
   totalCount: number
+  /** 새 지연으로 보는 감지 시작 시각(UTC ISO 8601). 이 시각 이후에 감지되고 최종 선택이 없는 건이다 */
+  detectedFrom: string
 }
 
 /**
  * 최근 감지되었고 최종 선택이 없는 지연을 알린다.
  * 1건이면 그 지연의 상세로, 여러 건이면 목록으로 보내서 문구가 말하는 범위와 이동 위치가 같게 한다.
  */
-export function DelayAlertBanner({ delay, totalCount }: DelayAlertBannerProps) {
+export function DelayAlertBanner({ delay, totalCount, detectedFrom }: DelayAlertBannerProps) {
   if (!delay || totalCount === 0) {
     return null
   }
@@ -60,9 +61,8 @@ export function DelayAlertBanner({ delay, totalCount }: DelayAlertBannerProps) {
           영향 확인하기 →
         </Link>
       ) : (
-        // TODO: 명세의 새 지연은 '최근 감지·최종 선택 전'(hasFinalDecision=false)인데, 목록은 아직 이 조건을 쿼리로 받지 않아 선택 대기 탭으로 근사한다
         <Link
-          to={delayCenterListPath(DELAY_STATUS.READY)}
+          to={delayCenterNewDelaysPath(detectedFrom)}
           className={cn(ACTION_CLASS_NAME, ACTION_COLOR_CLASS_NAME)}
         >
           지연 대응 센터에서 보기 →

@@ -31,7 +31,7 @@ export function AppLayout() {
         <AppGnb title={isTitleHidden ? pageTitle : ''} />
         <main
           ref={mainRef}
-          className="min-h-0 flex-1 overflow-y-auto p-28pxr"
+          className="min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto p-28pxr"
           onScroll={(event) =>
             setIsTitleHidden(event.currentTarget.scrollTop > TITLE_HIDDEN_SCROLL_TOP)
           }

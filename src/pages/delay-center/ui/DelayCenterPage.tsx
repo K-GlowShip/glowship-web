@@ -1,6 +1,10 @@
 import { useSearchParams } from 'react-router'
 
+import { NEW_DELAY_FROM } from '@/entities/delay-event'
+import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Card, CardContent } from '@/shared/ui/card'
+import { Label } from '@/shared/ui/label'
+import { Switch } from '@/shared/ui/switch'
 import { TableTemplate } from '@/shared/ui/table-template'
 
 import {
@@ -10,6 +14,8 @@ import {
   type DelayStatusFilter,
   filterDelayCases,
   LIST_PARAM,
+  parseFromParam,
+  parseHasFinalDecisionParam,
   sortDelayCases,
   STATUS_FILTER_ALL,
 } from '../model/delay-center'
@@ -30,9 +36,18 @@ export function DelayCenterPage() {
   const statusParam = searchParams.get(LIST_PARAM.STATUS) ?? STATUS_FILTER_ALL
   const status = isStatusFilter(statusParam) ? statusParam : STATUS_FILTER_ALL
 
-  const filtered = filterDelayCases(SORTED_CASES, status, keyword)
-  // 상태별 건수는 API 명세 4.4의 `counts`처럼 검색어는 반영하고 상태 선택은 반영하지 않는다
-  const counts = countByStatus(filterDelayCases(SORTED_CASES, STATUS_FILTER_ALL, keyword))
+  // 대시보드의 새 지연 알림에서 넘어오는 조건(명세 4.4 `from`, `hasFinalDecision`)
+  const from = parseFromParam(searchParams.get(LIST_PARAM.FROM))
+  const hasFinalDecision = parseHasFinalDecisionParam(
+    searchParams.get(LIST_PARAM.HAS_FINAL_DECISION),
+  )
+  const hasExtraCondition = from !== undefined || hasFinalDecision !== undefined
+  // 대시보드의 새 지연 알림과 같은 조건이면 '새 지연 보기'가 켜진 상태다
+  const isNewDelayView = from === NEW_DELAY_FROM && hasFinalDecision === false
+
+  const filtered = filterDelayCases(SORTED_CASES, status, keyword, { from, hasFinalDecision })
+  // 상태별 건수는 API 명세 4.4의 `counts`처럼 검색어와 `from`은 반영하고, 상태 선택과 `hasFinalDecision`은 반영하지 않는다
+  const counts = countByStatus(filterDelayCases(SORTED_CASES, STATUS_FILTER_ALL, keyword, { from }))
   const pageCount = Math.max(1, Math.ceil(filtered.length / DELAY_PAGE_SIZE))
   const page = Math.min(Math.max(1, Number(searchParams.get(LIST_PARAM.PAGE)) || 1), pageCount)
   const pageCases = filtered.slice((page - 1) * DELAY_PAGE_SIZE, page * DELAY_PAGE_SIZE)
@@ -58,6 +73,14 @@ export function DelayCenterPage() {
     )
   }
 
+  const extraConditionLabel = [
+    from !== undefined && `${formatYYYYMMDDHHmm(from)} 이후 감지`,
+    hasFinalDecision === false && '최종 선택 전',
+    hasFinalDecision === true && '최종 선택 완료',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <div className="flex flex-col gap-24pxr">
       <header>
@@ -69,6 +92,35 @@ export function DelayCenterPage() {
 
       <Card className="rounded-panel">
         <CardContent className="flex flex-col gap-16pxr p-32pxr">
+          <div className="flex min-h-24pxr flex-wrap items-center gap-12pxr">
+            {hasExtraCondition && (
+              <p role="status" className="text-b2 text-muted-foreground">
+                {extraConditionLabel} 건만 보고 있습니다.
+              </p>
+            )}
+            <div className="ml-auto flex items-center gap-8pxr">
+              <Switch
+                id="new-delay-toggle"
+                checked={isNewDelayView}
+                onCheckedChange={(checked) =>
+                  updateParams(
+                    checked
+                      ? {
+                          [LIST_PARAM.FROM]: NEW_DELAY_FROM,
+                          [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
+                        }
+                      : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
+                  )
+                }
+              />
+              <Label
+                htmlFor="new-delay-toggle"
+                className={isNewDelayView ? 'text-primary' : 'font-normal'}
+              >
+                새 지연 보기
+              </Label>
+            </div>
+          </div>
           <DelayListFilters
             keyword={keyword}
             status={status}
