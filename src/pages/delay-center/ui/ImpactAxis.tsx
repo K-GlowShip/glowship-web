@@ -42,12 +42,12 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
   const days = [
     toDay(plannedInbound),
     toDay(expectedInbound),
-    ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate, stockoutEndDate }) =>
+    ...estimableRows.flatMap(({ safetyStockBreachDate, stockoutDate, stockoutDays }) =>
       [safetyStockBreachDate, stockoutDate]
         .filter((date): date is string => date !== null)
         .map(toDay)
         // 품절 구간은 마지막 품절일이 끝나는 지점(다음 날 눈금)까지 그린다
-        .concat(stockoutEndDate ? [toDay(stockoutEndDate) + 1] : []),
+        .concat(stockoutDate && stockoutDays ? [toDay(stockoutDate) + stockoutDays] : []),
     ),
   ]
   const min = Math.min(...days)
@@ -199,7 +199,7 @@ interface StockRowProps {
 
 /** 상품 하나의 재고 줄. 안전재고 하회와 재고 소진 점, 품절 구간 띠를 그린다. */
 function StockRow({ impact, toPercent, dayToPercent }: StockRowProps) {
-  const { productName, skuCode, estimable, safetyStockBreachDate, stockoutDate, stockoutEndDate } =
+  const { productName, skuCode, estimable, safetyStockBreachDate, stockoutDate, stockoutDays } =
     impact
 
   return (
@@ -216,15 +216,15 @@ function StockRow({ impact, toPercent, dayToPercent }: StockRowProps) {
         {estimable ? (
           <>
             <span className="absolute inset-x-0 top-1/2 h-2pxr -translate-y-1/2 bg-border" />
-            {stockoutDate && stockoutEndDate && (
+            {stockoutDate && !!stockoutDays && (
               <span
                 className="absolute top-1/2 -translate-y-1/2 rounded-full bg-danger-bg"
                 style={{
                   height: BAND_HEIGHT,
                   left: `${toPercent(stockoutDate)}%`,
-                  width: `${dayToPercent(toDay(stockoutEndDate) + 1) - toPercent(stockoutDate)}%`,
+                  width: `${dayToPercent(toDay(stockoutDate) + stockoutDays) - toPercent(stockoutDate)}%`,
                 }}
-                title={`품절 ${formatMonthDay(stockoutDate)}–${stockoutEndDate.slice(8)}`}
+                title={`품절 ${formatMonthDay(stockoutDate)}부터 ${stockoutDays}일`}
               />
             )}
             {safetyStockBreachDate && (

@@ -96,8 +96,7 @@ export interface SkuImpact {
   safetyStockBreachDate: string | null
   /** 'YYYY-MM-DD'. 재고가 바닥나는 날 */
   stockoutDate: string | null
-  /** 'YYYY-MM-DD'. 품절 상태가 끝나는 날 */
-  stockoutEndDate: string | null
+  /** 품절 일수. 품절 구간은 `stockoutDate`부터 이 일수만큼이다. */
   stockoutDays: number | null
 }
 

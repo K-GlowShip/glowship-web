@@ -140,7 +140,6 @@ const HYDRA_CREAM_IMPACT: SkuImpact = {
   increasedShortage: 1240,
   safetyStockBreachDate: '2026-10-22',
   stockoutDate: '2026-10-24',
-  stockoutEndDate: '2026-10-27',
   stockoutDays: 4,
 }
 
@@ -154,7 +153,6 @@ const WATCH_IMPACT: SkuImpact = {
   increasedShortage: 0,
   safetyStockBreachDate: '2026-10-29',
   stockoutDate: null,
-  stockoutEndDate: null,
   stockoutDays: null,
 }
 
