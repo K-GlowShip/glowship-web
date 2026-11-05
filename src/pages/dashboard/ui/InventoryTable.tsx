@@ -1,4 +1,3 @@
-import { Info } from 'lucide-react'
 import { useState } from 'react'
 
 import { REGION_LABEL } from '@/entities/delay-event'
@@ -15,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table'
-import { Tooltip } from '@/shared/ui/tooltip'
+import { InfoTip } from '@/shared/ui/tooltip'
 
 import {
   addDays,
@@ -70,21 +69,6 @@ function StockoutCell({
         />
       </span>
     </div>
-  )
-}
-
-/** 정보 아이콘. 마우스를 올리거나 포커스하면 설명을 보여 준다 */
-function InfoTip({ label, description }: { label: string; description: string }) {
-  return (
-    <Tooltip content={description}>
-      <button
-        type="button"
-        aria-label={`${label} 설명`}
-        className="cursor-pointer rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
-      >
-        <Info className="size-14pxr" aria-hidden="true" />
-      </button>
-    </Tooltip>
   )
 }
 
