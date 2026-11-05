@@ -14,7 +14,7 @@ import {
   OPTION_TYPE_LABEL,
   REASON_LABEL,
 } from '../model/delay-center'
-import { NO_OPTION_LABEL } from '../model/delay-center-text'
+import { NO_OPTION_LABEL, OPTION_NOT_SELECTABLE } from '../model/delay-center-text'
 import { RecommendedBadge } from './RecommendedBadge'
 
 /** 대응안을 고르지 않았을 때의 값. 팀원이 의견만 저장할 때 쓴다. */
@@ -117,7 +117,7 @@ const getDetail = (option: DelayOption, selectable: boolean) => {
   if (option.reasonCode) {
     return REASON_LABEL[option.reasonCode]
   }
-  return selectable ? null : '선택할 수 없는 대응안입니다.'
+  return selectable ? null : OPTION_NOT_SELECTABLE
 }
 
 interface ChoiceCardProps {

@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 
+import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
@@ -14,7 +15,6 @@ import {
   REASON_LABEL,
 } from '../model/delay-center'
 import { RecommendedBadge } from './RecommendedBadge'
-import { EMPTY_VALUE } from '@/shared/config'
 
 interface OptionTableProps {
   options: DelayOption[]
@@ -27,8 +27,8 @@ const COLUMN_COUNT = 6
 const ACCENT_CLASS = 'shadow-[inset_3px_0_0_var(--color-primary)]'
 
 /**
- * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. AI의 대응안별 설명을 행 아래에 보여 주고,
- * 설명 생성이 실패했으면 정해진 사유(`reasonCode`) 라벨을 대신 보여 준다. 배지 아래에는 사유를 따로 적지 않는다.
+ * 대응안 하나의 근거는 그 행 바로 아래 한 곳에 모은다. 서버가 계산한 사유(`reasonCode`) 라벨을 먼저 두고,
+ * 그 뒤에 AI의 대응안별 설명을 덧붙인다(설명 생성이 실패했으면 사유만). 배지 아래에는 사유를 따로 적지 않는다.
  * 추천 대응안은 설명 뒤에 순위 기준(추천 근거)이 이어진다.
  * 불가·확인 필요인 대응안도 숨기지 않으며, 판정할 수 없는 값은 '–'로 표시한다.
  */
@@ -102,6 +102,7 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
                       )}
                     >
                       <div className="flex flex-col gap-4pxr">
+                        {evidence.reason && <p>{evidence.reason}</p>}
                         {evidence.explanation && <p>{evidence.explanation}</p>}
                         {evidence.recommendation && (
                           <p>
@@ -123,22 +124,22 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
 }
 
 interface OptionEvidence {
+  /** 서버가 계산한 사유 코드(`reasonCode`)의 라벨. AI 설명과 상관없이 항상 보여 준다. */
+  reason: string | null
   explanation: string | null
   /** 추천 대응안에만 있다 */
   recommendation: string | null
 }
 
-/** 행 아래에 보여 줄 근거. 설명도 추천 근거도 없으면 줄을 만들지 않는다. */
+/** 행 아래에 보여 줄 근거. 사유·설명·추천 근거가 모두 없으면 줄을 만들지 않는다. */
 const getEvidence = (
   option: DelayOption,
   explanation: AiExplanation | null,
 ): OptionEvidence | null => {
   const evidence = {
-    // AI 설명이 없을 때만 정해진 사유(`reasonCode`) 라벨로 대신한다. 둘 다 있으면 설명이 사유를 풀어 쓴 것이라 설명만 보여 준다.
-    explanation:
-      explanation?.optionExplanations[option.type] ??
-      (option.reasonCode ? REASON_LABEL[option.reasonCode] : null),
+    reason: option.reasonCode ? REASON_LABEL[option.reasonCode] : null,
+    explanation: explanation?.optionExplanations[option.type] ?? null,
     recommendation: option.recommended ? (explanation?.recommendation ?? null) : null,
   }
-  return evidence.explanation || evidence.recommendation ? evidence : null
+  return evidence.reason || evidence.explanation || evidence.recommendation ? evidence : null
 }

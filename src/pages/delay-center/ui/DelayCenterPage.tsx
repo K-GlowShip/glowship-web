@@ -103,15 +103,15 @@ export function DelayCenterPage() {
               })
             }
           />
+          {hasExtraCondition && (
+            <p role="status" className="text-b2 text-muted-foreground">
+              {extraConditionLabel} 건만 보고 있습니다.
+            </p>
+          )}
           <TableTemplate
             totalCount={filtered.length}
             Controls={
               <>
-                {hasExtraCondition && (
-                  <p role="status" className="text-b2 text-muted-foreground">
-                    {extraConditionLabel} 건만 보고 있습니다.
-                  </p>
-                )}
                 <Switch
                   id="new-delay-toggle"
                   checked={isNewDelayView}

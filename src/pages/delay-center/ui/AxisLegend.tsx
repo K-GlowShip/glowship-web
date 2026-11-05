@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Tooltip } from '@/shared/ui/tooltip'
 
+import { AXIS_LEGEND_TEXT } from '../model/delay-center-text'
+
 // TODO: 서버 연동 후 재고 영향 응답의 `safetyStockDays`로 바꾼다 (명세 4.5, 안전재고 기준 14일)
 const SAFETY_STOCK_DAYS = 14
 
@@ -16,14 +18,14 @@ export function AxisLegend({ hiddenCount }: AxisLegendProps) {
   return (
     <div className="flex flex-wrap items-center gap-x-16pxr gap-y-4pxr text-caption text-muted-foreground">
       <LegendDot
-        className="bg-warning-mark"
+        className="border-2 border-warning-mark bg-card"
         label="안전재고 하회"
-        description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다.`}
+        description={AXIS_LEGEND_TEXT.SAFETY_STOCK_BREACH(SAFETY_STOCK_DAYS)}
       />
-      <LegendDot className="bg-danger" label="재고 소진" description="가용 재고가 0이 되는 날" />
+      <LegendDot className="bg-danger" label="재고 소진" description={AXIS_LEGEND_TEXT.STOCKOUT} />
       <LegendItem
         label="품절 구간"
-        description="소진일부터 예상 입고 전까지의 구간. 그 사이 다른 선적이 입고되면 일부 날짜는 품절이 해소됩니다."
+        description={AXIS_LEGEND_TEXT.STOCKOUT_SPAN}
         mark={<span className="h-10pxr w-20pxr rounded-full bg-danger-bg" aria-hidden="true" />}
       />
       {hiddenCount > 0 && (

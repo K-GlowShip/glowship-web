@@ -45,7 +45,7 @@ export function AxisStockRow({ impact, expectedInbound, toPercent, guides }: Axi
         )}
         {safetyStockBreachDate && (
           <Dot
-            className="bg-warning-mark"
+            className="border-2 border-warning-mark bg-card"
             left={toPercent(safetyStockBreachDate)}
             title={`안전재고 하회 ${formatMonthDay(safetyStockBreachDate)}`}
           />

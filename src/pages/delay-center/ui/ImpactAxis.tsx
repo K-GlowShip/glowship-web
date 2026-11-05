@@ -44,7 +44,7 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
   const summary = buildAxisSummary(rows, plannedInbound, expectedInbound)
 
   return (
-    <div className="flex flex-col gap-12pxr [--axis-label:96px] lg:[--axis-label:224px]">
+    <div className="flex flex-col gap-12pxr [--axis-label:6rem] lg:[--axis-label:14rem]">
       <div role="img" aria-label={`재고와 입고 일정: ${summary}`} className="relative">
         <AxisTicks ticks={ticks} />
         {rows.map((row) => (
