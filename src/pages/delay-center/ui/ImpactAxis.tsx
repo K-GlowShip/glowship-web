@@ -176,12 +176,12 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
         <LegendDot
           className="bg-warning"
           label="안전재고 하회"
-          description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날까지는 안전재고가 남아 있고, 이후로는 여유 없이 재고 소진일까지 이어집니다.`}
+          description={`안전재고는 평균 일 판매량의 ${SAFETY_STOCK_DAYS}일분입니다.\n이 날 전까지는 안전재고가 남아 있고, 이 날부터는 여유 없이 재고가 줄어듭니다(소진일이 있으면 그날 0이 됩니다).`}
         />
         <LegendDot className="bg-danger" label="재고 소진" description="가용 재고가 0이 되는 날" />
         <LegendItem
           label="품절 구간"
-          description="재고가 0인 상태가 이어지는 기간"
+          description="소진일부터 예상 입고 전까지, 재고가 0인 날이 있는 구간. 중간에 다른 입고가 있으면 일부 날짜는 품절이 아닐 수 있습니다."
           mark={<span className="h-10pxr w-20pxr rounded-full bg-danger-bg" aria-hidden="true" />}
         />
         {hiddenCount > 0 && (

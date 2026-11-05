@@ -75,7 +75,7 @@ function ImpactTable({ impacts }: { impacts: SkuImpact[] }) {
             <TableHead className="w-120pxr">부족 증가분</TableHead>
             <TableHead className="w-110pxr">안전재고 하회</TableHead>
             <TableHead className="w-96pxr">재고 소진</TableHead>
-            <TableHead className="w-96pxr">품절 기간</TableHead>
+            <TableHead className="w-96pxr">품절 일수</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -319,13 +319,14 @@ const MANY_SKU_CASE = delayCase({
         increasedShortage: 2100,
         safetyStockBreachDate: '2026-10-22',
         stockoutDate: '2026-10-24',
-        stockoutDays: 7,
+        stockoutDays: 6,
       }),
       impact('SKU-102', 'A Glow Hydra Toner 150ml', 'WEST', 'IMPACTED', {
         increasedShortage: 640,
         safetyStockBreachDate: '2026-10-23',
         stockoutDate: '2026-10-27',
-        stockoutDays: 4,
+        // 중간에 다른 선적이 입고되어 품절이 끊기는 경우. 10.27~10.29 중 이틀만 품절이다
+        stockoutDays: 2,
       }),
       impact('SKU-103', 'A Glow Calming Serum 30ml', 'EAST', 'IMPACTED', {
         estimable: false,
@@ -397,7 +398,7 @@ const PORT_CASE = delayCase({
         increasedShortage: 380,
         safetyStockBreachDate: '2026-10-25',
         stockoutDate: '2026-10-27',
-        stockoutDays: 3,
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -473,8 +474,8 @@ const AIR_NO_OPTION_CASE = delayCase({
       impact('SKU-301', 'A Glow Hydra Mist 100ml', 'WEST', 'IMPACTED', {
         increasedShortage: 150,
         safetyStockBreachDate: '2026-10-26',
-        stockoutDate: '2026-10-28',
-        stockoutDays: 2,
+        stockoutDate: '2026-10-27',
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -611,8 +612,8 @@ const AT_SEA_CASE = delayCase({
       impact('SKU-501', 'A Glow Cleansing Oil 200ml', 'WEST', 'IMPACTED', {
         increasedShortage: 60,
         safetyStockBreachDate: '2026-10-26',
-        stockoutDate: '2026-10-28',
-        stockoutDays: 2,
+        stockoutDate: '2026-10-27',
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
@@ -689,7 +690,7 @@ const EXPLANATION_FAILED_CASE = delayCase({
         increasedShortage: 500,
         safetyStockBreachDate: '2026-10-25',
         stockoutDate: '2026-10-27',
-        stockoutDays: 3,
+        stockoutDays: 1,
       }),
     ],
     riskOrders: [
