@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 
 import { logout } from '@/shared/api'
 import { ROUTES } from '@/shared/config'
+import { toastError } from '@/shared/ui/toast'
 
 import { clearSession, isDemoSession } from './session'
 
@@ -23,6 +24,10 @@ export const useLogout = () => {
       clearSession()
       queryClient.clear()
       navigate(ROUTES.LOGIN, { replace: true })
+    },
+    // 서버에 닿지 못하면 쿠키가 남아 있어 로그아웃된 것이 아니므로, 이동하지 않고 알린다
+    onError: (error) => {
+      toastError(error.message)
     },
   })
 }

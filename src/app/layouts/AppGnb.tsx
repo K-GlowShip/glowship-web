@@ -1,6 +1,6 @@
 import { Bell } from 'lucide-react'
 
-import { ROLE_LABEL, useLogout, useSession } from '@/entities/session'
+import { getRoleLabel, useLogout, useSession } from '@/entities/session'
 import { cn } from '@/shared/lib/cn'
 import { Avatar } from '@/shared/ui/avatar'
 import { Button } from '@/shared/ui/button'
@@ -30,9 +30,9 @@ export function AppGnb({ title }: { title: string }) {
       <Button variant="ghost" size="icon" aria-label="알림">
         <Bell />
       </Button>
-      <Avatar aria-hidden="true">{userName[0]}</Avatar>
+      <Avatar aria-hidden="true">{Array.from(userName)[0]}</Avatar>
       <span className="text-b2 text-foreground">
-        {me ? `${userName} · ${ROLE_LABEL[me.roleCode]}` : userName}
+        {me ? `${userName} · ${getRoleLabel(me.roleCode)}` : userName}
       </span>
       {me?.companyName && <span className="text-b2 text-muted-foreground">{me.companyName}</span>}
       <Button variant="ghost" size="sm" loading={isPending} onClick={() => submitLogout()}>
