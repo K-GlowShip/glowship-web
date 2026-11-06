@@ -1,3 +1,5 @@
+import type { DelayEventCounts } from '@/shared/api'
+
 /** 서버 `GET /delay-events`의 `status` 코드값(API 명세 v6.2 2절, 4.4 탭 표) */
 export const DELAY_STATUS = {
   READY: 'READY_FOR_REVIEW',
@@ -20,6 +22,17 @@ export const DELAY_STATUS_LABEL: Record<DelayStatus, string> = {
   [DELAY_STATUS.FINALIZED]: '선택 완료',
   [DELAY_STATUS.NO_RISK]: '위험 없음',
   [DELAY_STATUS.NO_DELAY]: '지연 해소',
+}
+
+/** 지연 상태 코드에 해당하는 `GET /delay-events` 응답 `counts`의 키 */
+export const DELAY_COUNT_KEY: Record<DelayStatus, keyof DelayEventCounts> = {
+  [DELAY_STATUS.READY]: 'readyForReview',
+  [DELAY_STATUS.ANALYZING]: 'analyzing',
+  [DELAY_STATUS.ON_HOLD]: 'onHold',
+  [DELAY_STATUS.NEEDS_REANALYSIS]: 'needsReanalysis',
+  [DELAY_STATUS.FINALIZED]: 'finalized',
+  [DELAY_STATUS.NO_RISK]: 'noRisk',
+  [DELAY_STATUS.NO_DELAY]: 'noDelay',
 }
 
 export const DELAY_STATUS_BADGE_VARIANT = {

@@ -1,6 +1,8 @@
 import { Search } from 'lucide-react'
 import { type SubmitEvent, useState } from 'react'
 
+import { DELAY_COUNT_KEY } from '@/entities/delay-event'
+import type { DelayEventCounts } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
 import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
 import { Input } from '@/shared/ui/input'
@@ -15,7 +17,8 @@ import {
 interface DelayListFiltersProps {
   keyword: string
   status: DelayStatusFilter
-  counts: Record<DelayStatusFilter, number>
+  /** 불러오기 전이거나 불러오지 못했으면 undefined. 건수 없이 상태 이름만 보여 준다 */
+  counts: DelayEventCounts | undefined
   /** 조회 버튼을 누르거나 Enter를 칠 때만 부른다. 검색어와 상태를 고르는 동안에는 부르지 않는다. */
   onSearch: (filters: { keyword: string; status: DelayStatusFilter }) => void
 }
@@ -42,11 +45,14 @@ export function DelayListFilters({ keyword, status, counts, onSearch }: DelayLis
     onSearch({ keyword: draftKeyword.trim(), status: draftStatus })
   }
 
+  const withCount = (label: string, count: number | undefined) =>
+    count === undefined ? label : `${label} (${count})`
+
   const statusOptions: DropdownOption[] = [
-    { value: STATUS_FILTER_ALL, label: `전체 (${counts[STATUS_FILTER_ALL]})` },
+    { value: STATUS_FILTER_ALL, label: withCount('전체', counts?.all) },
     ...DELAY_STATUS_OPTIONS.map((value) => ({
       value,
-      label: `${DELAY_STATUS_LABEL[value]} (${counts[value]})`,
+      label: withCount(DELAY_STATUS_LABEL[value], counts?.[DELAY_COUNT_KEY[value]]),
     })),
   ]
 

@@ -1,5 +1,13 @@
 import { Link, useNavigate } from 'react-router'
 
+import {
+  DELAY_STATUS_BADGE_VARIANT,
+  DELAY_STATUS_LABEL,
+  formatRoute,
+  getStageLabel,
+  toDelayStatus,
+} from '@/entities/delay-event'
+import type { DelayEventListItem } from '@/shared/api'
 import { EMPTY_VALUE, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
@@ -8,39 +16,25 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmptyRow,
   TableHead,
   TableHeader,
+  type ListQuery,
+  TableQueryRows,
   TableRow,
 } from '@/shared/ui/table'
 
-import {
-  DELAY_STATUS_BADGE_VARIANT,
-  DELAY_STATUS_LABEL,
-  type DelayCase,
-  type DelayListLocationState,
-  formatMonthDay,
-  getAtRiskOrderCount,
-  formatProductLabel,
-  formatRoute,
-  STAGE_LABEL,
-} from '../model/delay-center'
+import { type DelayListLocationState, formatMonthDay } from '../model/delay-center'
 
 interface DelayTableProps {
-  cases: DelayCase[]
+  query: ListQuery<DelayEventListItem>
   /** 현재 목록 주소의 `?` 뒤 문자열. 상세에서 돌아올 때 검색 조건을 되살리는 데 쓴다. */
   listSearch: string
 }
 
 const COLUMN_COUNT = 7
-/** 계산 결과가 없는 건은 '–'로 표시한다. 결과가 있으면 0건도 숫자다. */
-const formatAtRiskOrders = (delayCase: DelayCase) => {
-  const count = getAtRiskOrderCount(delayCase)
-  return count === null ? EMPTY_VALUE : `${count}건`
-}
 
 /** 지연 목록. 행을 누르면 그 지연 건의 상세 화면으로 이동한다. */
-export function DelayTable({ cases, listSearch }: DelayTableProps) {
+export function DelayTable({ query, listSearch }: DelayTableProps) {
   const navigate = useNavigate()
   const state: DelayListLocationState = { listSearch }
 
@@ -58,52 +52,70 @@ export function DelayTable({ cases, listSearch }: DelayTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {cases.length === 0 && (
-          <TableEmptyRow colSpan={COLUMN_COUNT}>조건에 맞는 지연이 없습니다.</TableEmptyRow>
-        )}
-        {cases.map((delayCase) => (
-          <TableRow
-            key={delayCase.id}
-            className="cursor-pointer hover:bg-background"
-            onClick={() => navigate(delayCenterPath(delayCase.id), { state })}
-          >
-            <TableCell className="wrap-break-word">
-              <Link
-                to={delayCenterPath(delayCase.id)}
-                state={state}
-                className="font-bold outline-none focus-visible:underline"
-                onClick={(event) => event.stopPropagation()}
-              >
-                {delayCase.shipmentCode}
-              </Link>{' '}
-              <span className="text-muted-foreground">{formatProductLabel(delayCase)}</span>
-            </TableCell>
-            <TableCell>
-              <Badge variant={DELAY_STATUS_BADGE_VARIANT[delayCase.status]}>
-                {DELAY_STATUS_LABEL[delayCase.status]}
-              </Badge>
-            </TableCell>
-            <TableCell className={cn(delayCase.delayDays > 0 && 'font-bold text-danger')}>
-              {delayCase.delayDays > 0 ? `+${delayCase.delayDays}일` : EMPTY_VALUE}
-            </TableCell>
-            <TableCell>
-              <div className="flex flex-col">
-                <span className="font-bold">{STAGE_LABEL[delayCase.stage]}</span>
-                <span className="text-caption whitespace-nowrap text-muted-foreground">
-                  {formatRoute(delayCase)}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>
-              {formatMonthDay(delayCase.plannedInbound)} →{' '}
-              {formatMonthDay(delayCase.expectedInbound)}
-            </TableCell>
-            <TableCell>{formatAtRiskOrders(delayCase)}</TableCell>
-            <TableCell className="text-muted-foreground">
-              {formatYYYYMMDDHHmm(delayCase.detectedAt)}
-            </TableCell>
-          </TableRow>
-        ))}
+        <TableQueryRows
+          query={query}
+          colSpan={COLUMN_COUNT}
+          emptyMessage="조건에 맞는 지연이 없습니다."
+        >
+          {(delays) =>
+            delays.map((delay) => {
+              const status = toDelayStatus(delay.currentRun?.status)
+
+              return (
+                <TableRow
+                  key={delay.delayEventId}
+                  className="cursor-pointer hover:bg-background"
+                  onClick={() => navigate(delayCenterPath(delay.delayEventId), { state })}
+                >
+                  <TableCell className="wrap-break-word">
+                    <Link
+                      to={delayCenterPath(delay.delayEventId)}
+                      state={state}
+                      className="font-bold outline-none focus-visible:underline"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {delay.shipment.shipmentCode}
+                    </Link>{' '}
+                    <span className="text-muted-foreground">
+                      {delay.representativeSku?.productName ?? EMPTY_VALUE}
+                      {delay.skuCount > 1 && ` 외 ${delay.skuCount - 1}개`}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {status ? (
+                      <Badge variant={DELAY_STATUS_BADGE_VARIANT[status]}>
+                        {DELAY_STATUS_LABEL[status]}
+                      </Badge>
+                    ) : (
+                      EMPTY_VALUE
+                    )}
+                  </TableCell>
+                  <TableCell className={cn(delay.delayDays > 0 && 'font-bold text-danger')}>
+                    {delay.delayDays > 0 ? `+${delay.delayDays}일` : EMPTY_VALUE}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-bold">{getStageLabel(delay.stage)}</span>
+                      <span className="text-caption whitespace-nowrap text-muted-foreground">
+                        {formatRoute(delay)}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {formatMonthDay(delay.planned3plInboundDate)} →{' '}
+                    {formatMonthDay(delay.expected3plInboundDate)}
+                  </TableCell>
+                  <TableCell>
+                    {delay.atRiskOrderCount === null ? EMPTY_VALUE : `${delay.atRiskOrderCount}건`}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatYYYYMMDDHHmm(delay.detectedAt)}
+                  </TableCell>
+                </TableRow>
+              )
+            })
+          }
+        </TableQueryRows>
       </TableBody>
     </Table>
   )

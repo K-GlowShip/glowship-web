@@ -1,10 +1,5 @@
 import { DELAY_STATUS } from '@/entities/delay-event'
-import {
-  type DelayEventCounts,
-  INBOUND_TREND_DAYS,
-  INVENTORY_STATUS,
-  type InventoryStatus,
-} from '@/shared/api'
+import { INBOUND_TREND_DAYS, INVENTORY_STATUS, type InventoryStatus } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 
 export const TREND_DAYS_OPTIONS = [
@@ -20,15 +15,6 @@ export const DELAY_STATUS_ORDER = [
   DELAY_STATUS.ON_HOLD,
   DELAY_STATUS.ANALYZING,
 ] as const
-
-/** 지연 상태 코드에 해당하는 `GET /delay-events` 응답 `counts`의 키 */
-export const DELAY_COUNT_KEY: Record<(typeof DELAY_STATUS_ORDER)[number], keyof DelayEventCounts> =
-  {
-    [DELAY_STATUS.READY]: 'readyForReview',
-    [DELAY_STATUS.NEEDS_REANALYSIS]: 'needsReanalysis',
-    [DELAY_STATUS.ON_HOLD]: 'onHold',
-    [DELAY_STATUS.ANALYZING]: 'analyzing',
-  }
 
 /** 대시보드에 보여 주는 지연 수. `GET /delay-events`에 `size`로 보낸다 */
 export const DELAY_PREVIEW_SIZE = 5

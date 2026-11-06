@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
+  DELAY_COUNT_KEY,
   DELAY_STATUS_BADGE_VARIANT,
   DELAY_STATUS_LABEL,
   formatRoute,
@@ -24,12 +25,7 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import {
-  DELAY_COUNT_KEY,
-  DELAY_PREVIEW_SIZE,
-  DELAY_STATUS_ORDER,
-  formatMonthDay,
-} from '../model/dashboard'
+import { DELAY_PREVIEW_SIZE, DELAY_STATUS_ORDER, formatMonthDay } from '../model/dashboard'
 
 export function DelayTable() {
   // 최종 선택 전인 지연 중 최근 감지된 건. 상태별 건수(`counts`)는 같은 응답에 들어 있다
