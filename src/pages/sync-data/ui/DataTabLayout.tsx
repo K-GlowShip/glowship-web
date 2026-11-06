@@ -65,14 +65,14 @@ export function DataTabLayout({
             />
             <Input
               id={searchId}
-              className="h-48pxr pl-40pxr"
+              className="pl-40pxr"
               placeholder={searchPlaceholder}
               maxLength={100}
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
             />
           </div>
-          <Button type="submit" size="lg" loading={isFetching}>
+          <Button type="submit" size="lg" className="h-44pxr" loading={isFetching}>
             조회
           </Button>
         </div>

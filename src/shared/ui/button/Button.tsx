@@ -12,7 +12,12 @@ type ButtonProps = ComponentProps<'button'> &
 
 function Spinner() {
   return (
-    <svg className="animate-spin" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg
+      className="absolute size-16pxr animate-spin"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
       <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.3" strokeWidth="2" />
       <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
@@ -44,12 +49,17 @@ export function Button({
       type={type}
       aria-busy={loading || undefined}
       aria-disabled={loading || undefined}
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size }), 'relative', className)}
       onClick={handleClick}
       {...props}
     >
+      {/* 스피너를 가운데에 겹치고 글자는 자리를 유지해서, 로딩이 시작·끝날 때 버튼 크기가 바뀌지 않게 한다 */}
       {loading && <Spinner />}
-      {children}
+      {loading ? (
+        <span className="inline-flex items-center gap-8pxr opacity-0">{children}</span>
+      ) : (
+        children
+      )}
     </button>
   )
 }

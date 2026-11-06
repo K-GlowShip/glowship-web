@@ -82,7 +82,7 @@ export function DelayListFilters({ keyword, status, counts, onSearch }: DelayLis
           onChange={(event) => setDraftKeyword(event.target.value)}
         />
       </div>
-      <Button type="submit" className="h-44pxr">
+      <Button type="submit" size="lg" className="h-44pxr">
         조회
       </Button>
     </form>
