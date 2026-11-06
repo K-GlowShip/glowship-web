@@ -1,3 +1,4 @@
+import { STAGE_LABEL } from '@/entities/delay-event'
 import type { Shipment } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
@@ -14,7 +15,6 @@ import {
 import {
   getShipmentDelayLabel,
   SHIPMENT_STAGE_BADGE_VARIANT,
-  SHIPMENT_STAGE_LABEL,
   TRANSPORT_MODE_LABEL,
 } from '../model/shipments'
 
@@ -61,7 +61,7 @@ export function ShipmentTable({ shipments }: { shipments: Shipment[] }) {
             <TableCell>{formatRepresentativeSku(shipment)}</TableCell>
             <TableCell>
               <Badge variant={SHIPMENT_STAGE_BADGE_VARIANT[shipment.stage]}>
-                {SHIPMENT_STAGE_LABEL[shipment.stage]}
+                {STAGE_LABEL[shipment.stage]}
               </Badge>
             </TableCell>
             <TableCell className="whitespace-nowrap">{shipment.plannedKrReleaseDate}</TableCell>

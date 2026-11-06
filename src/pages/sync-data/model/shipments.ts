@@ -6,14 +6,6 @@ import {
   type TransportMode,
 } from '@/shared/api'
 
-export const SHIPMENT_STAGE_LABEL: Record<ShipmentStage, string> = {
-  [SHIPMENT_STAGE.PRE_DEPARTURE]: '출항 전',
-  [SHIPMENT_STAGE.AT_SEA]: '해상 운송',
-  [SHIPMENT_STAGE.IN_AIR]: '항공 운송',
-  [SHIPMENT_STAGE.AT_PORT]: '항구 도착·통관 중',
-  [SHIPMENT_STAGE.RECEIVED]: '입고 완료',
-}
-
 export const SHIPMENT_STAGE_BADGE_VARIANT = {
   [SHIPMENT_STAGE.PRE_DEPARTURE]: 'neutral',
   [SHIPMENT_STAGE.AT_SEA]: 'info',
