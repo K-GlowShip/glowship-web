@@ -9,6 +9,30 @@ export {
   type SyncStatus,
 } from './endpoints/data-sync-runs'
 export {
+  type DashboardSummary,
+  getDashboardSummary,
+  getInboundTrend,
+  type GetInboundTrendParams,
+  INBOUND_TREND_DAYS,
+  type InboundTrend,
+  type InboundTrendDays,
+  type InboundTrendPoint,
+} from './endpoints/dashboard'
+export {
+  type DelayEventCounts,
+  type DelayEventListItem,
+  type DelayEventListPage,
+  getDelayEvents,
+  type GetDelayEventsParams,
+} from './endpoints/delay-events'
+export {
+  getInventoryStatus,
+  INVENTORY_STATUS,
+  type InventoryStatus,
+  type InventoryStatusItem,
+  type InventoryStatusPage,
+} from './endpoints/inventory-status'
+export {
   type AnalysisRunDetail,
   type FinalDecision,
   getAnalysisRun,
@@ -69,9 +93,12 @@ export {
   type ValidationStatus,
 } from './endpoints/skus'
 export { analysisRunQueries } from './queries/analysis-runs'
+export { dashboardQueries } from './queries/dashboard'
 export { dataSyncRunQueries } from './queries/data-sync-runs'
+export { delayEventQueries } from './queries/delay-events'
 export { decisionQueries } from './queries/decisions'
 export { inventoryQueries } from './queries/inventory'
+export { inventoryStatusQueries } from './queries/inventory-status'
 export { isMeQuery, meQueryOptions } from './queries/me'
 export { orderQueries } from './queries/orders'
 export { shipmentQueries } from './queries/shipments'
