@@ -7,12 +7,9 @@ import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 
-import {
-  HISTORY_STATUS_LABEL,
-  HISTORY_STATUS_OPTIONS,
-  type HistoryFilter,
-  type HistoryStatus,
-} from '../model/history'
+import type { DecisionStatus } from '@/shared/api'
+
+import { HISTORY_STATUS_LABEL, HISTORY_STATUS_OPTIONS, type HistoryFilter } from '../model/history'
 
 const STATUS_OPTIONS: DropdownOption[] = [
   { value: '', label: '전체 상태' },
@@ -24,16 +21,13 @@ const STATUS_OPTIONS: DropdownOption[] = [
 
 interface HistoryFiltersProps {
   value: HistoryFilter
-  selectors: string[]
+  /** 조회 요청을 기다리는 중이면 "조회" 버튼을 막는다 */
+  isSearching: boolean
   onSearch: (filter: HistoryFilter) => void
 }
 
-export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersProps) {
+export function HistoryFilters({ value, isSearching, onSearch }: HistoryFiltersProps) {
   const [draft, setDraft] = useState(value)
-  const selectorOptions: DropdownOption[] = [
-    { value: '', label: '전체 팀원' },
-    ...selectors.map((selector) => ({ value: selector, label: selector })),
-  ]
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -43,7 +37,7 @@ export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersPro
   return (
     <form
       role="search"
-      className="grid items-end gap-16pxr md:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr_1fr_auto]"
+      className="grid items-end gap-16pxr md:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr_auto]"
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-8pxr">
@@ -74,26 +68,21 @@ export function HistoryFilters({ value, selectors, onSearch }: HistoryFiltersPro
       </div>
 
       <div className="flex flex-col gap-8pxr">
-        <Label id="history-selector-label">선택자</Label>
-        <Dropdown
-          aria-labelledby="history-selector-label"
-          options={selectorOptions}
-          value={draft.selector}
-          onChange={(selector) => setDraft({ ...draft, selector })}
-        />
-      </div>
-
-      <div className="flex flex-col gap-8pxr">
         <Label id="history-status-label">상태</Label>
         <Dropdown
           aria-labelledby="history-status-label"
           options={STATUS_OPTIONS}
           value={draft.status}
-          onChange={(status) => setDraft({ ...draft, status: status as HistoryStatus | '' })}
+          onChange={(status) => setDraft({ ...draft, status: status as DecisionStatus | '' })}
         />
       </div>
 
-      <Button type="submit" size="lg" className="h-44pxr md:col-span-2 xl:col-span-1">
+      <Button
+        type="submit"
+        size="lg"
+        loading={isSearching}
+        className="h-44pxr md:col-span-2 xl:col-span-1"
+      >
         조회
       </Button>
     </form>

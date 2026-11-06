@@ -1,37 +1,35 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { type Decision, decisionQueries } from '@/shared/api'
 import { useDetailDialog } from '@/shared/lib/use-detail-dialog'
 import { Card, CardContent } from '@/shared/ui/card'
 import { TableTemplate } from '@/shared/ui/table-template'
 
-import {
-  DEFAULT_HISTORY_FILTER,
-  filterHistory,
-  HISTORY_PAGE_SIZE,
-  type HistoryFilter,
-  type HistoryRecord,
-} from '../model/history'
-import { HISTORY_RECORDS } from '../model/history-mock'
+import { type HistoryFilter, toDecisionParams } from '../model/history'
 import { HistoryDetailDrawer } from './HistoryDetailDrawer'
 import { HistoryFilters } from './HistoryFilters'
 import { HistoryTable } from './HistoryTable'
 
-const SELECTORS = [...new Set(HISTORY_RECORDS.map((record) => record.selector))]
-
 export function DecisionHistoryPage() {
-  const [filter, setFilter] = useState<HistoryFilter>(DEFAULT_HISTORY_FILTER)
+  // 기간·검색어·상태를 고르지 않은 상태로 시작한다. 기간이 비어 있으면 전체 기간을 조회한다.
+  const [filter, setFilter] = useState<HistoryFilter>({
+    startDate: '',
+    endDate: '',
+    keyword: '',
+    status: '',
+  })
   const [page, setPage] = useState(1)
-  const detail = useDetailDialog<HistoryRecord>()
+  const detail = useDetailDialog<Decision>()
+  const query = useQuery(decisionQueries.list(toDecisionParams(filter, page)))
+  const { data, isFetching } = query
 
-  const filtered = filterHistory(HISTORY_RECORDS, filter)
-  const pageCount = Math.max(1, Math.ceil(filtered.length / HISTORY_PAGE_SIZE))
-  const currentPage = Math.min(page, pageCount)
-  const pageRecords = filtered.slice(
-    (currentPage - 1) * HISTORY_PAGE_SIZE,
-    currentPage * HISTORY_PAGE_SIZE,
-  )
-
+  // 조건이 그대로(같은 필터, 1페이지)면 상태가 바뀌지 않아 요청이 나가지 않으므로, "조회"를 누르면 새로 받는다
   const handleSearch = (next: HistoryFilter) => {
+    if (JSON.stringify(next) === JSON.stringify(filter) && page === 1) {
+      void query.refetch()
+      return
+    }
     setFilter(next)
     setPage(1)
   }
@@ -45,16 +43,16 @@ export function DecisionHistoryPage() {
 
       <Card className="rounded-panel">
         <CardContent className="flex flex-col gap-16pxr p-32pxr">
-          <HistoryFilters value={filter} selectors={SELECTORS} onSearch={handleSearch} />
+          <HistoryFilters value={filter} isSearching={isFetching} onSearch={handleSearch} />
           <TableTemplate
-            totalCount={filtered.length}
-            page={currentPage}
-            pageCount={pageCount}
+            totalCount={data?.totalCount}
+            page={page}
+            pageCount={data ? Math.max(1, data.totalPages) : undefined}
             onPageChange={setPage}
           >
             <HistoryTable
-              records={pageRecords}
-              selectedId={detail.open ? (detail.selected?.id ?? null) : null}
+              query={query}
+              selectedId={detail.open ? (detail.selected?.decisionId ?? null) : null}
               onSelect={detail.show}
             />
           </TableTemplate>
@@ -62,7 +60,7 @@ export function DecisionHistoryPage() {
       </Card>
 
       <HistoryDetailDrawer
-        record={detail.selected}
+        decision={detail.selected}
         open={detail.open}
         onOpenChange={detail.onOpenChange}
         onCloseAutoFocus={detail.onCloseAutoFocus}
