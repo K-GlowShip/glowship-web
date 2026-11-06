@@ -1,52 +1,46 @@
-/** 명세 v6.2 `GET /data-sync-runs/latest`의 `status` */
-export type SyncStatus = 'RUNNING' | 'SUCCEEDED' | 'PARTIAL_SUCCESS' | 'FAILED'
+import { type LatestSyncRun, SYNC_SOURCE_DOMAIN, SYNC_STATUS } from '@/shared/api'
 
-export interface SyncSource {
-  id: string
-  name: string
-  system: string
-  status: SyncStatus
-  /** ISO 8601 UTC. 예: '2026-10-21T00:30:00Z' */
-  lastCollectedAt: string
+/** 수집 현황 카드로 보여 주는 원천. 상품·창고는 카드가 없다. */
+export const SYNC_CARD_DOMAINS = [
+  SYNC_SOURCE_DOMAIN.ORDER,
+  SYNC_SOURCE_DOMAIN.INVENTORY,
+  SYNC_SOURCE_DOMAIN.SHIPMENT,
+] as const
+
+export const SYNC_CARD_NAME: Record<(typeof SYNC_CARD_DOMAINS)[number], string> = {
+  [SYNC_SOURCE_DOMAIN.ORDER]: '주문 데이터',
+  [SYNC_SOURCE_DOMAIN.INVENTORY]: '재고 데이터',
+  [SYNC_SOURCE_DOMAIN.SHIPMENT]: '선적 데이터',
 }
 
-export const SYNC_INTERVAL_LABEL = '모든 데이터는 10분마다 자동으로 수집됩니다'
-
-export const SYNC_STATUS_BADGE_VARIANT = {
-  RUNNING: 'info',
-  SUCCEEDED: 'success',
-  PARTIAL_SUCCESS: 'warning',
-  FAILED: 'danger',
-} as const satisfies Record<SyncStatus, 'info' | 'success' | 'warning' | 'danger'>
-
-export const SYNC_STATUS_LABEL: Record<SyncStatus, string> = {
-  RUNNING: '수집 중',
-  SUCCEEDED: '정상',
-  PARTIAL_SUCCESS: '일부 오류',
-  FAILED: '수집 오류',
+interface SyncBadge {
+  label: string
+  variant: 'info' | 'success' | 'warning' | 'danger' | 'neutral'
 }
 
-// TODO: 연동 데이터 API 명세 확정 후 서버 응답으로 교체
-export const SYNC_SOURCES: SyncSource[] = [
-  {
-    id: 'order',
-    name: '주문 데이터',
-    system: 'SAP ERP',
-    status: 'SUCCEEDED',
-    lastCollectedAt: '2026-10-21T00:30:00Z',
-  },
-  {
-    id: 'inventory',
-    name: '재고 데이터',
-    system: 'WMS · LA / NJ',
-    status: 'SUCCEEDED',
-    lastCollectedAt: '2026-10-21T00:30:00Z',
-  },
-  {
-    id: 'shipment',
-    name: '선적 데이터',
-    system: 'TMS',
-    status: 'FAILED',
-    lastCollectedAt: '2026-10-21T00:10:00Z',
-  },
-]
+/**
+ * 카드 배지. 서버가 판정한 `isSynced`와 마지막 실행의 `status`로 정한다.
+ * - 수집 중이면 판정을 미루고 "수집 중"
+ * - 동기화되지 않았으면, 마지막 수집 기록이 있으면 "수집 오류"(실패 또는 수집 멈춤), 없으면 "미연동"
+ * - 동기화됐으면 일부 레코드가 거절됐을 때만 "일부 오류"
+ */
+export const getSyncBadge = ({ status, isSynced, lastSyncedAt }: LatestSyncRun): SyncBadge => {
+  if (status === SYNC_STATUS.RUNNING) {
+    return { label: '수집 중', variant: 'info' }
+  }
+  if (!isSynced) {
+    return lastSyncedAt
+      ? { label: '수집 오류', variant: 'danger' }
+      : { label: '미연동', variant: 'neutral' }
+  }
+  if (status === SYNC_STATUS.PARTIAL_SUCCESS) {
+    return { label: '일부 오류', variant: 'warning' }
+  }
+  return { label: '정상', variant: 'success' }
+}
+
+export const isSyncError = ({ status, isSynced, lastSyncedAt }: LatestSyncRun) =>
+  status !== SYNC_STATUS.RUNNING && !isSynced && lastSyncedAt !== null
+
+export const getSyncIntervalLabel = (syncIntervalMinutes: number) =>
+  `모든 데이터는 ${syncIntervalMinutes}분마다 자동으로 수집됩니다`
