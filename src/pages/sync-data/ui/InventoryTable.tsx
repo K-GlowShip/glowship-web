@@ -1,3 +1,4 @@
+import { getRegionLabel } from '@/entities/delay-event'
 import type { InventoryItem } from '@/shared/api'
 import { formatNumber } from '@/shared/lib/format-number'
 import {
@@ -10,8 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table'
-
-import { getRegionLabel } from '../model/warehouse'
 
 export function InventoryTable({ query }: { query: ListQuery<InventoryItem> }) {
   return (

@@ -1,3 +1,4 @@
+import { getSyncBadge, isSyncError } from '@/entities/data-sync-run'
 import type { LatestSyncRun } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
@@ -5,8 +6,6 @@ import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
-
-import { getSyncBadge, isSyncError } from '../model/sync-sources'
 
 interface SyncSourceCardProps {
   name: string

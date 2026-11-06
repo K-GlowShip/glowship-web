@@ -13,10 +13,7 @@ const ORIGIN_PORT_LABEL: Record<TransportMode, string> = {
 }
 
 /** 경로의 출발 'KR'을 운송 수단에 맞는 출발 항구로 바꿔 보여 준다. 예: '부산 → LOS ANGELES' */
-export const formatRoute = ({
-  route,
-  transportMode,
-}: {
-  route: string
-  transportMode: TransportMode
-}) => route.replace(/^KR/, ORIGIN_PORT_LABEL[transportMode])
+export const formatRoute = ({ route, transportMode }: { route: string; transportMode: string }) => {
+  const originPort = ORIGIN_PORT_LABEL[transportMode as TransportMode]
+  return originPort ? route.replace(/^KR/, originPort) : route
+}

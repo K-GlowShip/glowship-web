@@ -113,3 +113,18 @@ export const delayEventQueries = {
     }),
 }
 ```
+
+## 시간과 날짜
+
+서버는 시각을 항상 UTC로 주고받고, KST 표시는 화면이 합니다. 변환은 [kst-date](../src/shared/lib/kst-date/kst-date.ts)로만 합니다.
+
+| 종류 | 서버 형식 | 화면 처리 |
+| --- | --- | --- |
+| 시각(`~At`) | ISO 8601 UTC, `Z`로 끝남 (`2026-10-21T00:30:00Z`) | KST로 변환해서 표시 (`formatYYYYMMDDHHmm`, 날짜만이면 `formatYYYYMMDD`) |
+| 날짜(`~Date`) | `YYYY-MM-DD`, 시간대 없음 | **변환하지 않고** 문자열 그대로 표시 (`formatMonthDay`처럼 자르기). KST로 바꾸면 하루가 어긋남 |
+| 조회 기간 `from`·`to` | 시간대 있는 ISO 8601 UTC 시각만 허용, 범위는 `[from, to)`(`to` 미포함) | 시작은 `toUtcDayStart(시작일)`, 끝은 `toUtcNextDayStart(종료일)`(종료일 + 1일). 값이 `''`이면 요청에서 생략 |
+
+- 날짜만(`2026-10-20`), 시간대 없음, Unix 초 숫자는 서버가 422 `VALIDATION_ERROR`로 거부합니다. 항상 ISO 문자열을 보냅니다.
+- **예외:** 재고 목록(`GET /inventory`)의 `date`는 기간 필터가 아니라 하루치 스냅샷 날짜라서 변환하지 않고 `YYYY-MM-DD`만 보냅니다. 응답의 `inventoryDate`도 그대로 표시하고 `null`(재고 없음)을 처리합니다.
+- 밀리초(`.123Z`)가 붙은 시각을 만들었다면 보내기 전에 지웁니다.
+

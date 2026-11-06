@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
+import { getRegionLabel } from '@/entities/delay-event'
 import type { Order } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { formatNumber } from '@/shared/lib/format-number'
@@ -23,7 +24,6 @@ import {
   ORDER_STATUS_LABEL,
   SALES_CHANNEL_LABEL,
 } from '../model/orders'
-import { getRegionLabel } from '../model/warehouse'
 
 const COLUMN_COUNT = 8
 

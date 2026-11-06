@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { SYNC_CARD_DOMAINS, SYNC_CARD_NAME } from '@/entities/data-sync-run'
 import { dataSyncRunQueries } from '@/shared/api'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
-import { getSyncIntervalLabel, SYNC_CARD_DOMAINS, SYNC_CARD_NAME } from '../model/sync-sources'
 import { SyncDataTabs } from './SyncDataTabs'
 import { SyncSourceCard } from './SyncSourceCard'
 
@@ -27,7 +27,7 @@ export function SyncDataPage() {
       <section className="flex flex-col gap-12pxr" aria-label="데이터 수집 현황">
         {runs[0] && (
           <p className="pr-12pxr text-right text-b2 text-muted-foreground">
-            {getSyncIntervalLabel(runs[0].run.syncIntervalMinutes)}
+            모든 데이터는 {runs[0].run.syncIntervalMinutes}분마다 자동으로 수집됩니다
           </p>
         )}
         {isPending && (

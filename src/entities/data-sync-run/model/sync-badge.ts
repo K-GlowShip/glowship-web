@@ -1,6 +1,6 @@
 import { type LatestSyncRun, SYNC_SOURCE_DOMAIN, SYNC_STATUS } from '@/shared/api'
 
-/** 수집 현황 카드로 보여 주는 원천. 상품·창고는 카드가 없다. */
+/** 수집 현황을 보여 주는 원천. 상품·창고는 카드가 없다. */
 export const SYNC_CARD_DOMAINS = [
   SYNC_SOURCE_DOMAIN.ORDER,
   SYNC_SOURCE_DOMAIN.INVENTORY,
@@ -19,7 +19,7 @@ interface SyncBadge {
 }
 
 /**
- * 카드 배지. 서버가 판정한 `isSynced`와 마지막 실행의 `status`로 정한다.
+ * 수집 상태 배지. 서버가 판정한 `isSynced`와 마지막 실행의 `status`로 정한다.
  * - 수집 중이면 판정을 미루고 "수집 중"
  * - 동기화되지 않았으면, 마지막 수집 기록이 있으면 "수집 오류"(실패 또는 수집 멈춤), 없으면 "미연동"
  * - 동기화됐으면 일부 레코드가 거절됐을 때만 "일부 오류"
@@ -41,6 +41,3 @@ export const getSyncBadge = ({ status, isSynced, lastSyncedAt }: LatestSyncRun):
 
 export const isSyncError = ({ status, isSynced, lastSyncedAt }: LatestSyncRun) =>
   status !== SYNC_STATUS.RUNNING && !isSynced && lastSyncedAt !== null
-
-export const getSyncIntervalLabel = (syncIntervalMinutes: number) =>
-  `모든 데이터는 ${syncIntervalMinutes}분마다 자동으로 수집됩니다`

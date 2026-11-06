@@ -31,3 +31,30 @@ export const DELAY_STATUS_BADGE_VARIANT = {
   [DELAY_STATUS.NO_RISK]: 'success',
   [DELAY_STATUS.NO_DELAY]: 'neutral',
 } as const satisfies Record<DelayStatus, 'warning' | 'info' | 'danger' | 'neutral' | 'success'>
+
+/**
+ * 지연 목록의 `currentRun.status`(분석 실행 상태)를 지연 상태 탭 코드로 바꾼다. 서버의 탭 집계와 같은 기준이다.
+ * (`STALE`·`FAILED` = 재분석 필요, 진행 중 상태 = 분석 중) 실행이 없으면 null.
+ */
+export const toDelayStatus = (runStatus: string | null | undefined): DelayStatus | null => {
+  switch (runStatus) {
+    case undefined:
+    case null:
+      return null
+    case 'READY_FOR_REVIEW':
+      return DELAY_STATUS.READY
+    case 'ON_HOLD':
+      return DELAY_STATUS.ON_HOLD
+    case 'STALE':
+    case 'FAILED':
+      return DELAY_STATUS.NEEDS_REANALYSIS
+    case 'FINALIZED':
+      return DELAY_STATUS.FINALIZED
+    case 'NO_RISK':
+      return DELAY_STATUS.NO_RISK
+    case 'NO_DELAY':
+      return DELAY_STATUS.NO_DELAY
+    default:
+      return DELAY_STATUS.ANALYZING
+  }
+}
