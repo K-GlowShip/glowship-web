@@ -8,7 +8,7 @@ import { ShipmentTable } from './ShipmentTable'
 
 export function ShipmentTab() {
   const list = useListParams()
-  const { data, error, isFetching, refetch } = useQuery(shipmentQueries.list(list.params))
+  const query = useQuery(shipmentQueries.list(list.params))
 
   return (
     <DataTabLayout
@@ -17,15 +17,12 @@ export function ShipmentTab() {
       searchPlaceholder="선적 코드"
       input={list.input}
       onInputChange={list.onInputChange}
-      onSubmit={() => list.onSubmit(refetch)}
-      data={data}
-      error={error}
-      isFetching={isFetching}
-      onRetry={() => void refetch()}
+      onSubmit={() => list.onSubmit(query.refetch)}
+      query={query}
       page={list.page}
       onPageChange={list.onPageChange}
     >
-      <ShipmentTable shipments={data?.items ?? []} />
+      <ShipmentTable query={query} />
     </DataTabLayout>
   )
 }

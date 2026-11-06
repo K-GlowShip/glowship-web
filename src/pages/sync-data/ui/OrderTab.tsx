@@ -8,7 +8,7 @@ import { OrderTable } from './OrderTable'
 
 export function OrderTab() {
   const list = useListParams()
-  const { data, error, isFetching, refetch } = useQuery(orderQueries.list(list.params))
+  const query = useQuery(orderQueries.list(list.params))
 
   return (
     <DataTabLayout
@@ -17,15 +17,12 @@ export function OrderTab() {
       searchPlaceholder="주문 번호, 상품 코드 또는 상품명"
       input={list.input}
       onInputChange={list.onInputChange}
-      onSubmit={() => list.onSubmit(refetch)}
-      data={data}
-      error={error}
-      isFetching={isFetching}
-      onRetry={() => void refetch()}
+      onSubmit={() => list.onSubmit(query.refetch)}
+      query={query}
       page={list.page}
       onPageChange={list.onPageChange}
     >
-      <OrderTable orders={data?.items ?? []} />
+      <OrderTable query={query} />
     </DataTabLayout>
   )
 }

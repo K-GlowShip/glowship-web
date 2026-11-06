@@ -15,9 +15,7 @@ export function ProductTab() {
   const list = useListParams()
   const [onlyErrors, setOnlyErrors] = useState(false)
   const detailDialog = useDetailDialog<Sku>()
-  const { data, error, isFetching, refetch } = useQuery(
-    skuQueries.list({ ...list.params, onlyErrors: onlyErrors || undefined }),
-  )
+  const query = useQuery(skuQueries.list({ ...list.params, onlyErrors: onlyErrors || undefined }))
 
   return (
     <>
@@ -27,11 +25,8 @@ export function ProductTab() {
         searchPlaceholder="상품명 또는 ERP 코드"
         input={list.input}
         onInputChange={list.onInputChange}
-        onSubmit={() => list.onSubmit(refetch)}
-        data={data}
-        error={error}
-        isFetching={isFetching}
-        onRetry={() => void refetch()}
+        onSubmit={() => list.onSubmit(query.refetch)}
+        query={query}
         page={list.page}
         onPageChange={list.onPageChange}
         Controls={
@@ -50,7 +45,7 @@ export function ProductTab() {
           </>
         }
       >
-        <ProductTable products={data?.items ?? []} onSelect={detailDialog.show} />
+        <ProductTable query={query} onSelect={detailDialog.show} />
       </DataTabLayout>
 
       <ProductDetailDialog

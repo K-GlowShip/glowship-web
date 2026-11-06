@@ -1,14 +1,12 @@
 import { Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import type { ApiError, Page } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
-import { Skeleton } from '@/shared/ui/skeleton'
+import type { Page } from '@/shared/api'
+import type { ListQuery } from '@/shared/ui/table'
 import { TableTemplate } from '@/shared/ui/table-template'
-
-import { QueryError } from './QueryError'
 
 interface DataTabLayoutProps {
   /** 검색 입력의 id. 탭마다 달라야 레이블이 연결된다. */
@@ -19,18 +17,15 @@ interface DataTabLayoutProps {
   onInputChange: (value: string) => void
   /** "조회" 버튼이나 Enter로 검색어를 확정할 때 */
   onSubmit: () => void
-  /** 서버 응답. 아직 받지 못했으면 undefined */
-  data: Page<unknown> | undefined
-  error: ApiError | null
-  isFetching: boolean
-  onRetry: () => void
+  /** 목록 query. 건수·페이지 수와 불러오는 중·오류 표시에 쓴다. */
+  query: Omit<ListQuery<unknown>, 'data'> & { data: Page<unknown> | undefined }
   page: number
   onPageChange: (page: number) => void
   /** 표 위쪽 제목. 예: 재고 탭의 기준일 */
   Title?: ReactNode
   /** 표 위쪽 오른쪽 컨트롤. 예: "오류만 보기" 체크박스 */
   Controls?: ReactNode
-  /** 표(Table) */
+  /** 표(Table). 불러오는 중·오류·빈 결과 행은 표가 `query`로 직접 그린다. */
   children: ReactNode
 }
 
@@ -42,16 +37,15 @@ export function DataTabLayout({
   input,
   onInputChange,
   onSubmit,
-  data,
-  error,
-  isFetching,
-  onRetry,
+  query,
   page,
   onPageChange,
   Title,
   Controls,
   children,
 }: DataTabLayoutProps) {
+  const { data, isFetching } = query
+
   return (
     <div className="flex flex-col gap-16pxr pt-24pxr">
       <form
@@ -84,22 +78,16 @@ export function DataTabLayout({
         </div>
       </form>
 
-      {data ? (
-        <TableTemplate
-          Title={Title}
-          totalCount={data.totalCount}
-          page={page}
-          pageCount={Math.max(1, data.totalPages)}
-          onPageChange={onPageChange}
-          Controls={Controls}
-        >
-          {children}
-        </TableTemplate>
-      ) : error ? (
-        <QueryError message={error.message} loading={isFetching} onRetry={onRetry} />
-      ) : (
-        <Skeleton className="h-300pxr rounded-card" />
-      )}
+      <TableTemplate
+        Title={Title}
+        totalCount={data?.totalCount}
+        page={page}
+        pageCount={data ? Math.max(1, data.totalPages) : undefined}
+        onPageChange={onPageChange}
+        Controls={Controls}
+      >
+        {children}
+      </TableTemplate>
     </div>
   )
 }

@@ -1,9 +1,11 @@
 import type { InventoryItem } from '@/shared/api'
+import { formatNumber } from '@/shared/lib/format-number'
 import {
   Table,
   TableBody,
   TableCell,
-  TableEmptyRow,
+  type ListQuery,
+  TableQueryRows,
   TableHead,
   TableHeader,
   TableRow,
@@ -11,9 +13,7 @@ import {
 
 import { getRegionLabel } from '../model/warehouse'
 
-const formatQuantity = (quantity: number) => quantity.toLocaleString('ko-KR')
-
-export function InventoryTable({ items }: { items: InventoryItem[] }) {
+export function InventoryTable({ query }: { query: ListQuery<InventoryItem> }) {
   return (
     <Table className="min-w-1010pxr">
       <TableHeader>
@@ -29,21 +29,22 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {items.length === 0 && (
-          <TableEmptyRow colSpan={8}>조건에 맞는 재고가 없습니다.</TableEmptyRow>
-        )}
-        {items.map((item) => (
-          <TableRow key={`${item.warehouse.warehouseId}-${item.sku.skuId}`}>
-            <TableCell>{item.warehouse.warehouseCode}</TableCell>
-            <TableCell>{getRegionLabel(item.warehouse.regionCode)}</TableCell>
-            <TableCell>{item.sku.skuCode}</TableCell>
-            <TableCell className="wrap-break-word">{item.sku.productName}</TableCell>
-            <TableCell className="text-right">{formatQuantity(item.onHandQuantity)}</TableCell>
-            <TableCell className="text-right">{formatQuantity(item.reservedQuantity)}</TableCell>
-            <TableCell className="text-right">{formatQuantity(item.availableQuantity)}</TableCell>
-            <TableCell className="text-right">{formatQuantity(item.outboundQuantity)}</TableCell>
-          </TableRow>
-        ))}
+        <TableQueryRows query={query} colSpan={8} emptyMessage="조건에 맞는 재고가 없습니다.">
+          {(items) =>
+            items.map((item) => (
+              <TableRow key={`${item.warehouse.warehouseId}-${item.sku.skuId}`}>
+                <TableCell>{item.warehouse.warehouseCode}</TableCell>
+                <TableCell>{getRegionLabel(item.warehouse.regionCode)}</TableCell>
+                <TableCell>{item.sku.skuCode}</TableCell>
+                <TableCell className="wrap-break-word">{item.sku.productName}</TableCell>
+                <TableCell className="text-right">{formatNumber(item.onHandQuantity)}</TableCell>
+                <TableCell className="text-right">{formatNumber(item.reservedQuantity)}</TableCell>
+                <TableCell className="text-right">{formatNumber(item.availableQuantity)}</TableCell>
+                <TableCell className="text-right">{formatNumber(item.outboundQuantity)}</TableCell>
+              </TableRow>
+            ))
+          }
+        </TableQueryRows>
       </TableBody>
     </Table>
   )

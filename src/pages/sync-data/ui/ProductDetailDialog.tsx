@@ -3,6 +3,7 @@ import { CircleAlert } from 'lucide-react'
 import { Fragment } from 'react'
 
 import { type Sku, skuQueries } from '@/shared/api'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Skeleton } from '@/shared/ui/skeleton'
 
@@ -52,7 +53,7 @@ function ProductDetail({ product }: { product: Sku }) {
           <dt className="text-muted-foreground">HS 코드</dt>
           <dd>{product.hs10}</dd>
           <dt className="text-muted-foreground">입수량</dt>
-          <dd>박스당 {product.unitsPerCase.toLocaleString('ko-KR')}개</dd>
+          <dd>박스당 {formatNumber(product.unitsPerCase)}개</dd>
           {product.externalCodes.map((code) => (
             <Fragment key={code.sourceDomain}>
               <dt className="text-muted-foreground">

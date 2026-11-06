@@ -5,7 +5,8 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmptyRow,
+  type ListQuery,
+  TableQueryRows,
   TableHead,
   TableHeader,
   TableRow,
@@ -19,11 +20,11 @@ import {
 } from '../model/products'
 
 interface ProductTableProps {
-  products: Sku[]
+  query: ListQuery<Sku>
   onSelect: (product: Sku) => void
 }
 
-export function ProductTable({ products, onSelect }: ProductTableProps) {
+export function ProductTable({ query, onSelect }: ProductTableProps) {
   return (
     <Table className="min-w-1010pxr">
       <TableHeader>
@@ -37,53 +38,54 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {products.length === 0 && (
-          <TableEmptyRow colSpan={6}>조건에 맞는 상품이 없습니다.</TableEmptyRow>
-        )}
-        {products.map((product) => {
-          const isError = isProductError(product)
+        <TableQueryRows query={query} colSpan={6} emptyMessage="조건에 맞는 상품이 없습니다.">
+          {(products) =>
+            products.map((product) => {
+              const isError = isProductError(product)
 
-          return (
-            <TableRow
-              key={product.skuId}
-              className="cursor-pointer hover:bg-background"
-              onClick={() => onSelect(product)}
-            >
-              <TableCell className="wrap-break-word">
-                <button
-                  type="button"
-                  className="cursor-pointer text-left outline-none focus-visible:underline"
-                  aria-label={`${product.productName} 상세 보기`}
+              return (
+                <TableRow
+                  key={product.skuId}
+                  className="cursor-pointer hover:bg-background"
+                  onClick={() => onSelect(product)}
                 >
-                  {product.productName}
-                </button>
-                <p className="text-b2 text-muted-foreground">
-                  {product.brandName} · {product.category} / {product.subcategory}
-                </p>
-              </TableCell>
-              <TableCell>{product.skuCode}</TableCell>
-              <TableCell>
-                <div className="flex flex-col gap-2pxr">
-                  {product.externalCodes.map((code) => (
-                    <span key={code.sourceDomain}>
-                      <span className="text-muted-foreground">
-                        {EXTERNAL_CODE_SOURCE_LABEL[code.sourceDomain]}:{' '}
-                      </span>
-                      {code.externalCode ?? EMPTY_VALUE}
-                    </span>
-                  ))}
-                </div>
-              </TableCell>
-              <TableCell>{isHitProduct(product) ? '예' : '아니오'}</TableCell>
-              <TableCell>{product.isEmergencyAirEligible ? '가능' : '불가'}</TableCell>
-              <TableCell>
-                <Badge variant={isError ? 'danger' : 'success'}>
-                  {VALIDATION_STATUS_LABEL[product.validationStatus]}
-                </Badge>
-              </TableCell>
-            </TableRow>
-          )
-        })}
+                  <TableCell className="wrap-break-word">
+                    <button
+                      type="button"
+                      className="cursor-pointer text-left outline-none focus-visible:underline"
+                      aria-label={`${product.productName} 상세 보기`}
+                    >
+                      {product.productName}
+                    </button>
+                    <p className="text-b2 text-muted-foreground">
+                      {product.brandName} · {product.category} / {product.subcategory}
+                    </p>
+                  </TableCell>
+                  <TableCell>{product.skuCode}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-2pxr">
+                      {product.externalCodes.map((code) => (
+                        <span key={code.sourceDomain}>
+                          <span className="text-muted-foreground">
+                            {EXTERNAL_CODE_SOURCE_LABEL[code.sourceDomain]}:{' '}
+                          </span>
+                          {code.externalCode ?? EMPTY_VALUE}
+                        </span>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>{isHitProduct(product) ? '예' : '아니오'}</TableCell>
+                  <TableCell>{product.isEmergencyAirEligible ? '가능' : '불가'}</TableCell>
+                  <TableCell>
+                    <Badge variant={isError ? 'danger' : 'success'}>
+                      {VALIDATION_STATUS_LABEL[product.validationStatus]}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              )
+            })
+          }
+        </TableQueryRows>
       </TableBody>
     </Table>
   )

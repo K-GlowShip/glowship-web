@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { dataSyncRunQueries } from '@/shared/api'
+import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
 import { getSyncIntervalLabel, SYNC_CARD_DOMAINS, SYNC_CARD_NAME } from '../model/sync-sources'
 import { SyncDataTabs } from './SyncDataTabs'
-import { QueryError } from './QueryError'
 import { SyncSourceCard } from './SyncSourceCard'
 
 export function SyncDataPage() {

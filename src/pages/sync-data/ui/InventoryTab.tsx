@@ -8,7 +8,7 @@ import { InventoryTable } from './InventoryTable'
 
 export function InventoryTab() {
   const list = useListParams()
-  const { data, error, isFetching, refetch } = useQuery(inventoryQueries.list(list.params))
+  const query = useQuery(inventoryQueries.list(list.params))
 
   return (
     <DataTabLayout
@@ -17,16 +17,13 @@ export function InventoryTab() {
       searchPlaceholder="SKU 코드 또는 상품명"
       input={list.input}
       onInputChange={list.onInputChange}
-      onSubmit={() => list.onSubmit(refetch)}
-      data={data}
-      error={error}
-      isFetching={isFetching}
-      onRetry={() => void refetch()}
+      onSubmit={() => list.onSubmit(query.refetch)}
+      query={query}
       page={list.page}
       onPageChange={list.onPageChange}
-      Title={data?.inventoryDate ? `기준일 ${data.inventoryDate}` : undefined}
+      Title={query.data?.inventoryDate ? `기준일 ${query.data.inventoryDate}` : undefined}
     >
-      <InventoryTable items={data?.items ?? []} />
+      <InventoryTable query={query} />
     </DataTabLayout>
   )
 }
