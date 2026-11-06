@@ -25,3 +25,15 @@ export interface RunSummary {
   /** `ON_HOLD`·`FAILED`일 때만 값이 있다 */
   failureCode: string | null
 }
+
+export interface UserSummary {
+  userId: string
+  displayName: string
+  roleCode: string
+}
+
+export interface ResponseOptionSummary {
+  responseOptionId: string
+  /** 대응안 유형 코드. 표시명은 화면에서 붙인다 */
+  optionType: string
+}

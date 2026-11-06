@@ -17,4 +17,6 @@ export const ENDPOINT = {
   ORDERS: '/orders',
   INVENTORY: '/inventory',
   SHIPMENTS: '/shipments',
+  DECISIONS: '/decisions',
+  ANALYSIS_RUNS: '/analysis-runs',
 } as const

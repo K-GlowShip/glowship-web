@@ -4,6 +4,6 @@ export {
   formatYYYYMMDD,
   formatYYYYMMDDHHmm,
   kstToUtc,
-  toUtcDayEnd,
   toUtcDayStart,
+  toUtcNextDayStart,
 } from './kst-date'

@@ -9,6 +9,22 @@ export {
   type SyncStatus,
 } from './endpoints/data-sync-runs'
 export {
+  type AnalysisRunDetail,
+  type FinalDecision,
+  getAnalysisRun,
+  type MemberDraft,
+  type RunExplanation,
+} from './endpoints/analysis-runs'
+export {
+  type Decision,
+  DECISION_STATUS,
+  DECISION_TYPE,
+  type DecisionStatus,
+  type DecisionType,
+  getDecisions,
+  type GetDecisionsParams,
+} from './endpoints/decisions'
+export {
   getInventory,
   type GetInventoryParams,
   type InventoryItem,
@@ -52,7 +68,9 @@ export {
   VALIDATION_STATUS,
   type ValidationStatus,
 } from './endpoints/skus'
+export { analysisRunQueries } from './queries/analysis-runs'
 export { dataSyncRunQueries } from './queries/data-sync-runs'
+export { decisionQueries } from './queries/decisions'
 export { inventoryQueries } from './queries/inventory'
 export { isMeQuery, meQueryOptions } from './queries/me'
 export { orderQueries } from './queries/orders'
@@ -61,4 +79,11 @@ export { skuQueries } from './queries/skus'
 export { API, fetcher } from './fetcher'
 export type { Page, PageParams } from './page'
 export { ENDPOINT } from './paths'
-export type { RunSummary, ShipmentSummary, SkuSummary, WarehouseSummary } from './summary'
+export type {
+  ResponseOptionSummary,
+  RunSummary,
+  ShipmentSummary,
+  SkuSummary,
+  UserSummary,
+  WarehouseSummary,
+} from './summary'

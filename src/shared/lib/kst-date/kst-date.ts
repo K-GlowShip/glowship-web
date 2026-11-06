@@ -78,9 +78,21 @@ export const kstToUtc = (kstDateTime: string) => {
 export const toUtcDayStart = (kstDate: string) =>
   KST_DATE_PATTERN.test(kstDate) ? kstToUtc(`${kstDate}T00:00:00`) : ''
 
-/** 한국 날짜 'YYYY-MM-DD'의 끝(23:59:59 KST)을 UTC 시각으로. (예: '2026-10-21' -> '2026-10-21T14:59:59Z') */
-export const toUtcDayEnd = (kstDate: string) =>
-  KST_DATE_PATTERN.test(kstDate) ? kstToUtc(`${kstDate}T23:59:59`) : ''
+/**
+ * 기간 필터의 끝(`to`)으로 보낼 시각. 한국 날짜 'YYYY-MM-DD'의 **다음 날** 시작(00:00:00 KST)을 UTC 시각으로.
+ * 서버의 `[from, to)`는 `to`를 포함하지 않으므로, 종료일을 포함하려면 종료일 + 1일을 보낸다.
+ * (예: '2026-10-21' -> '2026-10-21T15:00:00Z')
+ */
+export const toUtcNextDayStart = (kstDate: string) => {
+  const dayStart = toUtcDayStart(kstDate)
+  if (!dayStart) {
+    return ''
+  }
+  // 한국은 서머타임이 없어 하루는 항상 24시간이다.
+  return new Date(new Date(dayStart).getTime() + 24 * 60 * 60 * 1000)
+    .toISOString()
+    .replace(/\.\d{3}Z$/, 'Z')
+}
 
 const kstLongDateFormatter = new Intl.DateTimeFormat('ko-KR', {
   timeZone: KST_TIME_ZONE,
