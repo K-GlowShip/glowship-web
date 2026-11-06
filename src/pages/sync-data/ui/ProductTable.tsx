@@ -1,3 +1,5 @@
+import type { Sku } from '@/shared/api'
+import { EMPTY_VALUE } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
 import {
   Table,
@@ -11,15 +13,14 @@ import {
 
 import {
   EXTERNAL_CODE_SOURCE_LABEL,
+  isHitProduct,
   isProductError,
   VALIDATION_STATUS_LABEL,
-  type Product,
 } from '../model/products'
-import { EMPTY_VALUE } from '@/shared/config'
 
 interface ProductTableProps {
-  products: Product[]
-  onSelect: (product: Product) => void
+  products: Sku[]
+  onSelect: (product: Sku) => void
 }
 
 export function ProductTable({ products, onSelect }: ProductTableProps) {
@@ -44,7 +45,7 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
 
           return (
             <TableRow
-              key={product.id}
+              key={product.skuId}
               className="cursor-pointer hover:bg-background"
               onClick={() => onSelect(product)}
             >
@@ -52,15 +53,15 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
                 <button
                   type="button"
                   className="cursor-pointer text-left outline-none focus-visible:underline"
-                  aria-label={`${product.name} 상세 보기`}
+                  aria-label={`${product.productName} 상세 보기`}
                 >
-                  {product.name}
+                  {product.productName}
                 </button>
                 <p className="text-b2 text-muted-foreground">
                   {product.brandName} · {product.category} / {product.subcategory}
                 </p>
               </TableCell>
-              <TableCell>{product.erpCode}</TableCell>
+              <TableCell>{product.skuCode}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-2pxr">
                   {product.externalCodes.map((code) => (
@@ -73,7 +74,7 @@ export function ProductTable({ products, onSelect }: ProductTableProps) {
                   ))}
                 </div>
               </TableCell>
-              <TableCell>{product.isHit ? '예' : '아니오'}</TableCell>
+              <TableCell>{isHitProduct(product) ? '예' : '아니오'}</TableCell>
               <TableCell>{product.isEmergencyAirEligible ? '가능' : '불가'}</TableCell>
               <TableCell>
                 <Badge variant={isError ? 'danger' : 'success'}>
