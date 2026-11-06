@@ -219,13 +219,7 @@ export const STAGE_FLOW: Record<TransportMode, StageCode[]> = {
 
 export { formatRoute }
 
-// 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)을 그대로 쓴다.
-export const OPTION_TYPE_LABEL: Record<OptionType, string> = {
-  [OPTION_TYPE.KEEP_PLAN]: '현재 계획 유지',
-  [OPTION_TYPE.PRE_DEPARTURE_AIR]: '출항 전 항공 전환',
-  [OPTION_TYPE.KR_AIR_REPLENISH]: '한국 창고 항공 보충',
-  [OPTION_TYPE.OTHER_REGION_FULFILL]: '다른 권역 창고 출고',
-}
+export { OPTION_TYPE_LABEL } from '@/entities/delay-event'
 
 export const FEASIBILITY_LABEL: Record<Feasibility, string> = {
   [FEASIBILITY.FEASIBLE]: '실행 가능',

@@ -39,14 +39,7 @@ export const CLIENT_ROLE = {
 
 export type ClientRole = (typeof CLIENT_ROLE)[keyof typeof CLIENT_ROLE]
 
-export const OPTION_TYPE = {
-  KEEP_PLAN: 'KEEP_PLAN',
-  PRE_DEPARTURE_AIR: 'PRE_DEPARTURE_AIR',
-  KR_AIR_REPLENISH: 'KR_AIR_REPLENISH',
-  OTHER_REGION_FULFILL: 'OTHER_REGION_FULFILL',
-} as const
-
-export type OptionType = (typeof OPTION_TYPE)[keyof typeof OPTION_TYPE]
+export { OPTION_TYPE, type OptionType } from '@/entities/delay-event'
 
 export const FEASIBILITY = {
   FEASIBLE: 'FEASIBLE',
