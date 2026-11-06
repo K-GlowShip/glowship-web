@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react'
+// TODO: 알림 종을 되살릴 때 `import { Bell } from 'lucide-react'`도 함께 되살린다
 
 import { getRoleLabel, useLogout, useSession } from '@/entities/session'
 import { cn } from '@/shared/lib/cn'
@@ -27,9 +27,13 @@ export function AppGnb({ title }: { title: string }) {
         <span className="shrink-0 text-muted-foreground">/</span>
         <span className="truncate font-bold text-foreground">{title}</span>
       </p>
-      <Button variant="ghost" size="icon" aria-label="알림">
-        <Bell />
-      </Button>
+      {/*
+        TODO: 알림 종. 명세 7절 U7은 "최근 감지된 최종 선택 전 지연 건수"(고객사 공통, 읽음 상태 없음)로 정했는데,
+        계정별 알림이 필요한지 기획에 확인한 뒤 구현한다.
+        <Button variant="ghost" size="icon" aria-label="알림">
+          <Bell />
+        </Button>
+      */}
       <Avatar aria-hidden="true">{Array.from(userName)[0]}</Avatar>
       <span className="text-b2 text-foreground">
         {me ? `${userName} · ${getRoleLabel(me.roleCode)}` : userName}
