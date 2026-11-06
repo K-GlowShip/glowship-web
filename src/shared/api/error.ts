@@ -40,6 +40,12 @@ export class ApiError extends Error {
 
 export const isApiError = (error: unknown): error is ApiError => error instanceof ApiError
 
+export const HTTP_STATUS = { UNAUTHORIZED: 401 } as const
+
+/** 로그인이 필요하거나 세션이 끝난 경우(401)인지 확인한다. */
+export const isUnauthorizedError = (error: unknown) =>
+  isApiError(error) && error.status === HTTP_STATUS.UNAUTHORIZED
+
 const isErrorResponse = (data: unknown): data is ErrorResponse =>
   typeof data === 'object' &&
   data !== null &&

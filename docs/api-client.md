@@ -81,12 +81,13 @@ export const ENDPOINT = {
 
 ## 요청 함수 작성 예시
 
-- 요청 함수는 `shared/api/endpoints/`에 백엔드 리소스별 파일로 만듭니다. 실제 백엔드 API 명세에 있는 요청만 만듭니다.
-- query가 요청을 취소할 수 있도록 `signal`을 `API`의 `config`로 넘깁니다.
+- 요청 함수와 응답 타입은 `shared/api/endpoints/`에 백엔드 리소스별 파일로 만듭니다. 실제 백엔드 API 명세에 있는 요청만 만듭니다.
+- query 키·옵션(`queryOptions`)은 `shared/api/queries/`에 같은 리소스 이름의 파일로 만듭니다.
+- query가 요청을 취소할 수 있도록 요청 함수가 `config`를 받게 하고, query 옵션에서 `signal`을 넘깁니다.
 
 ```ts
 // shared/api/endpoints/delay-events.ts
-import { queryOptions } from '@tanstack/react-query'
+import type { AxiosRequestConfig } from 'axios'
 
 import { API } from '../fetcher'
 
@@ -94,11 +95,21 @@ export interface DelayEvent {
   id: string
 }
 
+export const getDelayEvents = (config?: AxiosRequestConfig) =>
+  API.get<DelayEvent[]>('/delay-events', config)
+```
+
+```ts
+// shared/api/queries/delay-events.ts
+import { queryOptions } from '@tanstack/react-query'
+
+import { getDelayEvents } from '../endpoints/delay-events'
+
 export const delayEventQueries = {
   list: () =>
     queryOptions({
       queryKey: ['delay-events'],
-      queryFn: ({ signal }) => API.get<DelayEvent[]>('/delay-events', { signal }),
+      queryFn: ({ signal }) => getDelayEvents({ signal }),
     }),
 }
 ```

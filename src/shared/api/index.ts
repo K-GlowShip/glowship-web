@@ -1,4 +1,6 @@
-export { ApiError, CLIENT_ERROR, isApiError } from './error'
-export { login, type LoginRequest } from './endpoints/auth'
+export { ApiError, CLIENT_ERROR, isApiError, isUnauthorizedError } from './error'
+export { login, type LoginRequest, logout } from './endpoints/auth'
+export { getMe, type Me, ROLE_CODE, type RoleCode } from './endpoints/me'
+export { isMeQuery, meQueryOptions } from './queries/me'
 export { API, fetcher } from './fetcher'
 export { ENDPOINT } from './paths'
