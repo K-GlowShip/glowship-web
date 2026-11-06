@@ -20,7 +20,7 @@ src/
 │   ├── decision-history/ # SCR-004
 │   └── sync-data/        # SCR-005
 └── shared/
-    ├── api/              # fetcher.ts, error.ts, endpoints/, index.ts
+    ├── api/              # fetcher.ts, error.ts, endpoints/, queries/, index.ts
     ├── ui/               # button/, badge/, table/ ...
     ├── lib/              # format-date/ ...
     └── config/           # env.ts
@@ -152,7 +152,8 @@ export function DelayInfoCard({ Actions }: { Actions?: ReactNode }) {
 | --- | --- |
 | `fetcher`(axios 인스턴스, 인터셉터), `API`(요청 메서드 객체) | `shared/api/fetcher.ts` |
 | `ApiError`(에러 응답 변환) | `shared/api/error.ts` |
-| 요청 함수, 응답 타입, query 옵션 | `shared/api/endpoints/` |
+| 요청 함수, 응답 타입 | `shared/api/endpoints/` |
+| query 키·옵션(`queryOptions`) | `shared/api/queries/` |
 | 한 slice에서만 쓰는 요청 | 그 slice의 `api` |
 | 요청 경로 상수(`ENDPOINT`) | `shared/api/paths.ts` |
 | 환경변수를 읽고 검증하는 코드 | `shared/config/env.ts` |
@@ -160,6 +161,7 @@ export function DelayInfoCard({ Actions }: { Actions?: ReactNode }) {
 
 - `entities`에는 요청 함수와 백엔드 응답 타입을 두지 않습니다. ([API 요청](https://fsd.how/kr/docs/guides/examples/api-requests/))
 - 요청 파일은 백엔드 리소스(URL 첫 경로)별로 하나씩 만듭니다. (`endpoints/delay-events.ts`, `endpoints/analyses.ts`)
+- query 키·옵션은 같은 리소스 이름의 파일로 `queries/`에 둡니다. (`queries/delay-events.ts`) 요청 함수는 axios에만, 캐시 정책(`staleTime` 등)은 query 옵션에만 의존하게 나누기 위해서입니다.
 - 실제 백엔드 API 명세에 있는 요청만 만듭니다.
 - 요청 함수 작성 방법은 [API 클라이언트 가이드](api-client.md)를 참고하세요.
 

@@ -4,7 +4,7 @@ import { getMe } from '../endpoints/me'
 
 export const meQueryOptions = queryOptions({
   queryKey: ['me'],
-  queryFn: getMe,
+  queryFn: ({ signal }) => getMe({ signal }),
   // 내 계정은 자주 바뀌지 않는다. 화면 이동·창 포커스마다 다시 받지 않고, 세션 만료는 다른 API의 401로 알아챈다.
   staleTime: Infinity,
 })

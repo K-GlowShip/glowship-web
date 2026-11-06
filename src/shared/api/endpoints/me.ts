@@ -1,3 +1,5 @@
+import type { AxiosRequestConfig } from 'axios'
+
 import { API } from '../fetcher'
 import { ENDPOINT } from '../paths'
 
@@ -20,4 +22,4 @@ export interface Me {
 }
 
 /** 내 계정을 조회한다. 쿠키가 없거나 만료되면 401이다. */
-export const getMe = () => API.get<Me>(ENDPOINT.ME)
+export const getMe = (config?: AxiosRequestConfig) => API.get<Me>(ENDPOINT.ME, config)
