@@ -1,4 +1,5 @@
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 
 import {
   countRiskOrdersByAttribution,
@@ -29,7 +30,7 @@ export function ImpactSummary({ analysis }: ImpactSummaryProps) {
           </span>
           {' · '}
           <span className="text-danger">
-            부족 수량 {getIncreasedShortage(impacts).toLocaleString()}개
+            부족 수량 {formatNumber(getIncreasedShortage(impacts))}개
           </span>
         </>
       )

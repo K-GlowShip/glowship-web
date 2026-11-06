@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { REGION_LABEL } from '@/entities/delay-event'
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Pagination } from '@/shared/ui/pagination'
@@ -145,8 +146,8 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
                   <TableCell>
                     {REGION_LABEL[item.warehouseRegion]} / {item.productName}
                   </TableCell>
-                  <TableCell>{item.availableQuantity.toLocaleString('ko-KR')}</TableCell>
-                  <TableCell>{item.averageDailySales.toLocaleString('ko-KR')}</TableCell>
+                  <TableCell>{formatNumber(item.availableQuantity)}</TableCell>
+                  <TableCell>{formatNumber(item.averageDailySales)}</TableCell>
                   <TableCell>{formatMonthDay(item.safetyStockBreachDate)}</TableCell>
                   <TableCell>
                     <StockoutCell

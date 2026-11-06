@@ -1,5 +1,6 @@
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { InfoTip } from '@/shared/ui/tooltip'
 
@@ -48,7 +49,7 @@ export function ImpactTable({ impacts }: ImpactTableProps) {
                   <TableCell
                     className={cn((impact.increasedShortage ?? 0) > 0 && 'font-bold text-danger')}
                   >
-                    {(impact.increasedShortage ?? 0).toLocaleString()}개
+                    {formatNumber(impact.increasedShortage ?? 0)}개
                   </TableCell>
                   <TableCell>
                     {impact.safetyStockBreachDate

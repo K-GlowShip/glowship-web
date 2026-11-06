@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 
@@ -70,7 +71,7 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
                   <TableCell>
                     {option.securableQuantity === null
                       ? EMPTY_VALUE
-                      : `${option.securableQuantity.toLocaleString()}개`}
+                      : `${formatNumber(option.securableQuantity)}개`}
                   </TableCell>
                   <TableCell>
                     {option.delayInducedRecoveredOrders === null
