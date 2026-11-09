@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 
+import { SEARCH_MAX_LENGTH } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { DateRangeInput } from '@/shared/ui/date-range-input'
 import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
@@ -61,6 +62,7 @@ export function HistoryFilters({ value, isSearching, onSearch }: HistoryFiltersP
             aria-labelledby="history-keyword-label"
             className="pl-40pxr"
             placeholder="선적 번호 또는 상품 검색"
+            maxLength={SEARCH_MAX_LENGTH}
             value={draft.keyword}
             onChange={(event) => setDraft({ ...draft, keyword: event.target.value })}
           />

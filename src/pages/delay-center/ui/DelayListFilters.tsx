@@ -3,6 +3,7 @@ import { type SubmitEvent, useState } from 'react'
 
 import { DELAY_COUNT_KEY } from '@/entities/delay-event'
 import type { DelayEventCounts } from '@/shared/api'
+import { DELAY_SEARCH_MAX_LENGTH } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Dropdown, type DropdownOption } from '@/shared/ui/dropdown'
 import { Input } from '@/shared/ui/input'
@@ -78,6 +79,7 @@ export function DelayListFilters({ keyword, status, counts, onSearch }: DelayLis
           aria-label="선적 번호 또는 상품 검색"
           className="pl-40pxr"
           placeholder="선적 번호 / 상품"
+          maxLength={DELAY_SEARCH_MAX_LENGTH}
           value={draftKeyword}
           onChange={(event) => setDraftKeyword(event.target.value)}
         />

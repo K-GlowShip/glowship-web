@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import type { Page } from '@/shared/api'
+import { SEARCH_MAX_LENGTH } from '@/shared/config'
 import type { ListQuery } from '@/shared/ui/table'
 import { TableTemplate } from '@/shared/ui/table-template'
 
@@ -67,7 +68,7 @@ export function DataTabLayout({
               id={searchId}
               className="pl-40pxr"
               placeholder={searchPlaceholder}
-              maxLength={100}
+              maxLength={SEARCH_MAX_LENGTH}
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
             />
