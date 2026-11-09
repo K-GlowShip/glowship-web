@@ -42,7 +42,7 @@ export function DelayCenterPage() {
 
   // '새 지연 보기'의 기준은 대시보드와 같이 마지막 수집 시각에서 계산한다. 수집된 데이터가 없으면 켤 수 없다
   const { data: summary } = useQuery(dashboardQueries.summary())
-  
+
   const newDelayFrom = summary?.lastSyncedAt ? getNewDelayFrom(summary.lastSyncedAt) : undefined
   const isNewDelayView =
     newDelayFrom !== undefined && from === newDelayFrom && hasFinalDecision === false
