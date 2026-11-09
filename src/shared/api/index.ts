@@ -20,8 +20,11 @@ export {
 } from './endpoints/dashboard'
 export {
   type DelayEventCounts,
+  type DelayEventDetail,
   type DelayEventListItem,
   type DelayEventListPage,
+  type DelayEventRun,
+  getDelayEvent,
   getDelayEvents,
   type GetDelayEventsParams,
 } from './endpoints/delay-events'
@@ -34,13 +37,24 @@ export {
 } from './endpoints/inventory-status'
 export {
   ANALYSIS_RUN_STATUS,
+  type AnalysisDataVersion,
+  type AnalysisInputBasis,
   type AnalysisRunDetail,
+  type AnalysisTarget,
+  type AtRiskOrder,
+  type AtRiskOrderLine,
   type FinalDecision,
   getAnalysisRun,
+  type InventoryImpact,
   type MemberDraft,
+  type OptionOrderOutcome,
+  type ResponseOption,
   type RunExplanation,
   SKU_SCOPE,
   type SkuScope,
+  type SkuResultDonor,
+  type SkuResultItem,
+  type SkuResults,
 } from './endpoints/analysis-runs'
 export {
   type Decision,

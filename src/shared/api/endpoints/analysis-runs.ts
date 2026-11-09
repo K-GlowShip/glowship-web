@@ -2,7 +2,13 @@ import type { AxiosRequestConfig } from 'axios'
 
 import { API } from '../fetcher'
 import { ENDPOINT } from '../paths'
-import type { ResponseOptionSummary, UserSummary } from '../summary'
+import type {
+  ResponseOptionSummary,
+  ShipmentSummary,
+  SkuSummary,
+  UserSummary,
+  WarehouseSummary,
+} from '../summary'
 
 export interface MemberDraft {
   memberDraftId: string
@@ -51,33 +57,262 @@ export type SkuScope = (typeof SKU_SCOPE)[keyof typeof SKU_SCOPE]
 
 /** 저장된 `explanation.v1` JSON. 감싸는 필드만 camelCase이고 안쪽은 저장된 키(snake_case) 그대로다. */
 export interface RunExplanation {
+  schema_version: string
+  language: string
+  analysis_run_id: string
+  /** 분석 요약(1~2문장) */
   run_summary: string
+  /** 영향 요약(1~3문장) */
   risk_summary: string
+  /** 대응안마다 한 건. 후보 대응안 전부를 고정 순서로 준다 */
+  option_explanations: { option_type: string; text: string }[]
+  recommendation_explanation: string
+  /** `code`: `FORECAST_EVENT_OVERLAP`·`BASELINE_SHORTAGE_EXISTS`·`OPTION_NEEDS_CHECK`·`SKU_NOT_ESTIMABLE` */
   warnings: { code: string; text: string }[]
+  /** 문장 속 근거 표지 `[E1]`…이 가리키는 값. 화면에는 표지를 숨기거나 근거 보기로 연결한다 */
+  evidence_references: { id: string; path: string; value: string | number | null }[]
+  model_provider: string
+  model_id: string
+  /** ISO 8601 UTC */
+  generated_at: string
+}
+
+/** 공여 창고 계산(`OTHER_REGION_FULFILL`). `NOT_ESTIMABLE`이면 `next_inbound_date`가 null */
+export interface SkuResultDonor {
+  source_warehouse_id: string
+  next_inbound_date: string | null
+  on_hand: number
+  reserved: number
+  open_commitment_net: number
+  safety_stock_quantity: number
+  transferable_quantity: number | null
+  forecast_securable_quantity: number | null
+}
+
+/** 대응안 하나의 SKU별 효과. `sku_results.v1` 저장 JSON의 한 항목(snake_case 그대로) */
+export interface SkuResultItem {
+  sku_id: string
+  /** `IMPACTED`·`WATCH`·`SHIPMENT_ONLY` */
+  sku_scope: string
+  /** `EVALUATED`·`NOT_ESTIMABLE`·`NOT_APPLICABLE` */
+  evaluation_status: string
+  /** `DONOR_NO_NEXT_INBOUND`·`MISSING_OPERATING_RULE`·`MISSING_REQUIRED_DATA` */
+  not_estimable_reason: string | null
+  baseline_prepare_quantity: number | null
+  increment_prepare_quantity: number | null
+  reduction_committed_quantity: number | null
+  residual_prepare_quantity: number | null
+  supply_quantity: number | null
+  supply_available_date: string | null
+  donor: SkuResultDonor | null
+}
+
+export interface SkuResults {
+  schema_version: string
+  unit: string
+  items: SkuResultItem[]
+}
+
+/** 분석 대상 지연. 지연 목록·상세(4.4)와 같은 값이다 */
+export interface AnalysisTarget {
+  delayEventId: string
+  episodeNo: number
+  shipment: ShipmentSummary
+  /** 도착 창고 */
+  warehouse: WarehouseSummary
+  representativeSku: SkuSummary | null
+  route: string
+  stage: string
+  /** `YYYY-MM-DD` */
+  planned3plInboundDate: string
+  expected3plInboundDate: string
+  delayDays: number
+}
+
+export interface AnalysisDataVersion {
+  dataSyncRunId: string
+  sourceDomain: string
+  /** ISO 8601 UTC */
+  finishedAt: string | null
+}
+
+export interface AnalysisInputBasis {
+  inputSeq: number
+  /** 분석 기준일 D(`YYYY-MM-DD`). 보류·실패이거나 진행 중에 `STALE`이 된 실행은 null */
+  baseDate: string | null
+  operatingRuleSetId: string
+  operatingRuleVersionNo: number
+  calculationContractVersion: string
+  allocationRuleVersion: string
+  /** 입력에 쓴 수집 목록 */
+  dataVersions: AnalysisDataVersion[]
+  /** 분석이 쓴 데이터의 기준 시각(사용한 수집 중 가장 오래된 시각). ISO 8601 UTC */
+  dataBasisAt: string | null
+  dataWarnings: { sourceDomain: string; lastStatus: string; lastFinishedAt: string | null }[]
 }
 
 /**
- * 분석 실행 상세. 응답이 커서 화면이 쓰는 필드만 타입으로 적었다. 필요한 필드는 쓰는 화면에서 더한다.
- * 상태에 따라 결과가 없으면 목록은 `[]`, 객체는 `null`이다.
+ * SKU·창고별 재고 영향. 기준선(`baseline~`)은 계획대로 입고했을 때, 나머지는 예상 입고일을 반영한 값이다.
+ * 날짜·일수·부족 수량은 구간 `[D, E)`에서 계산한다(명세 C33).
+ */
+export interface InventoryImpact {
+  sku: SkuSummary
+  warehouse: WarehouseSummary
+  /** `IMPACTED`·`WATCH`·`SHIPMENT_ONLY` */
+  skuScope: string
+  /** `CALCULATED`·`NOT_ESTIMABLE` */
+  calculationStatus: string
+  forecastMethod: string
+  availableQuantity: number
+  committedOpenQuantity: number | null
+  /** `ORDER_DEMAND`·`OUTBOUND` */
+  salesBasisType: string
+  salesBasisDays: number
+  salesBasisStartDate: string | null
+  salesBasisEndDate: string | null
+  salesBasisEventDays: number | null
+  salesBasisEventNames: string[] | null
+  averageDailySales: number | null
+  safetyStockDays: number
+  safetyStockQuantity: number | null
+  baselinePlanned3plInboundDate: string
+  expected3plInboundDate: string
+  baselineSafetyStockBreachDate: string | null
+  baselineStockoutDate: string | null
+  baselineStockoutDays: number | null
+  baselineShortageQuantity: number | null
+  safetyStockBreachDate: string | null
+  stockoutDate: string | null
+  stockoutDays: number | null
+  shortageQuantity: number | null
+}
+
+export interface AtRiskOrderLine {
+  atRiskOrderId: string
+  orderLineId: string
+  lineNo: number
+  sku: SkuSummary
+  openQuantity: number
+  /** `DIRECT_SKU_SHORTAGE`·`BUNDLED_ORDER_WAIT` */
+  waitCause: string | null
+}
+
+/** 위험 주문. 주문 단위로 한 항목이고, 줄은 `lines`에 있다 */
+export interface AtRiskOrder {
+  orderId: string
+  orderCode: string
+  /** `PRE_EXISTING`·`DELAY_INDUCED` */
+  riskAttribution: string
+  /** ISO 8601 UTC */
+  promisedDeliveryAt: string
+  baselineExpectedDeliveryAt: string | null
+  expectedDeliveryAt: string
+  /** 예상 납품이 계산 범위 밖인지 */
+  isBeyondHorizon: boolean
+  riskReason: string
+  lines: AtRiskOrderLine[]
+}
+
+/** 대응안별 주문 결과 */
+export interface OptionOrderOutcome {
+  atRiskOrderId: string
+  /** `RECOVERED`·`NOT_RECOVERED` */
+  outcome: string
+  notRecoveredReason: string | null
+  /** `FULLY_SECURED`·`PARTIALLY_SECURED`·`NOT_SECURED` */
+  lineSecurementStatus: string
+  securedQuantity: number
+  recoveredQuantity: number
+  /** ISO 8601 UTC */
+  expectedDeliveryAt: string | null
+  /** 공급 창고가 없으면 null */
+  sourceWarehouse: WarehouseSummary | null
+  /** `EXISTING_STOCK`·`OTHER_REGION_WAREHOUSE`·`KR_AIR`·`PRE_DEPARTURE_AIR` */
+  supplySource: string | null
+}
+
+/**
+ * 대응안 비교의 한 행. 판정할 수 없거나 사전 조건이 실패하면 주문 집계는 null이다(명세 4.5 집계 규칙).
+ * 비용 필드는 없다.
+ */
+export interface ResponseOption {
+  responseOptionId: string
+  /** `KEEP_PLAN`·`PRE_DEPARTURE_AIR`·`KR_AIR_REPLENISH`·`OTHER_REGION_FULFILL` */
+  optionType: string
+  /** `FEASIBLE`·`NOT_FEASIBLE`·`NEEDS_CHECK` */
+  feasibilityStatus: string
+  /** `FEASIBLE`이면 null. 화면 문구는 코드로 만든다 */
+  reasonCode: string | null
+  requiredQuantity: number
+  securableQuantity: number | null
+  reductionCommittedTotal: number | null
+  expectedDeliveryDate: string | null
+  fullyRecoveredOrders: number | null
+  delayInducedRecoveredOrders: number | null
+  itemSecuredBlockedOrders: number | null
+  notRecoveredOrders: number | null
+  recommendationRank: number | null
+  isRecommended: boolean
+  /** 저장값을 읽지 못하면 null */
+  skuResults: SkuResults | null
+  outcomes: OptionOrderOutcome[]
+}
+
+/**
+ * 분석 실행 상세(명세 4.5). 상태에 따라 결과가 없으면 목록은 `[]`, 객체는 `null`이다.
+ * 결과가 있는 상태는 `READY_FOR_REVIEW`·`NO_RISK`(재고 영향만)·`STALE`·`FINALIZED`다.
  */
 export interface AnalysisRunDetail {
+  // 실행
   runId: string
   runCode: string | null
+  versionNo: number
+  parentRunId: string | null
+  isLatest: boolean
   status: string
-  inputBasis: {
-    /** 분석이 쓴 데이터의 기준 시각. ISO 8601 UTC */
-    dataBasisAt: string | null
-  }
-  inventoryImpacts: {
-    skuScope: string
-    /** 지연 반영 부족 수량. 계산하지 않았으면 null */
-    shortageQuantity: number | null
-    /** 계획대로 입고했을 때의 부족 수량(기준선). 계산하지 않았으면 null */
-    baselineShortageQuantity: number | null
-  }[]
-  /** 위험 주문. 주문 단위로 한 항목이다 */
-  atRiskOrders: { orderId: string }[]
+  completedStatus: string | null
+  resultClass: string | null
+  statusReason: string | null
+  /** `AUTO`·`REANALYSIS` */
+  triggerType: string
+  triggerReason: string
+  /** 자동 실행이면 null */
+  requestedBy: UserSummary | null
+  requestReason: string | null
+  /** ISO 8601 UTC */
+  requestedAt: string | null
+  startedAt: string
+  finishedAt: string | null
+
+  // STALE(`STALE`일 때만 값이 있고, 아니면 목록은 `[]`)
+  staleDetectedAt: string | null
+  stalePrimaryReason: string | null
+  staleReasonCodes: string[]
+
+  target: AnalysisTarget
+  inputBasis: AnalysisInputBasis
+
+  // 결과
+  inventoryImpacts: InventoryImpact[]
+  atRiskOrders: AtRiskOrder[]
+  responseOptions: ResponseOption[]
+
+  // AI 설명(`explanationValidationStatus`가 `PASSED`일 때만 `explanation`이 있다)
   explanation: RunExplanation | null
+  /** `PASSED`·`FAILED` */
+  explanationValidationStatus: string | null
+  explanationGeneratedAt: string | null
+  modelName: string | null
+  promptVersion: string | null
+
+  // 실패 요약(`ON_HOLD`·`FAILED`일 때만 값이 있다)
+  failedStep: string | null
+  failureCode: string | null
+  attemptCount: number | null
+  isRetryExhausted: boolean | null
+  failureMessage: string | null
+
+  // 판단 이력
   drafts: MemberDraft[]
   finalDecision: FinalDecision | null
 }

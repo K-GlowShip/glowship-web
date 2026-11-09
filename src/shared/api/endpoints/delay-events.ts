@@ -57,9 +57,48 @@ export interface GetDelayEventsParams extends PageParams {
   from?: string
   to?: string
   hasFinalDecision?: boolean
-  /** 선적 코드, 또는 그 선적에 실린 상품 코드·상품명 부분 일치. 최대 100자 */
+  /** 선적 코드, 또는 그 선적에 실린 상품 코드·상품명 부분 일치. 최대 50자(`DELAY_SEARCH_MAX_LENGTH`) */
   q?: string
 }
 
 export const getDelayEvents = (params?: GetDelayEventsParams, config?: AxiosRequestConfig) =>
   API.get<DelayEventListPage>(ENDPOINT.DELAY_EVENTS, { ...config, params })
+
+/** 지연 상세의 분석 버전 한 건. 시스템의 분석 기록이며, 사람의 판단 이력(`/decisions`)과 다르다. */
+export interface DelayEventRun {
+  runId: string
+  /** 서버가 아직 값을 만들지 않았으면 null */
+  runCode: string | null
+  versionNo: number
+  status: string
+  isLatest: boolean
+  triggerType: string
+  triggerReason: string | null
+  parentRunId: string | null
+  /** 완료 판정 당시 상태. 완료 전이면 null */
+  completedStatus: string | null
+  resultClass: string | null
+  /** `ON_HOLD`·`FAILED`일 때만 값이 있다 */
+  failureCode: string | null
+  /** ISO 8601 UTC. `STALE`이 아니면 null */
+  staleDetectedAt: string | null
+  stalePrimaryReason: string | null
+  /** ISO 8601 UTC */
+  startedAt: string | null
+  finishedAt: string | null
+}
+
+/** 지연 상세. 목록의 한 건과 같은 값에 이전 예상 입고일과 분석 버전 이력(`runs`)이 더해진다. */
+export interface DelayEventDetail extends Omit<
+  DelayEventListItem,
+  'atRiskOrderCount' | 'currentRun' | 'hasFinalDecision'
+> {
+  /** `YYYY-MM-DD`. 이전에 관측한 예상 입고일. 없으면 null */
+  previousExpected3plInboundDate: string | null
+  /** 최신 버전 먼저. 실행이 없으면 빈 배열 */
+  runs: DelayEventRun[]
+}
+
+/** 없는 지연·다른 고객사 지연은 404 `DELAY_EVENT_NOT_FOUND` */
+export const getDelayEvent = (delayEventId: string, config?: AxiosRequestConfig) =>
+  API.get<DelayEventDetail>(`${ENDPOINT.DELAY_EVENTS}/${encodeURIComponent(delayEventId)}`, config)
