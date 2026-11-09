@@ -5,6 +5,7 @@ import {
   type Decision,
   type DecisionStatus,
   type GetDecisionsParams,
+  SKU_SCOPE,
 } from '@/shared/api'
 import { formatYYYYMMDDHHmm, toUtcDayStart, toUtcNextDayStart } from '@/shared/lib/kst-date'
 
@@ -70,6 +71,16 @@ export const getMemberOpinions = (decision: Decision, run: AnalysisRunDetail) =>
         .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt))
     : []
 
-/** 당시 분석 요약의 부족 수량. 상품·창고별 `shortageQuantity`의 합(계산하지 않은 값은 0) */
+/**
+ * 당시 분석 요약의 부족 수량. 지연으로 늘어난 부족이다(명세 4.5 D21).
+ * `IMPACTED` 행의 `shortageQuantity − baselineShortageQuantity`를 더한다. 계획대로 입고해도 생기는 기준선 부족과
+ * 지연과 무관한 `WATCH`·`SHIPMENT_ONLY` 행이 섞이지 않게 하려는 것이다. 계산하지 않은 값(null)은 0으로 본다.
+ */
 export const getShortageTotal = (run: AnalysisRunDetail) =>
-  run.inventoryImpacts.reduce((sum, impact) => sum + (impact.shortageQuantity ?? 0), 0)
+  run.inventoryImpacts
+    .filter((impact) => impact.skuScope === SKU_SCOPE.IMPACTED)
+    .reduce(
+      (sum, impact) =>
+        sum + Math.max((impact.shortageQuantity ?? 0) - (impact.baselineShortageQuantity ?? 0), 0),
+      0,
+    )

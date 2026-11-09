@@ -333,9 +333,16 @@ export const filterDelayCases = (
   )
 }
 
-/** 주소의 `from` 값. UTC 시각으로 읽을 수 없으면 조건을 쓰지 않는다. */
+const UTC_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
+
+/**
+ * 주소의 `from` 값. 서버가 받는 형식(UTC 시각 `YYYY-MM-DDTHH:mm:ssZ`)이 아니면 조건을 쓰지 않는다.
+ * 날짜만 있거나 시간대가 없는 값을 그대로 보내면 서버가 422로 거부한다.
+ */
 export const parseFromParam = (value: string | null) =>
-  value !== null && !Number.isNaN(Date.parse(value)) ? value : undefined
+  value !== null && UTC_DATE_TIME_PATTERN.test(value) && !Number.isNaN(Date.parse(value))
+    ? value
+    : undefined
 
 /** 주소의 `hasFinalDecision` 값. 'true'·'false'가 아니면 조건을 쓰지 않는다. */
 export const parseHasFinalDecisionParam = (value: string | null) =>

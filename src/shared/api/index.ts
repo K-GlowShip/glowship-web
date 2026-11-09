@@ -38,6 +38,8 @@ export {
   getAnalysisRun,
   type MemberDraft,
   type RunExplanation,
+  SKU_SCOPE,
+  type SkuScope,
 } from './endpoints/analysis-runs'
 export {
   type Decision,

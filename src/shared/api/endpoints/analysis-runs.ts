@@ -24,6 +24,15 @@ export interface FinalDecision {
   checkedSeq: number
 }
 
+/** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
+export const SKU_SCOPE = {
+  IMPACTED: 'IMPACTED',
+  WATCH: 'WATCH',
+  SHIPMENT_ONLY: 'SHIPMENT_ONLY',
+} as const
+
+export type SkuScope = (typeof SKU_SCOPE)[keyof typeof SKU_SCOPE]
+
 /** 저장된 `explanation.v1` JSON. 감싸는 필드만 camelCase이고 안쪽은 저장된 키(snake_case) 그대로다. */
 export interface RunExplanation {
   run_summary: string
@@ -43,7 +52,13 @@ export interface AnalysisRunDetail {
     /** 분석이 쓴 데이터의 기준 시각. ISO 8601 UTC */
     dataBasisAt: string | null
   }
-  inventoryImpacts: { shortageQuantity: number | null }[]
+  inventoryImpacts: {
+    skuScope: string
+    /** 지연 반영 부족 수량. 계산하지 않았으면 null */
+    shortageQuantity: number | null
+    /** 계획대로 입고했을 때의 부족 수량(기준선). 계산하지 않았으면 null */
+    baselineShortageQuantity: number | null
+  }[]
   /** 위험 주문. 주문 단위로 한 항목이다 */
   atRiskOrders: { orderId: string }[]
   explanation: RunExplanation | null
