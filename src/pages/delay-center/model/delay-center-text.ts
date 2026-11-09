@@ -1,3 +1,5 @@
+import { DECISION_TEXT } from '@/shared/config'
+
 import { CLIENT_ROLE, type ClientRole } from './delay-center-code'
 
 interface DecisionFormText {
@@ -11,13 +13,13 @@ interface DecisionFormText {
 export const DECISION_FORM_TEXT = {
   [CLIENT_ROLE.LEAD]: {
     optionLabel: '최종 대응안',
-    textLabel: '선택 이유',
+    textLabel: DECISION_TEXT.SELECTION_REASON,
     textPlaceholder: '이 대응안을 선택한 이유를 입력하세요.',
     submit: '최종 선택',
   },
   [CLIENT_ROLE.MEMBER]: {
     optionLabel: '선택한 대응안',
-    textLabel: '의견',
+    textLabel: DECISION_TEXT.OPINION,
     textPlaceholder: '동료와 팀장이 참고할 의견을 입력하세요.',
     submit: '의견·초안 저장',
   },
