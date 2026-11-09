@@ -1,3 +1,5 @@
+import { EMPTY_VALUE } from '@/shared/config'
+
 // 서버는 시각을 항상 UTC(ISO 8601, 'Z')로 주고받고, 화면은 한국 시간(KST)으로 보여 준다.
 // 브라우저 시간대에 기대지 않도록 시간대를 Asia/Seoul로 명시해서 변환한다.
 const KST_TIME_ZONE = 'Asia/Seoul'
@@ -78,9 +80,24 @@ export const kstToUtc = (kstDateTime: string) => {
 export const toUtcDayStart = (kstDate: string) =>
   KST_DATE_PATTERN.test(kstDate) ? kstToUtc(`${kstDate}T00:00:00`) : ''
 
-/** 한국 날짜 'YYYY-MM-DD'의 끝(23:59:59 KST)을 UTC 시각으로. (예: '2026-10-21' -> '2026-10-21T14:59:59Z') */
-export const toUtcDayEnd = (kstDate: string) =>
-  KST_DATE_PATTERN.test(kstDate) ? kstToUtc(`${kstDate}T23:59:59`) : ''
+/**
+ * 'YYYY-MM-DD'에 일수를 더한다. 브라우저 시간대에 기대지 않고 달력 날짜(UTC 기준 문자열)로만 계산한다.
+ * 형식이 올바르지 않으면 ''. (예: ('2026-10-31', 1) -> '2026-11-01')
+ */
+export const addDays = (date: string, days: number) => {
+  if (!KST_DATE_PATTERN.test(date)) {
+    return ''
+  }
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
+}
+
+/**
+ * 기간 필터의 끝(`to`)으로 보낼 시각. 한국 날짜 'YYYY-MM-DD'의 **다음 날** 시작(00:00:00 KST)을 UTC 시각으로.
+ * 서버의 `[from, to)`는 `to`를 포함하지 않으므로, 종료일을 포함하려면 종료일 + 1일을 보낸다.
+ * (예: '2026-10-21' -> '2026-10-21T15:00:00Z')
+ */
+export const toUtcNextDayStart = (kstDate: string) => toUtcDayStart(addDays(kstDate, 1))
 
 const kstLongDateFormatter = new Intl.DateTimeFormat('ko-KR', {
   timeZone: KST_TIME_ZONE,
@@ -98,3 +115,11 @@ export const formatKoreanLongDate = (isoUtc: string) => {
 
 /** UTC 시각을 한국 시간 'HH:mm'으로 바꾼다. (예: '2026-10-21T00:30:00Z' -> '09:30') */
 export const formatHHmm = (isoUtc: string) => formatYYYYMMDDHHmm(isoUtc).slice(-5)
+
+/** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. 값이 없거나 형식이 올바르지 않으면 `EMPTY_VALUE`. */
+export const formatMMDD = (date: string | null) => {
+  if (!date || !KST_DATE_PATTERN.test(date)) {
+    return EMPTY_VALUE
+  }
+  return date.slice(5).replace('-', '.')
+}

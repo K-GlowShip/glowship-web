@@ -1,6 +1,6 @@
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 
-import { formatMonthDay } from '../model/delay-center'
 import { getInboundDelay, isAxisEnd } from '../model/impact-axis'
 import { AxisGuides } from './AxisGuides'
 
@@ -85,7 +85,7 @@ function InboundMarker({ date, label, left, hollow }: InboundMarkerProps) {
         style={{ left: `${left}%` }}
       >
         <span className={cn('text-b2 font-bold', hollow ? 'text-muted-foreground' : 'text-info')}>
-          {formatMonthDay(date)}
+          {formatMMDD(date)}
         </span>
         <span className="text-caption text-muted-foreground">{label}</span>
       </span>

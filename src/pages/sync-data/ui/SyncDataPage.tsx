@@ -1,8 +1,22 @@
-import { SYNC_INTERVAL_LABEL, SYNC_SOURCES } from '../model/sync-sources'
-import { ProductPanel } from './ProductPanel'
+import { useQuery } from '@tanstack/react-query'
+
+import { SYNC_CARD_DOMAINS, SYNC_CARD_NAME } from '@/entities/data-sync-run'
+import { dataSyncRunQueries } from '@/shared/api'
+import { QueryError } from '@/shared/ui/query-error'
+import { Skeleton } from '@/shared/ui/skeleton'
+
+import { SyncDataTabs } from './SyncDataTabs'
 import { SyncSourceCard } from './SyncSourceCard'
 
 export function SyncDataPage() {
+  const { data, error, isPending, isFetching, refetch } = useQuery(dataSyncRunQueries.latest())
+
+  // 서버는 원천 5종을 항상 내려준다. 카드가 있는 원천만 순서대로 고른다.
+  const runs = SYNC_CARD_DOMAINS.flatMap((domain) => {
+    const run = data?.items.find((item) => item.sourceDomain === domain)
+    return run ? [{ domain, run }] : []
+  })
+
   return (
     <div className="flex flex-col gap-24pxr">
       <header>
@@ -11,15 +25,31 @@ export function SyncDataPage() {
       </header>
 
       <section className="flex flex-col gap-12pxr" aria-label="데이터 수집 현황">
-        <p className="pr-12pxr text-right text-b2 text-muted-foreground">{SYNC_INTERVAL_LABEL}</p>
-        <div className="grid gap-24pxr md:grid-cols-3">
-          {SYNC_SOURCES.map((source) => (
-            <SyncSourceCard key={source.id} source={source} />
-          ))}
-        </div>
+        {runs[0] && (
+          <p className="pr-12pxr text-right text-b2 text-muted-foreground">
+            모든 데이터는 {runs[0].run.syncIntervalMinutes}분마다 자동으로 수집됩니다
+          </p>
+        )}
+        {isPending && (
+          <div className="grid gap-24pxr md:grid-cols-3">
+            {SYNC_CARD_DOMAINS.map((domain) => (
+              <Skeleton key={domain} className="h-148pxr rounded-card" />
+            ))}
+          </div>
+        )}
+        {error && !data && (
+          <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
+        )}
+        {data && (
+          <div className="grid gap-24pxr md:grid-cols-3">
+            {runs.map(({ domain, run }) => (
+              <SyncSourceCard key={domain} name={SYNC_CARD_NAME[domain]} run={run} />
+            ))}
+          </div>
+        )}
       </section>
 
-      <ProductPanel />
+      <SyncDataTabs />
     </div>
   )
 }

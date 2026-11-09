@@ -1,72 +1,55 @@
-import { formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
-
-/** 명세 v6.2 2절 판단 이력 상태 코드 */
-export type HistoryStatus = 'FINAL' | 'DRAFT' | 'NEEDS_REANALYSIS'
-
-export interface HistoryComment {
-  author: string
-  time: string
-  text: string
-}
-
-export interface HistoryRecord {
-  id: string
-  /** ISO 8601 UTC. 예: '2026-10-21T00:24:00Z' */
-  selectedAt: string
-  /** 이 기록의 지연 이벤트. 지연 대응 센터에서 해당 건을 열 때 쓴다 */
-  delayEventId: string
-  shipmentCode: string
-  productName: string
-  option: string
-  selector: string
-  /** 분석 실행의 표시용 ID. 초안·최종 선택 모두 있다. 예: 'AN-261021-042' */
-  runCode: string
-  status: HistoryStatus
-  reason: string
-  comment: HistoryComment | null
-  /** ISO 8601 UTC. 예: '2026-10-21T00:00:00Z' */
-  baseDataAt: string
-  analysis: {
-    shortage: number
-    riskOrders: number
-    /** 저장된 분석의 `run_summary`. 지연 선적 일정과 결과 분류(1~2문장) */
-    runSummary: string
-    /** 저장된 분석의 `risk_summary`. 영향 SKU 수·위험 주문 수와 귀속, "예측 기준" 표기(1~3문장) */
-    riskSummary: string
-    /** 저장된 분석의 `warnings[]`. 없으면 빈 배열 */
-    warnings: { code: string; text: string }[]
-  }
-}
+import {
+  type AnalysisRunDetail,
+  DECISION_STATUS,
+  DECISION_TYPE,
+  type Decision,
+  type DecisionStatus,
+  type GetDecisionsParams,
+  SKU_SCOPE,
+} from '@/shared/api'
+import { formatYYYYMMDDHHmm, toUtcDayStart, toUtcNextDayStart } from '@/shared/lib/kst-date'
 
 export interface HistoryFilter {
-  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜 */
+  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜. 고르지 않았으면 '' */
   startDate: string
-  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜 */
+  /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜. 고르지 않았으면 '' */
   endDate: string
   keyword: string
-  status: HistoryStatus | ''
-  selector: string
+  status: DecisionStatus | ''
 }
 
-export const HISTORY_STATUS_LABEL: Record<HistoryStatus, string> = {
-  FINAL: '최종 선택',
-  DRAFT: '초안',
-  NEEDS_REANALYSIS: '재분석 필요',
+export const HISTORY_STATUS_LABEL: Record<DecisionStatus, string> = {
+  [DECISION_STATUS.FINAL]: '최종 선택',
+  [DECISION_STATUS.DRAFT]: '초안',
+  [DECISION_STATUS.NEEDS_REANALYSIS]: '재분석 필요',
 }
 
-export const HISTORY_STATUS_OPTIONS = Object.keys(HISTORY_STATUS_LABEL) as HistoryStatus[]
+export const HISTORY_STATUS_BADGE_VARIANT = {
+  [DECISION_STATUS.FINAL]: 'success',
+  [DECISION_STATUS.DRAFT]: 'neutral',
+  [DECISION_STATUS.NEEDS_REANALYSIS]: 'warning',
+} as const satisfies Record<DecisionStatus, 'success' | 'neutral' | 'warning'>
 
+export const HISTORY_STATUS_OPTIONS = Object.keys(HISTORY_STATUS_LABEL) as DecisionStatus[]
+
+/** 서버 `size`는 1~100. 화면은 10행씩 보여 준다 */
 export const HISTORY_PAGE_SIZE = 10
 
 export const HISTORY_DISCLAIMER = '최종 선택은 판단의 기록이며 실제 출고 변경을 의미하지 않습니다.'
 
-export const DEFAULT_HISTORY_FILTER: HistoryFilter = {
-  startDate: '2026-10-01',
-  endDate: '2026-10-21',
-  keyword: '',
-  status: '',
-  selector: '',
-}
+/**
+ * 화면 필터를 `GET /decisions` 요청으로 바꾼다. 서버의 기간은 `[from, to)`(UTC)라서,
+ * 한국 날짜 시작일은 그날 00:00 KST로, 종료일은 **다음 날** 00:00 KST로 보내 종료일 하루를 포함한다.
+ * 값이 없는 필터는 `undefined`로 두어 요청에 싣지 않는다.
+ */
+export const toDecisionParams = (filter: HistoryFilter, page: number): GetDecisionsParams => ({
+  from: toUtcDayStart(filter.startDate) || undefined,
+  to: toUtcNextDayStart(filter.endDate) || undefined,
+  q: filter.keyword.trim() || undefined,
+  status: filter.status || undefined,
+  page,
+  size: HISTORY_PAGE_SIZE,
+})
 
 /** UTC 시각을 한국 시간으로. '2026-10-21T00:24:00Z' -> '2026.10.21 09:24' */
 export const formatSelectedAt = formatYYYYMMDDHHmm
@@ -74,28 +57,30 @@ export const formatSelectedAt = formatYYYYMMDDHHmm
 /** UTC 시각을 한국 시간으로. '2026-10-21T00:00:00Z' -> '2026.10.21 09:00 KST' */
 export const formatBaseDataAt = (baseDataAt: string) => `${formatYYYYMMDDHHmm(baseDataAt)} KST`
 
-export const filterHistory = (records: HistoryRecord[], filter: HistoryFilter) => {
-  const keyword = filter.keyword.trim().toLowerCase()
+/** 선택 이유. 최종 선택은 선택 이유, 초안은 작성한 의견이다. 없으면 null */
+export const getDecisionReason = (decision: Decision, run: AnalysisRunDetail) =>
+  decision.decisionType === DECISION_TYPE.FINAL
+    ? (run.finalDecision?.reasonText ?? null)
+    : (run.drafts.find((draft) => draft.memberDraftId === decision.decisionId)?.opinionText ?? null)
 
-  return records.filter((record) => {
-    // 조회 기간은 한국 날짜이므로, UTC 시각을 한국 날짜로 바꿔 비교한다.
-    const date = formatYYYYMMDD(record.selectedAt)
-    if (filter.startDate && date < filter.startDate) {
-      return false
-    }
-    if (filter.endDate && date > filter.endDate) {
-      return false
-    }
-    if (filter.status && record.status !== filter.status) {
-      return false
-    }
-    if (filter.selector && record.selector !== filter.selector) {
-      return false
-    }
-    return (
-      !keyword ||
-      record.shipmentCode.toLowerCase().includes(keyword) ||
-      record.productName.toLowerCase().includes(keyword)
+/** 최종 선택 이력에 함께 보여 주는 팀원 의견. 의견 본문이 있는 초안만 오래된 순으로 */
+export const getMemberOpinions = (decision: Decision, run: AnalysisRunDetail) =>
+  decision.decisionType === DECISION_TYPE.FINAL
+    ? run.drafts
+        .filter((draft) => draft.opinionText)
+        .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt))
+    : []
+
+/**
+ * 당시 분석 요약의 부족 수량. 지연으로 늘어난 부족이다(명세 4.5 D21).
+ * `IMPACTED` 행의 `shortageQuantity − baselineShortageQuantity`를 더한다. 계획대로 입고해도 생기는 기준선 부족과
+ * 지연과 무관한 `WATCH`·`SHIPMENT_ONLY` 행이 섞이지 않게 하려는 것이다. 계산하지 않은 값(null)은 0으로 본다.
+ */
+export const getShortageTotal = (run: AnalysisRunDetail) =>
+  run.inventoryImpacts
+    .filter((impact) => impact.skuScope === SKU_SCOPE.IMPACTED)
+    .reduce(
+      (sum, impact) =>
+        sum + Math.max((impact.shortageQuantity ?? 0) - (impact.baselineShortageQuantity ?? 0), 0),
+      0,
     )
-  })
-}

@@ -1,11 +1,12 @@
 import { ChevronDown } from 'lucide-react'
 
+import { formatNumber } from '@/shared/lib/format-number'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 
 import {
   ATTRIBUTION_LABEL,
   countRiskOrdersByAttribution,
-  formatMonthDay,
   RISK_ATTRIBUTION,
   type RiskOrder,
   sortRiskOrders,
@@ -44,7 +45,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
       </div>
       {/* 주문이 많아도 상세가 길어지지 않게 영역 높이를 제한하고, 넘치면 이 안에서만 스크롤한다. 바깥 틀의 테두리로 영역을 구분하고, 스크롤바는 얇게 틀 안쪽에 둔다 */}
       <div className="rounded-card border border-border bg-background p-4pxr">
-        <div className="max-h-450pxr [scrollbar-width:thin] [scrollbar-color:color-mix(in_srgb,var(--color-muted-foreground)_40%,transparent)_transparent] overflow-y-auto p-8pxr">
+        <div className="max-h-450pxr scrollbar-thin [scrollbar-color:color-mix(in_srgb,var(--color-muted-foreground)_40%,transparent)_transparent] overflow-y-auto p-8pxr">
           <ul className="flex flex-col gap-8pxr">
             {sortRiskOrders(orders).map((order) => (
               <li key={order.orderCode}>
@@ -64,8 +65,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                       {ATTRIBUTION_LABEL[order.attribution]}
                     </Badge>
                     <span className="ml-auto text-b2 text-muted-foreground">
-                      약속 {formatMonthDay(order.promisedDate)} → 예상{' '}
-                      {formatMonthDay(order.expectedDate)}
+                      약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
                     </span>
                   </summary>
                   <p className="border-t border-border px-16pxr pt-12pxr text-b2 text-foreground">
@@ -83,7 +83,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                             <span className="font-bold text-foreground">{line.productName}</span>{' '}
                             {line.skuCode}
                           </span>
-                          <span>미출고 {line.openQuantity.toLocaleString()}개</span>
+                          <span>미출고 {formatNumber(line.openQuantity)}개</span>
                         </li>
                       ))}
                     </ul>

@@ -1,7 +1,17 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { REGION_LABEL } from '@/entities/delay-event'
+import { getRegionLabel } from '@/entities/delay-event'
+import {
+  INVENTORY_STATUS,
+  inventoryStatusQueries,
+  type InventoryStatus,
+  type InventoryStatusItem,
+} from '@/shared/api'
+import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
+import { addDays, formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Pagination } from '@/shared/ui/pagination'
@@ -9,27 +19,19 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmptyRow,
   TableHead,
   TableHeader,
+  TableQueryRows,
   TableRow,
 } from '@/shared/ui/table'
 import { InfoTip } from '@/shared/ui/tooltip'
 
 import {
-  addDays,
   diffDays,
-  formatMonthDay,
+  INVENTORY_PAGE_SIZE,
   INVENTORY_STATUS_BADGE_VARIANT,
-  INVENTORY_STATUS,
   INVENTORY_STATUS_LABEL,
-  type InventoryStatus,
-  type InventoryItem,
-  type InventoryStatusResult,
 } from '../model/dashboard'
-
-// 명세 공통 규칙: 목록은 page·size를 받는다. 서버가 위험 순으로 정렬해 주므로 1페이지에 급한 행이 모인다
-const PAGE_SIZE = 5
 
 const STATUS_BAR_COLOR: Record<InventoryStatus, string> = {
   [INVENTORY_STATUS.RISK]: 'bg-danger',
@@ -46,20 +48,21 @@ function StockoutCell({
   baseDate,
   safetyStockDays,
 }: {
-  item: InventoryItem
-  baseDate: string
-  safetyStockDays: number
+  item: InventoryStatusItem
+  baseDate: string | null
+  safetyStockDays: number | null
 }) {
-  if (!item.stockoutDate) {
+  if (!item.stockoutDate || !baseDate) {
     return <>-</>
   }
   const daysLeft = Math.max(diffDays(baseDate, item.stockoutDate), 0)
-  const ratio = Math.min(daysLeft / (safetyStockDays * BAR_FULL_MULTIPLE), 1)
+  // 안전재고 일수를 모르면 막대를 채울 기준이 없어 비워 둔다
+  const ratio = safetyStockDays ? Math.min(daysLeft / (safetyStockDays * BAR_FULL_MULTIPLE), 1) : 0
 
   return (
     <div className="flex flex-col gap-4pxr">
       <span>
-        {formatMonthDay(item.stockoutDate)}{' '}
+        {formatMMDD(item.stockoutDate)}{' '}
         <span className="text-caption text-muted-foreground">D-{daysLeft}</span>
       </span>
       <span className="h-4pxr w-80pxr overflow-hidden rounded-full bg-disabled" aria-hidden="true">
@@ -82,14 +85,15 @@ function InfoHeader({ label, description }: { label: string; description: string
   )
 }
 
-/** 서버 연동 후에는 화면에서 자르지 않고 page·size를 요청으로 보낸다 */
-export function InventoryTable({ inventory }: { inventory: InventoryStatusResult }) {
-  const [requestedPage, setPage] = useState(1)
-  const pageCount = Math.max(1, Math.ceil(inventory.items.length / PAGE_SIZE))
-  // 데이터가 줄어 요청한 페이지가 사라져도 빈 페이지가 보이지 않게 한다
-  const page = Math.min(requestedPage, pageCount)
-  const baseDate = addDays(inventory.inventoryDate, 1)
-  const pageItems = inventory.items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+export function InventoryTable() {
+  const [page, setPage] = useState(1)
+  const query = useQuery(inventoryStatusQueries.list({ page, size: INVENTORY_PAGE_SIZE }))
+  const { data } = query
+  // 계산 기준일은 마지막 재고 일자 + 1일이다. 재고가 없으면 null
+  const baseDate = data?.inventoryDate ? addDays(data.inventoryDate, 1) : null
+  // 불러오기 전이거나 적용할 운영 기준이 없으면 null
+  const salesBasisDays = data?.salesBasisDays ?? null
+  const safetyStockDays = data?.safetyStockDays ?? null
 
   return (
     <Card>
@@ -104,11 +108,11 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
         <dl className="flex flex-wrap justify-end gap-x-16pxr gap-y-2pxr text-caption">
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">기준일</dt>
-            <dd>{formatMonthDay(baseDate)}</dd>
+            <dd>{formatMMDD(baseDate)}</dd>
           </div>
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">판매량 기간</dt>
-            <dd>최근 {inventory.salesBasisDays}일</dd>
+            <dd>{salesBasisDays === null ? EMPTY_VALUE : `최근 ${salesBasisDays}일`}</dd>
           </div>
           {/* 명세 4.4: 이 값이 입고 예정을 반영하지 않은 참고값임을 기준과 함께 화면에 보여 준다 */}
           <div className="flex gap-6pxr">
@@ -127,7 +131,7 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
                 <TableHead>평균 일 판매량(개)</TableHead>
                 <TableHead>
                   <InfoHeader
-                    label={`안전재고(${inventory.safetyStockDays}일분) 하회`}
+                    label={`안전재고${safetyStockDays === null ? '' : `(${safetyStockDays}일분)`} 하회`}
                     description="가용 재고가 이 수량 밑으로 처음 내려가는 날짜입니다."
                   />
                 </TableHead>
@@ -136,36 +140,39 @@ export function InventoryTable({ inventory }: { inventory: InventoryStatusResult
               </TableRow>
             </TableHeader>
             <TableBody>
-              {inventory.items.length === 0 && (
-                <TableEmptyRow colSpan={6}>재고 현황이 없습니다.</TableEmptyRow>
-              )}
-              {pageItems.map((item) => (
-                // 같은 거점·상품은 한 행이다(명세 4.4)
-                <TableRow key={`${item.warehouseId}-${item.skuId}`}>
-                  <TableCell>
-                    {REGION_LABEL[item.warehouseRegion]} / {item.productName}
-                  </TableCell>
-                  <TableCell>{item.availableQuantity.toLocaleString('ko-KR')}</TableCell>
-                  <TableCell>{item.averageDailySales.toLocaleString('ko-KR')}</TableCell>
-                  <TableCell>{formatMonthDay(item.safetyStockBreachDate)}</TableCell>
-                  <TableCell>
-                    <StockoutCell
-                      item={item}
-                      baseDate={baseDate}
-                      safetyStockDays={inventory.safetyStockDays}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={INVENTORY_STATUS_BADGE_VARIANT[item.status]}>
-                      {INVENTORY_STATUS_LABEL[item.status]}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <TableQueryRows query={query} colSpan={6} emptyMessage="재고 현황이 없습니다.">
+                {(items) =>
+                  items.map((item) => (
+                    // 같은 거점·상품은 한 행이다(명세 4.4)
+                    <TableRow key={`${item.warehouse.warehouseId}-${item.sku.skuId}`}>
+                      <TableCell>
+                        {getRegionLabel(item.warehouse.regionCode)} / {item.sku.productName}
+                      </TableCell>
+                      <TableCell>{formatNumber(item.availableQuantity)}</TableCell>
+                      <TableCell>{formatNumber(item.averageDailySales)}</TableCell>
+                      <TableCell>{formatMMDD(item.safetyStockBreachDate)}</TableCell>
+                      <TableCell>
+                        <StockoutCell
+                          item={item}
+                          baseDate={baseDate}
+                          safetyStockDays={safetyStockDays}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={INVENTORY_STATUS_BADGE_VARIANT[item.status]}>
+                          {INVENTORY_STATUS_LABEL[item.status]}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                }
+              </TableQueryRows>
             </TableBody>
           </Table>
         </div>
-        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
+        {data && (
+          <Pagination page={page} pageCount={Math.max(1, data.totalPages)} onPageChange={setPage} />
+        )}
       </CardContent>
     </Card>
   )

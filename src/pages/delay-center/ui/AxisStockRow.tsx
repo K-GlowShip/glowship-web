@@ -1,6 +1,7 @@
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 
-import { formatMonthDay, type SkuImpact } from '../model/delay-center'
+import { type SkuImpact } from '../model/delay-center'
 import { getStockoutSpanDays } from '../model/impact-axis'
 import { AxisGuides } from './AxisGuides'
 
@@ -38,8 +39,8 @@ export function AxisStockRow({ impact, expectedInbound, toPercent, guides }: Axi
             }}
             title={
               stockoutDays < spanDays
-                ? `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터 입고 전까지 ${spanDays}일 중)`
-                : `품절 ${stockoutDays}일 (${formatMonthDay(stockoutDate)}부터)`
+                ? `품절 ${stockoutDays}일 (${formatMMDD(stockoutDate)}부터 입고 전까지 ${spanDays}일 중)`
+                : `품절 ${stockoutDays}일 (${formatMMDD(stockoutDate)}부터)`
             }
           />
         )}
@@ -47,14 +48,14 @@ export function AxisStockRow({ impact, expectedInbound, toPercent, guides }: Axi
           <Dot
             className="border-2 border-warning-mark bg-card"
             left={toPercent(safetyStockBreachDate)}
-            title={`안전재고 하회 ${formatMonthDay(safetyStockBreachDate)}`}
+            title={`안전재고 하회 ${formatMMDD(safetyStockBreachDate)}`}
           />
         )}
         {stockoutDate && (
           <Dot
             className="bg-danger"
             left={toPercent(stockoutDate)}
-            title={`재고 소진 ${formatMonthDay(stockoutDate)}`}
+            title={`재고 소진 ${formatMMDD(stockoutDate)}`}
           />
         )}
       </div>

@@ -1,34 +1,40 @@
+import { useQuery } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
+  DELAY_COUNT_KEY,
   DELAY_STATUS_BADGE_VARIANT,
   DELAY_STATUS_LABEL,
   formatRoute,
-  REGION_LABEL,
-  STAGE_LABEL,
+  getRegionLabel,
+  getStageLabel,
+  toDelayStatus,
 } from '@/entities/delay-event'
+import { delayEventQueries } from '@/shared/api'
 import { EMPTY_VALUE, ROUTES, delayCenterListPath, delayCenterPath } from '@/shared/config'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import {
   Table,
   TableBody,
   TableCell,
-  TableEmptyRow,
+  TableQueryRows,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/shared/ui/table'
 
-import {
-  DELAY_PREVIEW_SIZE,
-  DELAY_STATUS_ORDER,
-  formatMonthDay,
-  type DelayListResult,
-} from '../model/dashboard'
+import { DELAY_PREVIEW_SIZE, DELAY_STATUS_ORDER } from '../model/dashboard'
 
-export function DelayTable({ delays }: { delays: DelayListResult }) {
+export function DelayTable() {
+  // 최종 선택 전인 지연 중 최근 감지된 건. 상태별 건수(`counts`)는 같은 응답에 들어 있다
+  const query = useQuery(
+    delayEventQueries.list({ hasFinalDecision: false, size: DELAY_PREVIEW_SIZE }),
+  )
+  const counts = query.data?.counts
+
   return (
     <Card>
       <CardHeader>
@@ -55,7 +61,9 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
                   {DELAY_STATUS_LABEL[status]}
                 </Badge>
                 <span className="flex items-center gap-4pxr">
-                  <span className="text-h3 font-bold">{delays.counts[status]}건</span>
+                  <span className="text-h3 font-bold">
+                    {counts ? `${counts[DELAY_COUNT_KEY[status]]}건` : EMPTY_VALUE}
+                  </span>
                   <ChevronRight
                     className="size-16pxr text-muted-foreground group-hover:text-primary group-focus-visible:text-primary"
                     aria-hidden="true"
@@ -80,49 +88,65 @@ export function DelayTable({ delays }: { delays: DelayListResult }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {delays.items.length === 0 && (
-                <TableEmptyRow colSpan={8}>대응이 필요한 지연이 없습니다.</TableEmptyRow>
-              )}
-              {delays.items.map((delay) => (
-                <TableRow key={delay.delayEventId}>
-                  <TableCell className="whitespace-nowrap">
-                    <Link
-                      to={delayCenterPath(delay.delayEventId)}
-                      className="underline underline-offset-2"
-                    >
-                      {delay.shipmentCode}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    {delay.productName ?? EMPTY_VALUE}
-                    {delay.skuCount > 1 && (
-                      <span className="text-muted-foreground"> 외 {delay.skuCount - 1}개</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {formatRoute(delay)}
-                    <p className="text-caption text-muted-foreground">{STAGE_LABEL[delay.stage]}</p>
-                  </TableCell>
-                  <TableCell>{REGION_LABEL[delay.warehouseRegion]}</TableCell>
-                  <TableCell>
-                    {formatMonthDay(delay.planned3plInboundDate)} →{' '}
-                    {formatMonthDay(delay.expected3plInboundDate)}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">+{delay.delayDays}일</TableCell>
-                  <TableCell>
-                    {delay.atRiskOrderCount === null ? EMPTY_VALUE : `${delay.atRiskOrderCount}건`}
-                  </TableCell>
-                  <TableCell>
-                    {delay.status ? (
-                      <Badge variant={DELAY_STATUS_BADGE_VARIANT[delay.status]}>
-                        {DELAY_STATUS_LABEL[delay.status]}
-                      </Badge>
-                    ) : (
-                      EMPTY_VALUE
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+              <TableQueryRows
+                query={query}
+                colSpan={8}
+                emptyMessage="대응이 필요한 지연이 없습니다."
+              >
+                {(delays) =>
+                  delays.map((delay) => {
+                    const status = toDelayStatus(delay.currentRun?.status)
+
+                    return (
+                      <TableRow key={delay.delayEventId}>
+                        <TableCell className="whitespace-nowrap">
+                          <Link
+                            to={delayCenterPath(delay.delayEventId)}
+                            className="underline underline-offset-2"
+                          >
+                            {delay.shipment.shipmentCode}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          {delay.representativeSku?.productName ?? EMPTY_VALUE}
+                          {delay.skuCount > 1 && (
+                            <span className="text-muted-foreground">
+                              {' '}
+                              외 {delay.skuCount - 1}개
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {formatRoute(delay)}
+                          <p className="text-caption text-muted-foreground">
+                            {getStageLabel(delay.stage)}
+                          </p>
+                        </TableCell>
+                        <TableCell>{getRegionLabel(delay.warehouse.regionCode)}</TableCell>
+                        <TableCell>
+                          {formatMMDD(delay.planned3plInboundDate)} →{' '}
+                          {formatMMDD(delay.expected3plInboundDate)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">+{delay.delayDays}일</TableCell>
+                        <TableCell>
+                          {delay.atRiskOrderCount === null
+                            ? EMPTY_VALUE
+                            : `${delay.atRiskOrderCount}건`}
+                        </TableCell>
+                        <TableCell>
+                          {status ? (
+                            <Badge variant={DELAY_STATUS_BADGE_VARIANT[status]}>
+                              {DELAY_STATUS_LABEL[status]}
+                            </Badge>
+                          ) : (
+                            EMPTY_VALUE
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                }
+              </TableQueryRows>
             </TableBody>
           </Table>
         </div>

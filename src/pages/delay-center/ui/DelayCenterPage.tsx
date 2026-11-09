@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 
-import { NEW_DELAY_FROM } from '@/entities/delay-event'
+import { getNewDelayFrom } from '@/entities/delay-event'
+import { dashboardQueries, delayEventQueries } from '@/shared/api'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Label } from '@/shared/ui/label'
@@ -8,22 +10,16 @@ import { Switch } from '@/shared/ui/switch'
 import { TableTemplate } from '@/shared/ui/table-template'
 
 import {
-  countByStatus,
   DELAY_PAGE_SIZE,
   DELAY_STATUS_OPTIONS,
   type DelayStatusFilter,
-  filterDelayCases,
   LIST_PARAM,
   parseFromParam,
   parseHasFinalDecisionParam,
-  sortDelayCases,
   STATUS_FILTER_ALL,
 } from '../model/delay-center'
-import { DELAY_CASES } from '../model/delay-center-mock'
 import { DelayListFilters } from './DelayListFilters'
 import { DelayTable } from './DelayTable'
-
-const SORTED_CASES = sortDelayCases(DELAY_CASES)
 
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
   value === STATUS_FILTER_ALL || (DELAY_STATUS_OPTIONS as string[]).includes(value)
@@ -42,15 +38,26 @@ export function DelayCenterPage() {
     searchParams.get(LIST_PARAM.HAS_FINAL_DECISION),
   )
   const hasExtraCondition = from !== undefined || hasFinalDecision !== undefined
-  // 대시보드의 새 지연 알림과 같은 조건이면 '새 지연 보기'가 켜진 상태다
-  const isNewDelayView = from === NEW_DELAY_FROM && hasFinalDecision === false
+  const page = Math.max(1, Math.floor(Number(searchParams.get(LIST_PARAM.PAGE))) || 1)
 
-  const filtered = filterDelayCases(SORTED_CASES, status, keyword, { from, hasFinalDecision })
-  // 상태별 건수는 API 명세 4.4의 `counts`처럼 검색어와 `from`은 반영하고, 상태 선택과 `hasFinalDecision`은 반영하지 않는다
-  const counts = countByStatus(filterDelayCases(SORTED_CASES, STATUS_FILTER_ALL, keyword, { from }))
-  const pageCount = Math.max(1, Math.ceil(filtered.length / DELAY_PAGE_SIZE))
-  const page = Math.min(Math.max(1, Number(searchParams.get(LIST_PARAM.PAGE)) || 1), pageCount)
-  const pageCases = filtered.slice((page - 1) * DELAY_PAGE_SIZE, page * DELAY_PAGE_SIZE)
+  // '새 지연 보기'의 기준은 대시보드와 같이 마지막 수집 시각에서 계산한다. 수집된 데이터가 없으면 켤 수 없다
+  const { data: summary } = useQuery(dashboardQueries.summary())
+
+  const newDelayFrom = summary?.lastSyncedAt ? getNewDelayFrom(summary.lastSyncedAt) : undefined
+  const isNewDelayView =
+    newDelayFrom !== undefined && from === newDelayFrom && hasFinalDecision === false
+
+  const query = useQuery(
+    delayEventQueries.list({
+      status: status === STATUS_FILTER_ALL ? undefined : status,
+      q: keyword || undefined,
+      from,
+      hasFinalDecision,
+      page,
+      size: DELAY_PAGE_SIZE,
+    }),
+  )
+  const { data } = query
 
   /** 값이 빈 문자열이면 주소에서 지운다. 조건이 바뀌면 1페이지로 돌아간다. */
   const updateParams = (changes: Partial<Record<string, string>>, resetPage = true) => {
@@ -95,7 +102,7 @@ export function DelayCenterPage() {
           <DelayListFilters
             keyword={keyword}
             status={status}
-            counts={counts}
+            counts={data?.counts}
             onSearch={({ keyword: nextKeyword, status: nextStatus }) =>
               updateParams({
                 [LIST_PARAM.KEYWORD]: nextKeyword,
@@ -109,17 +116,18 @@ export function DelayCenterPage() {
             </p>
           )}
           <TableTemplate
-            totalCount={filtered.length}
+            totalCount={data?.totalCount}
             Controls={
               <>
                 <Switch
                   id="new-delay-toggle"
                   checked={isNewDelayView}
+                  disabled={newDelayFrom === undefined}
                   onCheckedChange={(checked) =>
                     updateParams(
                       checked
                         ? {
-                            [LIST_PARAM.FROM]: NEW_DELAY_FROM,
+                            [LIST_PARAM.FROM]: newDelayFrom ?? '',
                             [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
                           }
                         : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
@@ -135,12 +143,12 @@ export function DelayCenterPage() {
               </>
             }
             page={page}
-            pageCount={pageCount}
+            pageCount={Math.max(1, data?.totalPages ?? 1)}
             onPageChange={(next) =>
               updateParams({ [LIST_PARAM.PAGE]: next > 1 ? String(next) : '' }, false)
             }
           >
-            <DelayTable cases={pageCases} listSearch={searchParams.toString()} />
+            <DelayTable query={query} listSearch={searchParams.toString()} />
           </TableTemplate>
         </CardContent>
       </Card>

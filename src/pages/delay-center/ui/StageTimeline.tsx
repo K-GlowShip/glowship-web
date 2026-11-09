@@ -1,6 +1,7 @@
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 
-import { type DelayCase, formatMonthDay, STAGE_FLOW, STAGE_LABEL } from '../model/delay-center'
+import { type DelayCase, STAGE_FLOW, STAGE_LABEL } from '../model/delay-center'
 import { TimelineTrack } from './TimelineTrack'
 
 interface StageTimelineProps {
@@ -55,7 +56,7 @@ export function StageTimeline({ delayCase }: StageTimelineProps) {
                 {plannedInbound !== expectedInbound && (
                   <>
                     <span className="text-muted-foreground line-through">
-                      {formatMonthDay(plannedInbound)}
+                      {formatMMDD(plannedInbound)}
                     </span>
                     <span aria-hidden="true" className="text-muted-foreground">
                       →
@@ -65,7 +66,7 @@ export function StageTimeline({ delayCase }: StageTimelineProps) {
                 <span
                   className={cn('font-bold', delayDays > 0 ? 'text-danger' : 'text-foreground')}
                 >
-                  예상 {formatMonthDay(expectedInbound)}
+                  예상 {formatMMDD(expectedInbound)}
                 </span>
               </span>
             )}

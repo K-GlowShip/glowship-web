@@ -1,4 +1,4 @@
-import type { DashboardSummary } from './dashboard'
+import type { DashboardSummary } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 
 export const KPI_ID = {

@@ -1,9 +1,11 @@
 export {
+  addDays,
   formatHHmm,
   formatKoreanLongDate,
+  formatMMDD,
   formatYYYYMMDD,
   formatYYYYMMDDHHmm,
   kstToUtc,
-  toUtcDayEnd,
   toUtcDayStart,
+  toUtcNextDayStart,
 } from './kst-date'

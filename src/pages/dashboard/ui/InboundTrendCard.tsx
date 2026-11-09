@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   CartesianGrid,
@@ -10,20 +11,23 @@ import {
   YAxis,
 } from 'recharts'
 
+import { dashboardQueries, INBOUND_TREND_DAYS, type InboundTrendDays } from '@/shared/api'
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { QueryError } from '@/shared/ui/query-error'
+import { Skeleton } from '@/shared/ui/skeleton'
 
-import { formatMonthDay, TREND_DAYS, TREND_DAYS_OPTIONS, type TrendDays } from '../model/dashboard'
-import { buildMockTrend } from '../model/dashboard-mock'
+import { TREND_DAYS_OPTIONS } from '../model/dashboard'
 
 const PLANNED_COLOR = 'var(--color-primary-600)'
 const ACTUAL_COLOR = 'var(--color-rose-500)'
 const TICK_STYLE = { fontSize: '0.75rem', fill: 'var(--color-muted-foreground)' }
 
 export function InboundTrendCard() {
-  const [days, setDays] = useState<TrendDays>(TREND_DAYS.WEEK)
-  // TODO: GET /dashboard/inbound-trend?days= 연동 시 교체
-  const points = buildMockTrend(days)
+  const [days, setDays] = useState<InboundTrendDays>(INBOUND_TREND_DAYS.WEEK)
+  const { data, error, isFetching, refetch } = useQuery(dashboardQueries.inboundTrend({ days }))
+  const points = data?.points ?? []
   const baseDate = points.at(-1)?.date
   const plannedTotal = points.reduce((sum, point) => sum + point.plannedCount, 0)
   const actualTotal = points.reduce((sum, point) => sum + point.actualCount, 0)
@@ -62,7 +66,17 @@ export function InboundTrendCard() {
             실제 입고(실제 입고일)
           </li>
         </ul>
-        {points.length === 0 ? (
+        {!data ? (
+          error ? (
+            <QueryError
+              message={error.message}
+              loading={isFetching}
+              onRetry={() => void refetch()}
+            />
+          ) : (
+            <Skeleton className="h-280pxr rounded-card" />
+          )
+        ) : points.length === 0 ? (
           <p className="py-80pxr text-center text-muted-foreground">입고 추이 데이터가 없습니다.</p>
         ) : (
           <>
@@ -70,14 +84,14 @@ export function InboundTrendCard() {
             <div
               className="h-280pxr"
               role="img"
-              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMonthDay(baseDate) : ''}. 입고 예정 합계 ${plannedTotal}건, 실제 입고 합계 ${actualTotal}건`}
+              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMMDD(baseDate) : ''}. 입고 예정 합계 ${plannedTotal}건, 실제 입고 합계 ${actualTotal}건`}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
                   <CartesianGrid vertical={false} stroke="var(--color-border)" />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={formatMonthDay}
+                    tickFormatter={formatMMDD}
                     tick={TICK_STYLE}
                     tickLine={false}
                     axisLine={false}
@@ -104,7 +118,7 @@ export function InboundTrendCard() {
                     />
                   )}
                   <Tooltip
-                    labelFormatter={(label) => formatMonthDay(String(label))}
+                    labelFormatter={(label) => formatMMDD(String(label))}
                     formatter={(value, name) => [`${value}건`, name]}
                   />
                   <Line
@@ -112,7 +126,7 @@ export function InboundTrendCard() {
                     dataKey="plannedCount"
                     stroke={PLANNED_COLOR}
                     strokeWidth={2}
-                    dot={days === TREND_DAYS.WEEK}
+                    dot={days === INBOUND_TREND_DAYS.WEEK}
                     isAnimationActive={false}
                   />
                   <Line
@@ -121,7 +135,7 @@ export function InboundTrendCard() {
                     stroke={ACTUAL_COLOR}
                     strokeWidth={2}
                     strokeDasharray="5 4"
-                    dot={days === TREND_DAYS.WEEK}
+                    dot={days === INBOUND_TREND_DAYS.WEEK}
                     isAnimationActive={false}
                   />
                 </LineChart>

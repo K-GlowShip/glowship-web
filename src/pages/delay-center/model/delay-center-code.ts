@@ -39,14 +39,7 @@ export const CLIENT_ROLE = {
 
 export type ClientRole = (typeof CLIENT_ROLE)[keyof typeof CLIENT_ROLE]
 
-export const OPTION_TYPE = {
-  KEEP_PLAN: 'KEEP_PLAN',
-  PRE_DEPARTURE_AIR: 'PRE_DEPARTURE_AIR',
-  KR_AIR_REPLENISH: 'KR_AIR_REPLENISH',
-  OTHER_REGION_FULFILL: 'OTHER_REGION_FULFILL',
-} as const
-
-export type OptionType = (typeof OPTION_TYPE)[keyof typeof OPTION_TYPE]
+export { OPTION_TYPE, type OptionType } from '@/entities/delay-event'
 
 export const FEASIBILITY = {
   FEASIBLE: 'FEASIBLE',
@@ -86,14 +79,7 @@ export const RISK_ATTRIBUTION = {
 
 export type RiskAttribution = (typeof RISK_ATTRIBUTION)[keyof typeof RISK_ATTRIBUTION]
 
-/** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
-export const SKU_SCOPE = {
-  IMPACTED: 'IMPACTED',
-  WATCH: 'WATCH',
-  SHIPMENT_ONLY: 'SHIPMENT_ONLY',
-} as const
-
-export type SkuScope = (typeof SKU_SCOPE)[keyof typeof SKU_SCOPE]
+export { SKU_SCOPE, type SkuScope } from '@/shared/api'
 
 export const DETAIL_SECTION = {
   IMPACT: 'impact',

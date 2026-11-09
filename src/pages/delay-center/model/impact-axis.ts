@@ -1,4 +1,5 @@
-import { formatMonthDay, type SkuImpact } from './delay-center'
+import { formatMMDD } from '@/shared/lib/kst-date'
+import { type SkuImpact } from './delay-center'
 
 /** 날짜 축에 상품별 줄로 그리는 최대 개수. 더 많으면 나머지는 아래 표에서 본다. */
 export const MAX_AXIS_ROWS = 5
@@ -95,13 +96,12 @@ export const buildAxisSummary = (
     ...rows.map((row) =>
       row.estimable
         ? `${row.productName}: ${[
-            row.safetyStockBreachDate &&
-              `${formatMonthDay(row.safetyStockBreachDate)} 안전재고 하회`,
-            row.stockoutDate && `${formatMonthDay(row.stockoutDate)} 재고 소진`,
+            row.safetyStockBreachDate && `${formatMMDD(row.safetyStockBreachDate)} 안전재고 하회`,
+            row.stockoutDate && `${formatMMDD(row.stockoutDate)} 재고 소진`,
           ]
             .filter(Boolean)
             .join(', ')}`
         : `${row.productName}: 판정 불가`,
     ),
-    `계획 입고 ${formatMonthDay(plannedInbound)}, 예상 입고 ${formatMonthDay(expectedInbound)}`,
+    `계획 입고 ${formatMMDD(plannedInbound)}, 예상 입고 ${formatMMDD(expectedInbound)}`,
   ].join(' / ')

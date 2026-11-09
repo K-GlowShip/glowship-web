@@ -10,4 +10,19 @@ export const ENDPOINT = {
     LOGOUT: '/auth/logout',
   },
   ME: '/me',
+  DATA_SYNC_RUNS: {
+    LATEST: '/data-sync-runs/latest',
+  },
+  SKUS: '/skus',
+  ORDERS: '/orders',
+  INVENTORY: '/inventory',
+  SHIPMENTS: '/shipments',
+  DECISIONS: '/decisions',
+  DASHBOARD: {
+    SUMMARY: '/dashboard/summary',
+    INBOUND_TREND: '/dashboard/inbound-trend',
+  },
+  INVENTORY_STATUS: '/inventory-status',
+  DELAY_EVENTS: '/delay-events',
+  ANALYSIS_RUNS: '/analysis-runs',
 } as const
