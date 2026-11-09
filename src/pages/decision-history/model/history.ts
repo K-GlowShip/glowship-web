@@ -57,6 +57,9 @@ export const formatSelectedAt = formatYYYYMMDDHHmm
 /** UTC 시각을 한국 시간으로. '2026-10-21T00:00:00Z' -> '2026.10.21 09:00 KST' */
 export const formatBaseDataAt = (baseDataAt: string) => `${formatYYYYMMDDHHmm(baseDataAt)} KST`
 
+/** AI 설명 문장 속 근거 표지(`[E1]`)를 숨긴다. 화면에는 표지 대신 문장만 보여 준다(명세 U10) */
+export const stripEvidenceMarks = (text: string) => text.replace(/\s*\[E\d+\]/g, '').trim()
+
 /** 선택 이유. 최종 선택은 선택 이유, 초안은 작성한 의견이다. 없으면 null */
 export const getDecisionReason = (decision: Decision, run: AnalysisRunDetail) =>
   decision.decisionType === DECISION_TYPE.FINAL
