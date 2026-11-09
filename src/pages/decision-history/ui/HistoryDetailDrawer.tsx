@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
+import { getRoleLabel } from '@/entities/session'
 import { analysisRunQueries, type Decision } from '@/shared/api'
 import { delayCenterPath } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
@@ -60,9 +61,14 @@ function HistoryDetail({ decision }: { decision: Decision }) {
   return (
     <>
       <DrawerHeader className="bg-linear-to-br from-primary-50 via-card to-rose-50">
-        <Badge variant={HISTORY_STATUS_BADGE_VARIANT[decision.status]}>
-          {HISTORY_STATUS_LABEL[decision.status]}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-8pxr">
+          <p className="text-caption text-muted-foreground">
+            {decision.decidedBy.displayName} · {getRoleLabel(decision.decidedBy.roleCode)}
+          </p>
+          <Badge variant={HISTORY_STATUS_BADGE_VARIANT[decision.status]}>
+            {HISTORY_STATUS_LABEL[decision.status]}
+          </Badge>
+        </div>
         <DrawerTitle className="mt-8pxr text-h2">{getDecisionOptionLabel(decision)}</DrawerTitle>
         <DrawerDescription>{getDecisionTargetLabel(decision)}</DrawerDescription>
       </DrawerHeader>
