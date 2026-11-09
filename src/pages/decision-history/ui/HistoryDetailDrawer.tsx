@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { getRoleLabel } from '@/entities/session'
 import { analysisRunQueries, type Decision } from '@/shared/api'
 import { delayCenterPath } from '@/shared/config'
-import { Avatar } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { buttonVariants } from '@/shared/ui/button'
 import {
@@ -20,14 +18,13 @@ import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
 import {
-  formatSelectedAt,
   HISTORY_DISCLAIMER,
   HISTORY_STATUS_BADGE_VARIANT,
   HISTORY_STATUS_LABEL,
 } from '../model/history'
 import { getDecisionOptionLabel, getDecisionTargetLabel } from '../model/history-display'
 import { HistoryAnalysisSection } from './HistoryAnalysisSection'
-import { HistoryReasonSection } from './HistoryReasonSection'
+import { HistoryTimeline } from './HistoryTimeline'
 
 interface HistoryDetailDrawerProps {
   decision: Decision | null
@@ -68,22 +65,16 @@ function HistoryDetail({ decision }: { decision: Decision }) {
         </Badge>
         <DrawerTitle className="mt-8pxr text-h2">{getDecisionOptionLabel(decision)}</DrawerTitle>
         <DrawerDescription>{getDecisionTargetLabel(decision)}</DrawerDescription>
-        <div className="mt-16pxr flex items-center gap-8pxr">
-          <Avatar aria-hidden="true">{Array.from(decision.decidedBy.displayName)[0]}</Avatar>
-          <p className="text-b2">
-            <span className="font-bold">{decision.decidedBy.displayName}</span>{' '}
-            <span className="text-muted-foreground">
-              {getRoleLabel(decision.decidedBy.roleCode)} · {formatSelectedAt(decision.decidedAt)}
-            </span>
-          </p>
-        </div>
       </DrawerHeader>
 
       <DrawerBody className="flex flex-col gap-24pxr">
         {run ? (
           <>
-            <HistoryReasonSection decision={decision} run={run} />
-            <HistoryAnalysisSection run={run} />
+            <HistoryTimeline decision={decision} run={run} />
+            <HistoryAnalysisSection
+              run={run}
+              selectedOptionType={decision.responseOption?.optionType ?? null}
+            />
           </>
         ) : error ? (
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />

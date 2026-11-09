@@ -60,6 +60,12 @@ export const formatBaseDataAt = (baseDataAt: string) => `${formatYYYYMMDDHHmm(ba
 /** AI 설명 문장 속 근거 표지(`[E1]`)를 숨긴다. 화면에는 표지 대신 문장만 보여 준다(명세 U10) */
 export const stripEvidenceMarks = (text: string) => text.replace(/\s*\[E\d+\]/g, '').trim()
 
+/** 앱 다른 곳과 날짜 모양을 맞춘다. '2026-01-27' -> '2026.01.27' */
+const formatIsoDates = (text: string) => text.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$1.$2.$3')
+
+/** AI 설명 문장을 화면에 보여 줄 모양으로: 근거 표지를 지우고 날짜 모양을 맞춘다 */
+export const formatExplanationText = (text: string) => formatIsoDates(stripEvidenceMarks(text))
+
 /** 선택 이유. 최종 선택은 선택 이유, 초안은 작성한 의견이다. 없으면 null */
 export const getDecisionReason = (decision: Decision, run: AnalysisRunDetail) =>
   decision.decisionType === DECISION_TYPE.FINAL
