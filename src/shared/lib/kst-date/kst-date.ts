@@ -1,3 +1,5 @@
+import { EMPTY_VALUE } from '@/shared/config'
+
 // 서버는 시각을 항상 UTC(ISO 8601, 'Z')로 주고받고, 화면은 한국 시간(KST)으로 보여 준다.
 // 브라우저 시간대에 기대지 않도록 시간대를 Asia/Seoul로 명시해서 변환한다.
 const KST_TIME_ZONE = 'Asia/Seoul'
@@ -113,3 +115,11 @@ export const formatKoreanLongDate = (isoUtc: string) => {
 
 /** UTC 시각을 한국 시간 'HH:mm'으로 바꾼다. (예: '2026-10-21T00:30:00Z' -> '09:30') */
 export const formatHHmm = (isoUtc: string) => formatYYYYMMDDHHmm(isoUtc).slice(-5)
+
+/** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. 값이 없거나 형식이 올바르지 않으면 `EMPTY_VALUE`. */
+export const formatMMDD = (date: string | null) => {
+  if (!date || !KST_DATE_PATTERN.test(date)) {
+    return EMPTY_VALUE
+  }
+  return date.slice(5).replace('-', '.')
+}

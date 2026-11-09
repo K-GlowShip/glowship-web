@@ -12,7 +12,6 @@ import {
   DELAY_LIST_STATUS_PARAM,
 } from '@/shared/config'
 
-import { EMPTY_TEXT } from './delay-center-text'
 import {
   DELAY_STATUS,
   CLIENT_ROLE,
@@ -25,9 +24,7 @@ import {
   RISK_ATTRIBUTION,
   SKU_SCOPE,
   DETAIL_SECTION,
-  STATUS_FILTER_ALL,
   type DelayStatus,
-  type DelayStatusFilter,
   type ClientRole,
   type TransportMode,
   type StageCode,
@@ -285,54 +282,6 @@ export const ATTRIBUTION_LABEL = {
   [RISK_ATTRIBUTION.PRE_EXISTING]: '기존 위험',
 } as const satisfies Record<RiskOrder['attribution'], string>
 
-/** API 명세 4.4의 정렬을 따른다. 감지 시각이 최신인 지연이 위로 오고, 같으면 ID 순서다. */
-export const sortDelayCases = (cases: DelayCase[]) =>
-  [...cases].sort((a, b) => b.detectedAt.localeCompare(a.detectedAt) || a.id.localeCompare(b.id))
-
-export const countByStatus = (cases: DelayCase[]): Record<DelayStatusFilter, number> => {
-  const counts: Record<DelayStatusFilter, number> = {
-    [STATUS_FILTER_ALL]: cases.length,
-    [DELAY_STATUS.READY]: 0,
-    [DELAY_STATUS.ANALYZING]: 0,
-    [DELAY_STATUS.ON_HOLD]: 0,
-    [DELAY_STATUS.NEEDS_REANALYSIS]: 0,
-    [DELAY_STATUS.FINALIZED]: 0,
-    [DELAY_STATUS.NO_RISK]: 0,
-    [DELAY_STATUS.NO_DELAY]: 0,
-  }
-  for (const delayCase of cases) {
-    counts[delayCase.status] += 1
-  }
-  return counts
-}
-
-/** 상태·검색어 밖의 목록 조건. 대시보드의 새 지연 알림이 쓴다(명세 4.4 `from`, `hasFinalDecision`). */
-export interface DelayListConditions {
-  /** 이 시각(UTC ISO 8601) 이후에 감지된 건만 */
-  from?: string
-  /** 최종 선택이 있는 건만(true), 없는 건만(false) */
-  hasFinalDecision?: boolean
-}
-
-export const filterDelayCases = (
-  cases: DelayCase[],
-  status: DelayStatusFilter,
-  keyword: string,
-  { from, hasFinalDecision }: DelayListConditions = {},
-) => {
-  const query = keyword.trim().toLowerCase()
-  const fromTime = from === undefined ? undefined : Date.parse(from)
-  return cases.filter(
-    (delayCase) =>
-      (status === STATUS_FILTER_ALL || delayCase.status === status) &&
-      (!query ||
-        delayCase.shipmentCode.toLowerCase().includes(query) ||
-        delayCase.productName?.toLowerCase().includes(query)) &&
-      (fromTime === undefined || Date.parse(delayCase.detectedAt) >= fromTime) &&
-      (hasFinalDecision === undefined || (delayCase.finalDecision !== null) === hasFinalDecision),
-  )
-}
-
 const UTC_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
 
 /**
@@ -347,27 +296,6 @@ export const parseFromParam = (value: string | null) =>
 /** 주소의 `hasFinalDecision` 값. 'true'·'false'가 아니면 조건을 쓰지 않는다. */
 export const parseHasFinalDecisionParam = (value: string | null) =>
   value === 'true' ? true : value === 'false' ? false : undefined
-
-/** 대표 상품명. 상품이 여러 개면 '외 N개'를 붙인다. */
-export const formatProductLabel = ({ productName, skuCount }: DelayCase) => {
-  if (!productName) {
-    return EMPTY_TEXT.PRODUCT
-  }
-  return skuCount > 1 ? `${productName} ${formatExtraSkus(skuCount)}` : productName
-}
-
-/** 대표 상품 외에 담긴 상품 수. 하나뿐이면 빈 문자열. */
-const formatExtraSkus = (skuCount: number) => (skuCount > 1 ? `외 ${skuCount - 1}개` : '')
-
-/** 'YYYY-MM-DD'를 'MM.DD'로 줄여 보여 준다. */
-export const formatMonthDay = (date: string) => date.slice(5).replace('-', '.')
-
-/**
- * 위험 주문 수(서로 다른 주문 수). 저장된 계산 결과가 없으면(분석 중·분석 보류·도구 실패·지연 해소) null이다.
- * 결과가 있으면 0건도 숫자로 준다. 설명 생성만 실패한 건도 계산 결과가 있어 숫자다.
- */
-export const getAtRiskOrderCount = ({ analysis }: DelayCase) =>
-  analysis ? analysis.riskOrders.length : null
 
 /** 종료된 지연(입고 완료·지연 해소). 닫힌 지연의 초안·최종 선택·재분석은 서버가 `EPISODE_CLOSED`로 거부한다. */
 export const isClosed = ({ closedAt }: DelayCase) => closedAt !== null

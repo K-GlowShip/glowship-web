@@ -24,6 +24,22 @@ export interface FinalDecision {
   checkedSeq: number
 }
 
+/** 분석 실행의 상태 코드(`status`). 진행 중인 단계가 앞의 다섯 개다 */
+export const ANALYSIS_RUN_STATUS = {
+  DETECTED: 'DETECTED',
+  VALIDATING: 'VALIDATING',
+  ANALYZING_IMPACT: 'ANALYZING_IMPACT',
+  ANALYZING_OPTIONS: 'ANALYZING_OPTIONS',
+  VALIDATING_OUTPUT: 'VALIDATING_OUTPUT',
+  READY_FOR_REVIEW: 'READY_FOR_REVIEW',
+  NO_DELAY: 'NO_DELAY',
+  NO_RISK: 'NO_RISK',
+  ON_HOLD: 'ON_HOLD',
+  FAILED: 'FAILED',
+  STALE: 'STALE',
+  FINALIZED: 'FINALIZED',
+} as const
+
 /** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
 export const SKU_SCOPE = {
   IMPACTED: 'IMPACTED',

@@ -7,7 +7,7 @@ export {
   toDelayStatus,
 } from './model/delay-status'
 export { getStageLabel, STAGE_CODE, STAGE_LABEL, type StageCode } from './model/stage'
-export { getNewDelayFrom, NEW_DELAY_FROM } from './model/new-delay'
+export { getNewDelayFrom } from './model/new-delay'
 export { getRegionLabel, REGION_CODE, REGION_LABEL, type RegionCode } from './model/region'
 export { formatRoute, TRANSPORT_MODE, type TransportMode } from './model/route'
 export {

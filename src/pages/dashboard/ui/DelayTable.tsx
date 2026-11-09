@@ -13,6 +13,7 @@ import {
 } from '@/entities/delay-event'
 import { delayEventQueries } from '@/shared/api'
 import { EMPTY_VALUE, ROUTES, delayCenterListPath, delayCenterPath } from '@/shared/config'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import {
@@ -25,7 +26,7 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import { DELAY_PREVIEW_SIZE, DELAY_STATUS_ORDER, formatMonthDay } from '../model/dashboard'
+import { DELAY_PREVIEW_SIZE, DELAY_STATUS_ORDER } from '../model/dashboard'
 
 export function DelayTable() {
   // 최종 선택 전인 지연 중 최근 감지된 건. 상태별 건수(`counts`)는 같은 응답에 들어 있다
@@ -123,8 +124,8 @@ export function DelayTable() {
                         </TableCell>
                         <TableCell>{getRegionLabel(delay.warehouse.regionCode)}</TableCell>
                         <TableCell>
-                          {formatMonthDay(delay.planned3plInboundDate)} →{' '}
-                          {formatMonthDay(delay.expected3plInboundDate)}
+                          {formatMMDD(delay.planned3plInboundDate)} →{' '}
+                          {formatMMDD(delay.expected3plInboundDate)}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">+{delay.delayDays}일</TableCell>
                         <TableCell>

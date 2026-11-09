@@ -6,9 +6,8 @@ import { getNewDelayFrom } from '@/entities/delay-event'
 import { delayEventQueries } from '@/shared/api'
 import { delayCenterNewDelaysPath, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { buttonVariants } from '@/shared/ui/button'
-
-import { formatMonthDay } from '../model/dashboard'
 
 // buttonVariants의 기본 색(text-primary 등)을 덮어쓰려면 cn(tailwind-merge)으로 합쳐야 한다
 const ACTION_CLASS_NAME = buttonVariants({ variant: 'secondary', size: 'sm' })
@@ -40,7 +39,7 @@ export function DelayAlertBanner({ referenceAt }: DelayAlertBannerProps) {
 
   const isSingle = totalCount === 1
   const productName = delay.representativeSku?.productName ?? '상품 정보 없음'
-  const delayDescription = `입고가 ${delay.delayDays}일 지연됩니다. 계획 ${formatMonthDay(delay.planned3plInboundDate)} → 예상 ${formatMonthDay(delay.expected3plInboundDate)}`
+  const delayDescription = `입고가 ${delay.delayDays}일 지연됩니다. 계획 ${formatMMDD(delay.planned3plInboundDate)} → 예상 ${formatMMDD(delay.expected3plInboundDate)}`
   const riskDescription =
     delay.atRiskOrderCount === null ? '' : `, 위험 주문 ${delay.atRiskOrderCount}건`
 

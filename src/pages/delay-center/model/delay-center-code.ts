@@ -79,14 +79,7 @@ export const RISK_ATTRIBUTION = {
 
 export type RiskAttribution = (typeof RISK_ATTRIBUTION)[keyof typeof RISK_ATTRIBUTION]
 
-/** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
-export const SKU_SCOPE = {
-  IMPACTED: 'IMPACTED',
-  WATCH: 'WATCH',
-  SHIPMENT_ONLY: 'SHIPMENT_ONLY',
-} as const
-
-export type SkuScope = (typeof SKU_SCOPE)[keyof typeof SKU_SCOPE]
+export { SKU_SCOPE, type SkuScope } from '@/shared/api'
 
 export const DETAIL_SECTION = {
   IMPACT: 'impact',

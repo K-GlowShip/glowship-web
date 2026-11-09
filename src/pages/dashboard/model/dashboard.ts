@@ -1,6 +1,5 @@
 import { DELAY_STATUS } from '@/entities/delay-event'
 import { INBOUND_TREND_DAYS, INVENTORY_STATUS, type InventoryStatus } from '@/shared/api'
-import { EMPTY_VALUE } from '@/shared/config'
 
 export const TREND_DAYS_OPTIONS = [
   { days: INBOUND_TREND_DAYS.WEEK, label: '7일' },
@@ -40,12 +39,3 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000
 /** 두 'YYYY-MM-DD' 사이의 일수(to - from) */
 export const diffDays = (from: string, to: string) =>
   Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / MS_PER_DAY)
-
-/** 'YYYY-MM-DD' -> 'MM.DD'. 값이 없으면 `EMPTY_VALUE` */
-export const formatMonthDay = (date: string | null) => {
-  if (!date) {
-    return EMPTY_VALUE
-  }
-  const [, month, day] = date.split('-')
-  return month && day ? `${month}.${day}` : EMPTY_VALUE
-}

@@ -121,7 +121,7 @@ export const delayEventQueries = {
 | 종류 | 서버 형식 | 화면 처리 |
 | --- | --- | --- |
 | 시각(`~At`) | ISO 8601 UTC, `Z`로 끝남 (`2026-10-21T00:30:00Z`) | KST로 변환해서 표시 (`formatYYYYMMDDHHmm`, 날짜만이면 `formatYYYYMMDD`) |
-| 날짜(`~Date`) | `YYYY-MM-DD`, 시간대 없음 | **변환하지 않고** 문자열 그대로 표시 (`formatMonthDay`처럼 자르기). KST로 바꾸면 하루가 어긋남 |
+| 날짜(`~Date`) | `YYYY-MM-DD`, 시간대 없음 | **변환하지 않고** 문자열 그대로 표시 (`formatMMDD`처럼 자르기). KST로 바꾸면 하루가 어긋남 |
 | 조회 기간 `from`·`to` | 시간대 있는 ISO 8601 UTC 시각만 허용, 범위는 `[from, to)`(`to` 미포함) | 시작은 `toUtcDayStart(시작일)`, 끝은 `toUtcNextDayStart(종료일)`(종료일 + 1일). 값이 `''`이면 요청에서 생략 |
 
 - 날짜만(`2026-10-20`), 시간대 없음, Unix 초 숫자는 서버가 422 `VALIDATION_ERROR`로 거부합니다. 항상 ISO 문자열을 보냅니다.

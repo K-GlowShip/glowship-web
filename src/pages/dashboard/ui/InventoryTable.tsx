@@ -11,7 +11,7 @@ import {
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
-import { addDays } from '@/shared/lib/kst-date'
+import { addDays, formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Pagination } from '@/shared/ui/pagination'
@@ -28,7 +28,6 @@ import { InfoTip } from '@/shared/ui/tooltip'
 
 import {
   diffDays,
-  formatMonthDay,
   INVENTORY_PAGE_SIZE,
   INVENTORY_STATUS_BADGE_VARIANT,
   INVENTORY_STATUS_LABEL,
@@ -63,7 +62,7 @@ function StockoutCell({
   return (
     <div className="flex flex-col gap-4pxr">
       <span>
-        {formatMonthDay(item.stockoutDate)}{' '}
+        {formatMMDD(item.stockoutDate)}{' '}
         <span className="text-caption text-muted-foreground">D-{daysLeft}</span>
       </span>
       <span className="h-4pxr w-80pxr overflow-hidden rounded-full bg-disabled" aria-hidden="true">
@@ -109,7 +108,7 @@ export function InventoryTable() {
         <dl className="flex flex-wrap justify-end gap-x-16pxr gap-y-2pxr text-caption">
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">기준일</dt>
-            <dd>{formatMonthDay(baseDate)}</dd>
+            <dd>{formatMMDD(baseDate)}</dd>
           </div>
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">판매량 기간</dt>
@@ -151,7 +150,7 @@ export function InventoryTable() {
                       </TableCell>
                       <TableCell>{formatNumber(item.availableQuantity)}</TableCell>
                       <TableCell>{formatNumber(item.averageDailySales)}</TableCell>
-                      <TableCell>{formatMonthDay(item.safetyStockBreachDate)}</TableCell>
+                      <TableCell>{formatMMDD(item.safetyStockBreachDate)}</TableCell>
                       <TableCell>
                         <StockoutCell
                           item={item}

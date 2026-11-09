@@ -2,6 +2,7 @@ export {
   addDays,
   formatHHmm,
   formatKoreanLongDate,
+  formatMMDD,
   formatYYYYMMDD,
   formatYYYYMMDDHHmm,
   kstToUtc,

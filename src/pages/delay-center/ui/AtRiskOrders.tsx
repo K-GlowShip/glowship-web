@@ -1,12 +1,12 @@
 import { ChevronDown } from 'lucide-react'
 
 import { formatNumber } from '@/shared/lib/format-number'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 
 import {
   ATTRIBUTION_LABEL,
   countRiskOrdersByAttribution,
-  formatMonthDay,
   RISK_ATTRIBUTION,
   type RiskOrder,
   sortRiskOrders,
@@ -65,8 +65,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                       {ATTRIBUTION_LABEL[order.attribution]}
                     </Badge>
                     <span className="ml-auto text-b2 text-muted-foreground">
-                      약속 {formatMonthDay(order.promisedDate)} → 예상{' '}
-                      {formatMonthDay(order.expectedDate)}
+                      약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
                     </span>
                   </summary>
                   <p className="border-t border-border px-16pxr pt-12pxr text-b2 text-foreground">

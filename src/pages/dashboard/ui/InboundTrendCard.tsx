@@ -13,11 +13,12 @@ import {
 
 import { dashboardQueries, INBOUND_TREND_DAYS, type InboundTrendDays } from '@/shared/api'
 import { cn } from '@/shared/lib/cn'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
-import { formatMonthDay, TREND_DAYS_OPTIONS } from '../model/dashboard'
+import { TREND_DAYS_OPTIONS } from '../model/dashboard'
 
 const PLANNED_COLOR = 'var(--color-primary-600)'
 const ACTUAL_COLOR = 'var(--color-rose-500)'
@@ -83,14 +84,14 @@ export function InboundTrendCard() {
             <div
               className="h-280pxr"
               role="img"
-              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMonthDay(baseDate) : ''}. 입고 예정 합계 ${plannedTotal}건, 실제 입고 합계 ${actualTotal}건`}
+              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMMDD(baseDate) : ''}. 입고 예정 합계 ${plannedTotal}건, 실제 입고 합계 ${actualTotal}건`}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
                   <CartesianGrid vertical={false} stroke="var(--color-border)" />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={formatMonthDay}
+                    tickFormatter={formatMMDD}
                     tick={TICK_STYLE}
                     tickLine={false}
                     axisLine={false}
@@ -117,7 +118,7 @@ export function InboundTrendCard() {
                     />
                   )}
                   <Tooltip
-                    labelFormatter={(label) => formatMonthDay(String(label))}
+                    labelFormatter={(label) => formatMMDD(String(label))}
                     formatter={(value, name) => [`${value}건`, name]}
                   />
                   <Line

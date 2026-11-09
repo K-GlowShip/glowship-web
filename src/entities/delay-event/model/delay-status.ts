@@ -1,4 +1,4 @@
-import type { DelayEventCounts } from '@/shared/api'
+import { ANALYSIS_RUN_STATUS, type DelayEventCounts } from '@/shared/api'
 
 /** 서버 `GET /delay-events`의 `status` 코드값(API 명세 v6.2 2절, 4.4 탭 표) */
 export const DELAY_STATUS = {
@@ -47,27 +47,31 @@ export const DELAY_STATUS_BADGE_VARIANT = {
 
 /**
  * 지연 목록의 `currentRun.status`(분석 실행 상태)를 지연 상태 탭 코드로 바꾼다. 서버의 탭 집계와 같은 기준이다.
- * (`STALE`·`FAILED` = 재분석 필요, 진행 중 상태 = 분석 중) 실행이 없으면 null.
+ * (`STALE`·`FAILED` = 재분석 필요, 진행 중 상태 = 분석 중) 실행이 없거나 모르는 상태면 null이다.
+ * 모르는 상태를 "분석 중"으로 보여 주면 서버가 상태를 늘렸을 때 틀린 정보가 되므로 상태를 비워 둔다.
  */
 export const toDelayStatus = (runStatus: string | null | undefined): DelayStatus | null => {
   switch (runStatus) {
-    case undefined:
-    case null:
-      return null
-    case 'READY_FOR_REVIEW':
+    case ANALYSIS_RUN_STATUS.READY_FOR_REVIEW:
       return DELAY_STATUS.READY
-    case 'ON_HOLD':
+    case ANALYSIS_RUN_STATUS.ON_HOLD:
       return DELAY_STATUS.ON_HOLD
-    case 'STALE':
-    case 'FAILED':
+    case ANALYSIS_RUN_STATUS.STALE:
+    case ANALYSIS_RUN_STATUS.FAILED:
       return DELAY_STATUS.NEEDS_REANALYSIS
-    case 'FINALIZED':
+    case ANALYSIS_RUN_STATUS.FINALIZED:
       return DELAY_STATUS.FINALIZED
-    case 'NO_RISK':
+    case ANALYSIS_RUN_STATUS.NO_RISK:
       return DELAY_STATUS.NO_RISK
-    case 'NO_DELAY':
+    case ANALYSIS_RUN_STATUS.NO_DELAY:
       return DELAY_STATUS.NO_DELAY
-    default:
+    case ANALYSIS_RUN_STATUS.DETECTED:
+    case ANALYSIS_RUN_STATUS.VALIDATING:
+    case ANALYSIS_RUN_STATUS.ANALYZING_IMPACT:
+    case ANALYSIS_RUN_STATUS.ANALYZING_OPTIONS:
+    case ANALYSIS_RUN_STATUS.VALIDATING_OUTPUT:
       return DELAY_STATUS.ANALYZING
+    default:
+      return null
   }
 }

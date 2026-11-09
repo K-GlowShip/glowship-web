@@ -3,6 +3,7 @@ import { Fragment } from 'react'
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 
@@ -11,7 +12,6 @@ import {
   type DelayOption,
   FEASIBILITY_BADGE_VARIANT,
   FEASIBILITY_LABEL,
-  formatMonthDay,
   OPTION_TYPE_LABEL,
   REASON_LABEL,
 } from '../model/delay-center'
@@ -66,7 +66,7 @@ export function OptionTable({ options, explanation }: OptionTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {option.expectedArrival ? formatMonthDay(option.expectedArrival) : EMPTY_VALUE}
+                    {option.expectedArrival ? formatMMDD(option.expectedArrival) : EMPTY_VALUE}
                   </TableCell>
                   <TableCell>
                     {option.securableQuantity === null

@@ -1,10 +1,11 @@
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
+import { formatMMDD } from '@/shared/lib/kst-date'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { InfoTip } from '@/shared/ui/tooltip'
 
-import { formatMonthDay, type SkuImpact, WAREHOUSE_LABEL } from '../model/delay-center'
+import { type SkuImpact, WAREHOUSE_LABEL } from '../model/delay-center'
 import { IMPACT_TEXT } from '../model/delay-center-text'
 
 const getImpactKey = ({ skuCode, region }: SkuImpact) => `${skuCode}-${region}`
@@ -53,11 +54,11 @@ export function ImpactTable({ impacts }: ImpactTableProps) {
                   </TableCell>
                   <TableCell>
                     {impact.safetyStockBreachDate
-                      ? formatMonthDay(impact.safetyStockBreachDate)
+                      ? formatMMDD(impact.safetyStockBreachDate)
                       : EMPTY_VALUE}
                   </TableCell>
                   <TableCell>
-                    {impact.stockoutDate ? formatMonthDay(impact.stockoutDate) : EMPTY_VALUE}
+                    {impact.stockoutDate ? formatMMDD(impact.stockoutDate) : EMPTY_VALUE}
                   </TableCell>
                   <TableCell>
                     {impact.stockoutDays ? `${impact.stockoutDays}일` : EMPTY_VALUE}

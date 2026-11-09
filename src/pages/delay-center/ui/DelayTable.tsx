@@ -10,7 +10,7 @@ import {
 import type { DelayEventListItem } from '@/shared/api'
 import { EMPTY_VALUE, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
-import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { formatYYYYMMDDHHmm, formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import {
   Table,
@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import { type DelayListLocationState, formatMonthDay } from '../model/delay-center'
+import { type DelayListLocationState } from '../model/delay-center'
 
 interface DelayTableProps {
   query: ListQuery<DelayEventListItem>
@@ -102,8 +102,8 @@ export function DelayTable({ query, listSearch }: DelayTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {formatMonthDay(delay.planned3plInboundDate)} →{' '}
-                    {formatMonthDay(delay.expected3plInboundDate)}
+                    {formatMMDD(delay.planned3plInboundDate)} →{' '}
+                    {formatMMDD(delay.expected3plInboundDate)}
                   </TableCell>
                   <TableCell>
                     {delay.atRiskOrderCount === null ? EMPTY_VALUE : `${delay.atRiskOrderCount}건`}
