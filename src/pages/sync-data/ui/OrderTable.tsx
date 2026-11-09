@@ -40,6 +40,14 @@ export function OrderTable({ query }: { query: ListQuery<Order> }) {
       return next
     })
 
+  // 주문 번호 등을 드래그해서 복사하려는 클릭은 토글하지 않는다
+  const toggleRow = (orderId: string) => {
+    if (window.getSelection()?.toString()) {
+      return
+    }
+    toggle(orderId)
+  }
+
   return (
     <Table className="min-w-1010pxr">
       <TableHeader>
@@ -67,23 +75,26 @@ export function OrderTable({ query }: { query: ListQuery<Order> }) {
 
               return (
                 <Fragment key={order.orderId}>
-                  <TableRow>
+                  {/* 행 어디를 눌러도 열리고 닫힌다. 키보드·스크린 리더는 안의 버튼을 쓰고, 그 클릭이 행으로 전달돼 한 번만 토글된다 */}
+                  <TableRow className="cursor-pointer" onClick={() => toggleRow(order.orderId)}>
                     <TableCell>
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center gap-4pxr text-left outline-none focus-visible:underline"
-                        aria-expanded={isExpanded}
-                        aria-controls={linesId}
-                        aria-label={`${order.orderCode} 주문 상품 ${isExpanded ? '접기' : '펼치기'}`}
-                        onClick={() => toggle(order.orderId)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="size-16pxr shrink-0" aria-hidden="true" />
-                        ) : (
-                          <ChevronRight className="size-16pxr shrink-0" aria-hidden="true" />
-                        )}
-                        {order.orderCode}
-                      </button>
+                      <div className="flex items-center gap-4pxr">
+                        {/* 주문 번호는 버튼 밖에 둔다. 버튼 안의 글자는 드래그로 선택·복사할 수 없다 */}
+                        <button
+                          type="button"
+                          className="cursor-pointer rounded-control p-2pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
+                          aria-expanded={isExpanded}
+                          aria-controls={linesId}
+                          aria-label={`${order.orderCode} 주문 상품 ${isExpanded ? '접기' : '펼치기'}`}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="size-16pxr shrink-0" aria-hidden="true" />
+                          ) : (
+                            <ChevronRight className="size-16pxr shrink-0" aria-hidden="true" />
+                          )}
+                        </button>
+                        <span>{order.orderCode}</span>
+                      </div>
                     </TableCell>
                     <TableCell>{SALES_CHANNEL_LABEL[order.salesChannel]}</TableCell>
                     <TableCell>{formatYYYYMMDDHHmm(order.orderedAt)}</TableCell>
@@ -120,7 +131,7 @@ function OrderLines({ order }: { order: Order }) {
   }
 
   return (
-    <table className="w-full text-b2">
+    <table className="w-full max-w-800pxr text-b2">
       <caption className="sr-only">{order.orderCode} 주문 상품</caption>
       <thead>
         <tr className="text-left text-muted-foreground">
