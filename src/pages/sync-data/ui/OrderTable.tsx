@@ -29,24 +29,10 @@ const COLUMN_COUNT = 8
 
 // 재고 확보일·출고 예정일·배송 예정일은 서버가 아직 계산하지 않아 항상 null이라 열을 두지 않는다.
 export function OrderTable({ query }: { query: ListQuery<Order> }) {
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const toggle = (orderId: string) =>
-    setExpandedIds((prev) => {
-      const next = new Set(prev)
-      if (!next.delete(orderId)) {
-        next.add(orderId)
-      }
-      return next
-    })
-
-  // 주문 번호 등을 드래그해서 복사하려는 클릭은 토글하지 않는다
-  const toggleRow = (orderId: string) => {
-    if (window.getSelection()?.toString()) {
-      return
-    }
-    toggle(orderId)
-  }
+    setExpanded((prev) => ({ ...prev, [orderId]: !prev[orderId] }))
 
   return (
     <Table className="min-w-1010pxr">
@@ -70,13 +56,13 @@ export function OrderTable({ query }: { query: ListQuery<Order> }) {
         >
           {(orders) =>
             orders.map((order) => {
-              const isExpanded = expandedIds.has(order.orderId)
+              const isExpanded = expanded[order.orderId] ?? false
               const linesId = `order-lines-${order.orderId}`
 
               return (
                 <Fragment key={order.orderId}>
                   {/* 행 어디를 눌러도 열리고 닫힌다. 키보드·스크린 리더는 안의 버튼을 쓰고, 그 클릭이 행으로 전달돼 한 번만 토글된다 */}
-                  <TableRow className="cursor-pointer" onClick={() => toggleRow(order.orderId)}>
+                  <TableRow className="cursor-pointer" onClick={() => toggle(order.orderId)}>
                     <TableCell>
                       <div className="flex items-center gap-4pxr">
                         {/* 주문 번호는 버튼 밖에 둔다. 버튼 안의 글자는 드래그로 선택·복사할 수 없다 */}

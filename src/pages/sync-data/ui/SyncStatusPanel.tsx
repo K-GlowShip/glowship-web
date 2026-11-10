@@ -32,8 +32,8 @@ export function SyncStatusPanel({ overview }: SyncStatusPanelProps) {
             <p className="text-caption text-muted-foreground">마지막 수집</p>
             <p className="text-b1 font-bold">{formatSyncedAt(lastSyncedAt)}</p>
           </div>
-          {/* TODO: 전체 동기화 API 연결(요청 본문·진행 중 재요청 응답은 서버와 확정 후). 누른 뒤 latest를 다시 조회한다 */}
-          <Button variant="secondary" size="sm" disabled={isRunning} className="shrink-0">
+          {/* TODO(GLOW-146): 전체 동기화 API 연결 전까지 비활성(요청 본문·진행 중 재요청 응답은 서버와 확정 후). 누른 뒤 latest를 다시 조회한다 */}
+          <Button variant="secondary" size="sm" disabled className="shrink-0">
             {isRunning ? '수집 중' : '동기화'}
           </Button>
         </div>
