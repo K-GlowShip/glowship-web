@@ -12,6 +12,7 @@ import { dataSyncRunQueries } from '@/shared/api'
 import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatHHmm, formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -84,7 +85,8 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
                     {card.lastSyncedAt
                       ? `마지막 수집 ${formatFinishedAt(card.lastSyncedAt, referenceAt)} KST`
                       : '수집 기록 없음'}
-                    {card.openIssueCount > 0 && ` · 오류 항목 ${card.openIssueCount}건`}
+                    {card.openIssueCount > 0 &&
+                      ` · 오류 항목 ${formatNumber(card.openIssueCount)}건`}
                     {card.problemDomains.length > 0 &&
                       ` · 확인 필요: ${card.problemDomains.map((domain) => SYNC_SOURCE_LABEL[domain]).join(' · ')}`}
                   </p>
