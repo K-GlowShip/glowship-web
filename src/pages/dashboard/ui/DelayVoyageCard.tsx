@@ -38,28 +38,27 @@ export function DelayVoyageCard() {
         </Link>
       </CardHeader>
       <CardContent className="flex flex-col gap-16pxr px-0 pt-16pxr pb-0">
+        {/* 상태별 건수는 상자에 담지 않고 한 줄로 둔다 */}
         <ul
           aria-label="상태별 지연 건수, 누르면 해당 상태 목록으로 이동"
-          className="grid grid-cols-2 gap-16pxr px-24pxr lg:grid-cols-4"
+          className="flex flex-wrap gap-x-24pxr gap-y-8pxr px-24pxr"
         >
           {DELAY_STATUS_ORDER.map((status) => (
             <li key={status}>
               <Link
                 to={delayCenterListPath(status)}
-                className="group flex items-center justify-between gap-8pxr rounded-card border border-transparent bg-primary-50 px-16pxr py-12pxr transition-colors outline-none hover:border-primary-200 focus-visible:ring-[3px] focus-visible:ring-primary/30"
+                className="group flex items-center gap-8pxr rounded-control py-2pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
               >
                 <Badge variant={DELAY_STATUS_BADGE_VARIANT[status]}>
                   {DELAY_STATUS_LABEL[status]}
                 </Badge>
-                <span className="flex items-center gap-4pxr">
-                  <span className="text-h3 font-bold tabular-nums">
-                    {counts ? `${formatNumber(counts[DELAY_COUNT_KEY[status]])}건` : EMPTY_VALUE}
-                  </span>
-                  <ChevronRight
-                    className="size-16pxr text-muted-foreground group-hover:text-primary group-focus-visible:text-primary"
-                    aria-hidden="true"
-                  />
+                <span className="text-b1 font-bold tabular-nums group-hover:text-primary group-focus-visible:text-primary">
+                  {counts ? `${formatNumber(counts[DELAY_COUNT_KEY[status]])}건` : EMPTY_VALUE}
                 </span>
+                <ChevronRight
+                  className="size-14pxr text-muted-foreground group-hover:text-primary group-focus-visible:text-primary"
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}
