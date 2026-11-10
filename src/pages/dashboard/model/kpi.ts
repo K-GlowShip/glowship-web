@@ -42,8 +42,6 @@ export interface Kpi {
   caption: string
   tone: KpiTone
   trend: KpiTrend
-  /** 원형 게이지로 보여 주는 비율(0~1). 비율 지표가 아니거나 계산할 수 없으면 null */
-  rate: number | null
   /** 주의가 필요한 지표. 화면이 값을 붉게 강조한다 */
   isAlert: boolean
 }
@@ -87,7 +85,6 @@ export const toKpis = (summary: DashboardSummary): Kpi[] => {
         weekOverWeek === null ? EMPTY_VALUE : `전주 대비 ${formatSigned(weekOverWeek, '건')}`,
       tone: KPI_TONE.NEUTRAL,
       trend: toTrend(weekOverWeek),
-      rate: null,
       isAlert: false,
     },
     {
@@ -99,7 +96,6 @@ export const toKpis = (summary: DashboardSummary): Kpi[] => {
       caption: dayOverDay === null ? EMPTY_VALUE : `전일 대비 ${formatSigned(dayOverDay, '건')}`,
       tone: dayOverDay !== null && dayOverDay > 0 ? KPI_TONE.BAD : KPI_TONE.NEUTRAL,
       trend: toTrend(dayOverDay),
-      rate: null,
       isAlert: summary.delayedShipmentCount > 0,
     },
     {
@@ -119,7 +115,6 @@ export const toKpis = (summary: DashboardSummary): Kpi[] => {
             ? KPI_TONE.BAD
             : KPI_TONE.NEUTRAL,
       trend: toTrend(monthOverMonth),
-      rate: onTimeInboundRate,
       isAlert: false,
     },
     {
@@ -132,7 +127,6 @@ export const toKpis = (summary: DashboardSummary): Kpi[] => {
         atRiskOrderRate === null ? EMPTY_VALUE : `미출고 주문의 ${formatPercent(atRiskOrderRate)}`,
       tone: KPI_TONE.NEUTRAL,
       trend: KPI_TREND.NONE,
-      rate: atRiskOrderRate,
       isAlert: summary.atRiskOrderCount > 0,
     },
   ]

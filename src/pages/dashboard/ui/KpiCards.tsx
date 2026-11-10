@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { Minus, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
-import { useId, type CSSProperties } from 'react'
 
 import { dashboardQueries } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
@@ -21,9 +20,9 @@ import {
 } from '../model/kpi'
 
 const TONE_CLASS: Record<KpiTone, string> = {
-  [KPI_TONE.NEUTRAL]: 'bg-primary-50 text-muted-foreground',
-  [KPI_TONE.GOOD]: 'bg-success-bg text-success',
-  [KPI_TONE.BAD]: 'bg-danger-bg text-danger',
+  [KPI_TONE.NEUTRAL]: 'text-muted-foreground',
+  [KPI_TONE.GOOD]: 'text-success',
+  [KPI_TONE.BAD]: 'text-danger',
 }
 
 const TREND_ICON: Record<KpiTrend, LucideIcon | null> = {
@@ -33,10 +32,9 @@ const TREND_ICON: Record<KpiTrend, LucideIcon | null> = {
   [KPI_TREND.NONE]: null,
 }
 
-const GRID_CLASS = 'grid gap-16pxr sm:grid-cols-2 xl:grid-cols-4'
-
-const RING_RADIUS = 22
-const RING_LENGTH = 2 * Math.PI * RING_RADIUS
+// 지표를 상자에 담지 않고 요약 영역 위에 바로 놓는다. 가는 선으로만 나눠서 숫자가 주인공이 되게 한다
+const GRID_CLASS =
+  'grid gap-y-24pxr border-t border-primary-900/10 pt-24pxr sm:grid-cols-2 lg:grid-cols-4'
 
 export function KpiCards() {
   // 헤더의 기준 시각과 같은 요약 query다. 같은 키라서 요청은 한 번만 나간다
@@ -48,9 +46,9 @@ export function KpiCards() {
         {error ? (
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
         ) : (
-          <div className={GRID_CLASS}>
+          <div className={cn(GRID_CLASS, 'gap-x-24pxr')}>
             {Object.values(KPI_ID).map((id) => (
-              <Skeleton key={id} className="h-144pxr rounded-card bg-white/70" />
+              <Skeleton key={id} className="h-104pxr bg-white/60" />
             ))}
           </div>
         )}
@@ -61,90 +59,45 @@ export function KpiCards() {
   return (
     <section aria-label="핵심 지표" className={GRID_CLASS}>
       {toKpis(data).map((kpi) => (
-        <KpiCard key={kpi.id} kpi={kpi} />
+        <KpiItem key={kpi.id} kpi={kpi} />
       ))}
     </section>
   )
 }
 
-/** 비율(0~1)을 채워지는 원으로 보여 준다. 값은 옆의 숫자가 말하므로 장식으로 둔다 */
-function RateRing({ rate, isAlert }: { rate: number; isAlert: boolean }) {
-  const gradientId = useId()
-  const filled = Math.min(Math.max(rate, 0), 1)
-
-  return (
-    <svg viewBox="0 0 56 56" className="size-56pxr shrink-0 -rotate-90" aria-hidden="true">
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--color-primary-500)" />
-          <stop offset="1" stopColor="var(--color-rose-500)" />
-        </linearGradient>
-      </defs>
-      <circle
-        cx="28"
-        cy="28"
-        r={RING_RADIUS}
-        fill="none"
-        strokeWidth="6"
-        stroke={isAlert ? 'var(--color-danger-bg)' : 'var(--color-primary-100)'}
-      />
-      {filled > 0 && (
-        <circle
-          cx="28"
-          cy="28"
-          r={RING_RADIUS}
-          fill="none"
-          strokeWidth="6"
-          strokeLinecap="round"
-          stroke={isAlert ? 'var(--color-danger)' : `url(#${gradientId})`}
-          strokeDasharray={RING_LENGTH}
-          strokeDashoffset={RING_LENGTH * (1 - filled)}
-          className="animate-ring-fill motion-reduce:animate-none"
-          style={{ '--ring-length': RING_LENGTH } as CSSProperties}
-        />
-      )}
-    </svg>
-  )
-}
-
-function KpiCard({ kpi }: { kpi: Kpi }) {
-  const { label, value, unit, fractionDigits, caption, tone, trend, rate, isAlert } = kpi
+function KpiItem({ kpi }: { kpi: Kpi }) {
+  const { label, value, unit, fractionDigits, caption, tone, trend, isAlert } = kpi
   const TrendIcon = TREND_ICON[trend]
 
   return (
-    <div className="flex flex-col gap-8pxr rounded-card border border-white bg-white/70 p-20pxr shadow-[0_0.5rem_1.5rem_-1rem_rgb(89_67_184/0.45)] backdrop-blur-md">
-      <p className="text-b1 text-muted-foreground">{label}</p>
-      <div className="flex items-end justify-between gap-12pxr">
-        <div className="flex min-w-0 flex-col gap-8pxr">
-          <p className={cn('text-display font-bold tabular-nums', isAlert && 'text-danger')}>
-            {value === null ? (
-              EMPTY_VALUE
-            ) : (
-              <>
-                <CountUp
-                  value={value}
-                  format={(current) => formatKpiValue(current, fractionDigits)}
-                />
-                <span className="ml-2pxr text-h3">{unit}</span>
-              </>
-            )}
-          </p>
-          {caption === EMPTY_VALUE ? (
-            <p className="text-b2 text-muted-foreground">{caption}</p>
-          ) : (
-            <p
-              className={cn(
-                'inline-flex items-center gap-4pxr self-start rounded-full px-10pxr py-2pxr text-caption font-bold',
-                TONE_CLASS[tone],
-              )}
-            >
-              {TrendIcon && <TrendIcon className="size-14pxr" aria-hidden="true" />}
-              {caption}
-            </p>
-          )}
-        </div>
-        {rate !== null && <RateRing rate={rate} isAlert={isAlert} />}
-      </div>
+    // 넓은 화면에서는 지표 사이를 세로선으로 나눈다. 두 줄로 접히는 폭에서는 선 없이 간격만 둔다
+    <div className="flex flex-col gap-8pxr border-primary-900/10 pr-16pxr lg:border-l lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0">
+      <p className="text-b2 text-muted-foreground">{label}</p>
+      {/* 숫자는 크고 가늘게, 단위는 화장품 용량 표기처럼 숫자 머리 높이에 작게 올린다 */}
+      <p
+        className={cn(
+          'flex items-start text-kpi font-light tracking-[-0.03em] tabular-nums',
+          isAlert && 'text-danger',
+        )}
+      >
+        {value === null ? (
+          EMPTY_VALUE
+        ) : (
+          <>
+            <CountUp value={value} format={(current) => formatKpiValue(current, fractionDigits)} />
+            {/* 위 여백을 숫자 크기에 비례(em)하게 줘서, 숫자가 커져도 단위가 숫자 머리에 맞는다 */}
+            <span className="pt-[0.2em] pl-4pxr">
+              <span className="block text-b1 font-normal tracking-normal text-muted-foreground">
+                {unit}
+              </span>
+            </span>
+          </>
+        )}
+      </p>
+      <p className={cn('flex items-center gap-4pxr text-caption', TONE_CLASS[tone])}>
+        {TrendIcon && <TrendIcon className="size-14pxr" aria-hidden="true" />}
+        {caption}
+      </p>
     </div>
   )
 }

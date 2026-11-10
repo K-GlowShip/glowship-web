@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useSession } from '@/entities/session'
-import { dashboardQueries, type DashboardSummary } from '@/shared/api'
-import { formatNumber } from '@/shared/lib/format-number'
+import { dashboardQueries } from '@/shared/api'
 import { formatHHmm, formatKoreanLongDate } from '@/shared/lib/kst-date'
 
 import { KpiCards } from './KpiCards'
+
+// 160px 정사각형 노이즈 무늬(SVG feTurbulence)를 타일로 깐다
+const GRAIN_IMAGE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.26 0 0 0 0 0.72 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`
 
 /** 화면 맨 위의 요약. 인사말·기준 시각과 핵심 지표를 빛이 번지는 배경 위에 함께 둔다 */
 export function DashboardHero() {
@@ -20,6 +22,11 @@ export function DashboardHero() {
         <div className="absolute -top-200pxr -left-80pxr size-448pxr animate-aurora rounded-full bg-primary-300/50 blur-3xl motion-reduce:animate-none" />
         <div className="absolute -right-40pxr -bottom-280pxr size-480pxr animate-aurora rounded-full bg-rose-200/70 blur-3xl [animation-delay:-6s] [animation-direction:alternate-reverse] motion-reduce:animate-none" />
         <div className="absolute -top-160pxr right-[25%] size-320pxr animate-aurora rounded-full bg-info-bg blur-3xl [animation-delay:-11s] motion-reduce:animate-none" />
+        {/* 고운 입자를 덮어 그라데이션이 매끈한 화면 효과가 아니라 종이·분말 같은 질감으로 보이게 한다 */}
+        <div
+          className="absolute inset-0 opacity-25 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN_IMAGE }}
+        />
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-12pxr">
@@ -29,11 +36,7 @@ export function DashboardHero() {
           )}
           <h1 className="text-h1 font-bold">안녕하세요{me && `, ${me.displayName}님`}</h1>
           <p className="text-b1 text-muted-foreground">
-            {summary ? (
-              <Briefing summary={summary} />
-            ) : (
-              '오늘의 물류 흐름과 확인이 필요한 변화를 살펴보세요.'
-            )}
+            오늘의 물류 흐름과 확인이 필요한 변화를 살펴보세요.
           </p>
         </div>
         {summary && (
@@ -55,23 +58,5 @@ export function DashboardHero() {
 
       <KpiCards />
     </div>
-  )
-}
-
-/** 지금 확인할 것을 한 문장으로 알린다. 숫자는 아래 지표 카드와 같은 요약에서 나온다 */
-function Briefing({ summary }: { summary: DashboardSummary }) {
-  const { delayedShipmentCount, atRiskOrderCount } = summary
-
-  if (delayedShipmentCount === 0 && atRiskOrderCount === 0) {
-    return <>현재 지연 선적과 위험 주문이 없습니다.</>
-  }
-  return (
-    <>
-      현재 지연 선적{' '}
-      <strong className="font-bold text-danger">{formatNumber(delayedShipmentCount)}건</strong>,
-      위험 주문{' '}
-      <strong className="font-bold text-danger">{formatNumber(atRiskOrderCount)}건</strong>이
-      있습니다.
-    </>
   )
 }
