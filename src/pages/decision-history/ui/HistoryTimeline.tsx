@@ -6,14 +6,11 @@ import { getRoleLabel } from '@/entities/session'
 import { type AnalysisRunDetail, type Decision, DECISION_TYPE } from '@/shared/api'
 import { DECISION_TEXT } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Avatar } from '@/shared/ui/avatar'
+import { Badge } from '@/shared/ui/badge'
 
-import {
-  formatBaseDataAt,
-  formatSelectedAt,
-  getDecisionReason,
-  getMemberOpinions,
-} from '../model/history'
+import { getDecisionReason, getMemberOpinions } from '../model/history'
 import { getDecisionOptionLabel } from '../model/history-display'
 
 interface HistoryTimelineProps {
@@ -45,7 +42,7 @@ export function HistoryTimeline({ decision, run }: HistoryTimelineProps) {
           <p className="text-caption text-muted-foreground">
             분석 버전 v{run.versionNo}
             {run.inputBasis.dataBasisAt &&
-              ` · 기준 데이터 ${formatBaseDataAt(run.inputBasis.dataBasisAt)}`}
+              ` · 기준 데이터 ${formatYYYYMMDDHHmm(run.inputBasis.dataBasisAt)} KST`}
           </p>
         </TimelineItem>
 
@@ -143,18 +140,21 @@ function EntryHead({ name, roleCode, time, optionType, emphasis = false }: Entry
           <span className="font-bold">{name}</span>{' '}
           <span className="text-muted-foreground">{getRoleLabel(roleCode)}</span>
         </p>
-        <time className="text-caption text-muted-foreground">{formatSelectedAt(time)}</time>
+        <time dateTime={time} className="text-caption text-muted-foreground">
+          {formatYYYYMMDDHHmm(time)}
+        </time>
       </div>
-      <span
+      <Badge
+        variant="neutral"
+        dot={false}
         className={cn(
-          'inline-flex items-center self-start rounded-full px-10pxr py-2pxr text-b2 font-bold',
-          emphasis && 'bg-primary text-primary-foreground',
-          !emphasis && optionType && 'bg-muted text-foreground',
-          !optionType && 'border border-dashed border-border text-muted-foreground',
+          'self-start',
+          emphasis && 'bg-primary font-bold text-primary-foreground',
+          !emphasis && optionType && 'bg-muted font-bold text-foreground',
         )}
       >
         {optionType ? getOptionTypeLabel(optionType) : DECISION_TEXT.OPINION_ONLY}
-      </span>
+      </Badge>
     </div>
   )
 }

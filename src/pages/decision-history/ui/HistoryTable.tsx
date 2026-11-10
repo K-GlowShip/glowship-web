@@ -2,6 +2,7 @@ import { getRoleLabel } from '@/entities/session'
 import type { Decision } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import {
   Table,
@@ -14,11 +15,7 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import {
-  formatSelectedAt,
-  HISTORY_STATUS_BADGE_VARIANT,
-  HISTORY_STATUS_LABEL,
-} from '../model/history'
+import { HISTORY_STATUS_BADGE_VARIANT, HISTORY_STATUS_LABEL } from '../model/history'
 import { getDecisionOptionLabel, getDecisionTargetLabel } from '../model/history-display'
 
 interface HistoryTableProps {
@@ -56,9 +53,9 @@ export function HistoryTable({ query, selectedId, onSelect }: HistoryTableProps)
                   <button
                     type="button"
                     className="cursor-pointer outline-none focus-visible:underline"
-                    aria-label={`${formatSelectedAt(decision.decidedAt)} 상세 보기`}
+                    aria-label={`${formatYYYYMMDDHHmm(decision.decidedAt)} 상세 보기`}
                   >
-                    {formatSelectedAt(decision.decidedAt)}
+                    {formatYYYYMMDDHHmm(decision.decidedAt)}
                   </button>
                 </TableCell>
                 <TableCell className="wrap-break-word">
