@@ -2,6 +2,7 @@ import { Search } from 'lucide-react'
 import { type SubmitEvent, useState } from 'react'
 
 import { DELAY_COUNT_KEY } from '@/entities/delay-event'
+import { formatNumber } from '@/shared/lib/format-number'
 import type { DelayEventCounts } from '@/shared/api'
 import { DELAY_SEARCH_MAX_LENGTH } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
@@ -47,7 +48,7 @@ export function DelayListFilters({ keyword, status, counts, onSearch }: DelayLis
   }
 
   const withCount = (label: string, count: number | undefined) =>
-    count === undefined ? label : `${label} (${count})`
+    count === undefined ? label : `${label} (${formatNumber(count)})`
 
   const statusOptions: DropdownOption[] = [
     { value: STATUS_FILTER_ALL, label: withCount('전체', counts?.all) },
