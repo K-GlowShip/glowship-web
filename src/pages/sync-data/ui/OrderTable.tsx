@@ -131,42 +131,44 @@ function OrderLines({ order }: { order: Order }) {
   }
 
   return (
-    <table className="w-full max-w-800pxr text-b2">
-      <caption className="sr-only">{order.orderCode} 주문 상품</caption>
-      <thead>
-        <tr className="text-left text-muted-foreground">
-          <th scope="col" className="w-48pxr py-4pxr font-normal">
-            #
-          </th>
-          <th scope="col" className="w-140pxr py-4pxr font-normal">
-            SKU 코드
-          </th>
-          <th scope="col" className="py-4pxr font-normal">
-            상품명
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
-            주문 수량
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
-            출고 수량
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr pl-16pxr font-normal">
-            상태
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {order.lines.map((line) => (
-          <tr key={line.lineNo}>
-            <td className="py-4pxr">{line.lineNo}</td>
-            <td className="py-4pxr">{line.sku.skuCode}</td>
-            <td className="py-4pxr wrap-break-word">{line.sku.productName}</td>
-            <td className="py-4pxr text-right">{formatNumber(line.orderedQuantity)}</td>
-            <td className="py-4pxr text-right">{formatNumber(line.shippedQuantity)}</td>
-            <td className="py-4pxr pl-16pxr">{getOrderLineStatusLabel(line)}</td>
+    <div className="pl-24pxr">
+      <table className="w-full max-w-800pxr text-b2">
+        <caption className="sr-only">{order.orderCode} 주문 상품</caption>
+        <thead>
+          <tr className="text-left text-muted-foreground">
+            <th scope="col" className="w-48pxr py-4pxr font-normal">
+              #
+            </th>
+            <th scope="col" className="w-140pxr py-4pxr font-normal">
+              SKU 코드
+            </th>
+            <th scope="col" className="py-4pxr font-normal">
+              상품명
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
+              주문 수량
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
+              출고 수량
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr pl-16pxr font-normal">
+              상태
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {order.lines.map((line) => (
+            <tr key={line.lineNo}>
+              <td className="py-4pxr">{line.lineNo}</td>
+              <td className="py-4pxr">{line.sku.skuCode}</td>
+              <td className="py-4pxr wrap-break-word">{line.sku.productName}</td>
+              <td className="py-4pxr text-right">{formatNumber(line.orderedQuantity)}</td>
+              <td className="py-4pxr text-right">{formatNumber(line.shippedQuantity)}</td>
+              <td className="py-4pxr pl-16pxr">{getOrderLineStatusLabel(line)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
