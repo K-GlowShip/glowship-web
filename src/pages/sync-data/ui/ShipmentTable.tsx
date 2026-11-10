@@ -1,4 +1,4 @@
-import { getStageLabel } from '@/entities/delay-event'
+import { getStageLabel, TRANSPORT_MODE_LABEL } from '@/entities/delay-event'
 import type { Shipment } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { Badge } from '@/shared/ui/badge'
@@ -13,11 +13,7 @@ import {
   TableRow,
 } from '@/shared/ui/table'
 
-import {
-  getShipmentDelayLabel,
-  SHIPMENT_STAGE_BADGE_VARIANT,
-  TRANSPORT_MODE_LABEL,
-} from '../model/shipments'
+import { getShipmentDelayLabel, SHIPMENT_STAGE_BADGE_VARIANT } from '../model/shipments'
 
 /** 대표 상품과 나머지 품목 수. 예: "SKU-001 외 19종" */
 const formatRepresentativeSku = ({ representativeSku, skuCount }: Shipment) => {
