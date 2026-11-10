@@ -43,7 +43,7 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
   const syncIntervalMinutes = overview?.syncIntervalMinutes
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col border-primary-100">
       <CardHeader>
         <CardTitle as="h2">데이터 수집 상태</CardTitle>
         <Button

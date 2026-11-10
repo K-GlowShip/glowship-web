@@ -42,47 +42,10 @@ const STATUS_BAR_COLOR: Record<InventoryStatus, string> = {
 /** 막대가 가득 차는 기준: 안전재고 일수의 이 배수만큼 남았을 때 */
 const BAR_FULL_MULTIPLE = 3
 
-/** 소진까지 남은 일수(D-day)와 안전재고 일수 대비 남은 정도를 막대로 보여 준다 */
-function StockoutCell({
-  item,
-  baseDate,
-  safetyStockDays,
-}: {
-  item: InventoryStatusItem
-  baseDate: string | null
-  safetyStockDays: number | null
-}) {
-  if (!item.stockoutDate || !baseDate) {
-    return <>-</>
-  }
-  const daysLeft = Math.max(diffDays(baseDate, item.stockoutDate), 0)
-  // 안전재고 일수를 모르면 막대를 채울 기준이 없어 비워 둔다
-  const ratio = safetyStockDays ? Math.min(daysLeft / (safetyStockDays * BAR_FULL_MULTIPLE), 1) : 0
-
-  return (
-    <div className="flex flex-col gap-4pxr">
-      <span>
-        {formatMMDD(item.stockoutDate)}{' '}
-        <span className="text-caption text-muted-foreground">D-{daysLeft}</span>
-      </span>
-      <span className="h-4pxr w-80pxr overflow-hidden rounded-full bg-disabled" aria-hidden="true">
-        <span
-          className={cn('block h-full rounded-full', STATUS_BAR_COLOR[item.status])}
-          style={{ width: `${Math.max(ratio, 0.06) * 100}%` }}
-        />
-      </span>
-    </div>
-  )
-}
-
-/** 열 이름 옆에 정보 아이콘을 둔다 */
-function InfoHeader({ label, description }: { label: string; description: string }) {
-  return (
-    <span className="inline-flex items-center gap-4pxr">
-      {label}
-      <InfoTip label={label} description={description} />
-    </span>
-  )
+const STATUS_DDAY_CLASS: Record<InventoryStatus, string> = {
+  [INVENTORY_STATUS.RISK]: 'bg-danger-bg text-danger',
+  [INVENTORY_STATUS.CAUTION]: 'bg-warning-bg text-warning',
+  [INVENTORY_STATUS.OK]: 'bg-success-bg text-success',
 }
 
 export function InventoryTable() {
@@ -96,7 +59,7 @@ export function InventoryTable() {
   const safetyStockDays = data?.safetyStockDays ?? null
 
   return (
-    <Card>
+    <Card className="border-primary-100">
       <CardHeader>
         <div className="flex items-center gap-8pxr">
           <CardTitle as="h2">거점별 재고 현황</CardTitle>
@@ -135,7 +98,12 @@ export function InventoryTable() {
                     description="가용 재고가 이 수량 밑으로 처음 내려가는 날짜입니다."
                   />
                 </TableHead>
-                <TableHead>소진 예상</TableHead>
+                <TableHead>
+                  <InfoHeader
+                    label="소진 예상"
+                    description={`막대는 소진까지 남은 일수입니다.${safetyStockDays === null ? '' : `\n세로선은 안전재고 일수(${safetyStockDays}일)이고, 막대가 선에 못 미치면 안전재고보다 적게 남은 것입니다.`}`}
+                  />
+                </TableHead>
                 <TableHead>상태</TableHead>
               </TableRow>
             </TableHeader>
@@ -175,5 +143,69 @@ export function InventoryTable() {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+/**
+ * 소진까지 남은 일수(D-day)와 안전재고 일수 대비 남은 정도를 막대로 보여 준다.
+ * 막대 위 세로선이 안전재고 일수 자리라서, 막대가 선에 못 미치면 안전재고보다 적게 남은 것이다.
+ */
+function StockoutCell({
+  item,
+  baseDate,
+  safetyStockDays,
+}: {
+  item: InventoryStatusItem
+  baseDate: string | null
+  safetyStockDays: number | null
+}) {
+  if (!item.stockoutDate || !baseDate) {
+    return <>-</>
+  }
+  const daysLeft = Math.max(diffDays(baseDate, item.stockoutDate), 0)
+  // 안전재고 일수를 모르면 막대를 채울 기준이 없어 비워 둔다
+  const ratio = safetyStockDays ? Math.min(daysLeft / (safetyStockDays * BAR_FULL_MULTIPLE), 1) : 0
+
+  return (
+    <div className="flex flex-col gap-6pxr">
+      <span className="flex items-center gap-8pxr">
+        {formatMMDD(item.stockoutDate)}
+        <span
+          className={cn(
+            'rounded-full px-8pxr text-caption font-bold',
+            STATUS_DDAY_CLASS[item.status],
+          )}
+        >
+          D-{daysLeft}
+        </span>
+      </span>
+      <span className="relative h-6pxr w-120pxr" aria-hidden="true">
+        <span className="absolute inset-0 overflow-hidden rounded-full bg-disabled">
+          <span
+            className={cn(
+              'block h-full origin-left animate-grow-x rounded-full motion-reduce:animate-none',
+              STATUS_BAR_COLOR[item.status],
+            )}
+            style={{ width: `${Math.max(ratio, 0.06) * 100}%` }}
+          />
+        </span>
+        {safetyStockDays !== null && (
+          <span
+            className="absolute -inset-y-2pxr w-2pxr rounded-full bg-input"
+            style={{ left: `${100 / BAR_FULL_MULTIPLE}%` }}
+          />
+        )}
+      </span>
+    </div>
+  )
+}
+
+/** 열 이름 옆에 정보 아이콘을 둔다 */
+function InfoHeader({ label, description }: { label: string; description: string }) {
+  return (
+    <span className="inline-flex items-center gap-4pxr">
+      {label}
+      <InfoTip label={label} description={description} />
+    </span>
   )
 }
