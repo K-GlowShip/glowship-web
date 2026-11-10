@@ -218,17 +218,7 @@ export { formatRoute }
 
 export { OPTION_TYPE_LABEL } from '@/entities/delay-event'
 
-export const FEASIBILITY_LABEL: Record<Feasibility, string> = {
-  [FEASIBILITY.FEASIBLE]: '실행 가능',
-  [FEASIBILITY.NOT_FEASIBLE]: '실행 불가',
-  [FEASIBILITY.NEEDS_CHECK]: '확인 필요',
-}
-
-export const FEASIBILITY_BADGE_VARIANT = {
-  [FEASIBILITY.FEASIBLE]: 'success',
-  [FEASIBILITY.NOT_FEASIBLE]: 'danger',
-  [FEASIBILITY.NEEDS_CHECK]: 'warning',
-} as const satisfies Record<Feasibility, 'success' | 'danger' | 'warning'>
+export { FEASIBILITY_BADGE_VARIANT, FEASIBILITY_LABEL, REASON_LABEL } from '@/entities/delay-event'
 
 /**
  * 역할별로 고를 수 있는 대응안. 최종 선택은 실행 가능한 안만 고른다. 초안은 실행 가능 여부를 묻지 않아서
@@ -241,18 +231,6 @@ const SELECTABLE_FEASIBILITY: Record<ClientRole, Feasibility[]> = {
 
 export const getSelectableOptions = (role: ClientRole, options: DelayOption[]) =>
   options.filter((option) => SELECTABLE_FEASIBILITY[role].includes(option.feasibility))
-
-export const REASON_LABEL: Record<ReasonCode, string> = {
-  [REASON_CODE.ARRIVES_AFTER_DELAYED_SHIPMENT]: '지연 선적보다 늦게 도착',
-  [REASON_CODE.NO_KR_ELIGIBLE_STOCK]: '한국 창고에 보충할 재고 없음',
-  [REASON_CODE.NO_TRANSFERABLE_STOCK]: '공여 창고에 넘길 재고 없음',
-  [REASON_CODE.PROMISE_UNREACHABLE_LEADTIME]: '배송 기간 안에 약속일을 맞출 수 없음',
-  [REASON_CODE.DONOR_NO_NEXT_INBOUND]: '공여 창고의 다음 입고 없음',
-  [REASON_CODE.FORECAST_EFFECT_BELOW_ONE_UNIT]: '효과가 1개 미만',
-  [REASON_CODE.NO_RECOVERY_EFFECT]: '회복 효과 없음',
-  [REASON_CODE.MISSING_OPERATING_RULE]: '운영 기준 없음',
-  [REASON_CODE.MISSING_REQUIRED_DATA]: '필수 자료 없음',
-}
 
 /**
  * 급한 위험 주문이 위로 오게 정렬한다. 지연 유발 위험을 먼저 두고(대응안으로 회복할 수 있는 대상),

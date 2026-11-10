@@ -14,6 +14,7 @@ import {
 import { dashboardQueries, INBOUND_TREND_DAYS, type InboundTrendDays } from '@/shared/api'
 import { cn } from '@/shared/lib/cn'
 import { formatMMDD } from '@/shared/lib/kst-date'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -84,7 +85,7 @@ export function InboundTrendCard() {
             <div
               className="h-280pxr"
               role="img"
-              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMMDD(baseDate) : ''}. 입고 예정 합계 ${plannedTotal}건, 실제 입고 합계 ${actualTotal}건`}
+              aria-label={`최근 ${days}일 3PL 입고 추이 선 그래프, 기준일 ${baseDate ? formatMMDD(baseDate) : ''}. 입고 예정 합계 ${formatNumber(plannedTotal)}건, 실제 입고 합계 ${formatNumber(actualTotal)}건`}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
@@ -119,7 +120,10 @@ export function InboundTrendCard() {
                   )}
                   <Tooltip
                     labelFormatter={(label) => formatMMDD(String(label))}
-                    formatter={(value, name) => [`${value}건`, name]}
+                    formatter={(value, name) => [
+                      `${typeof value === 'number' ? formatNumber(value) : value}건`,
+                      name,
+                    ]}
                   />
                   <Line
                     name="입고 예정"

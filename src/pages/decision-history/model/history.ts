@@ -7,7 +7,7 @@ import {
   type GetDecisionsParams,
   SKU_SCOPE,
 } from '@/shared/api'
-import { formatYYYYMMDDHHmm, toUtcDayStart, toUtcNextDayStart } from '@/shared/lib/kst-date'
+import { toUtcDayStart, toUtcNextDayStart } from '@/shared/lib/kst-date'
 
 export interface HistoryFilter {
   /** 'YYYY-MM-DD'. 화면(KST) 기준 날짜. 고르지 않았으면 '' */
@@ -51,11 +51,14 @@ export const toDecisionParams = (filter: HistoryFilter, page: number): GetDecisi
   size: HISTORY_PAGE_SIZE,
 })
 
-/** UTC 시각을 한국 시간으로. '2026-10-21T00:24:00Z' -> '2026.10.21 09:24' */
-export const formatSelectedAt = formatYYYYMMDDHHmm
+/** AI 설명 문장 속 근거 표지(`[E1]`)를 숨긴다. 화면에는 표지 대신 문장만 보여 준다(명세 U10) */
+export const stripEvidenceMarks = (text: string) => text.replace(/\s*\[E\d+\]/g, '').trim()
 
-/** UTC 시각을 한국 시간으로. '2026-10-21T00:00:00Z' -> '2026.10.21 09:00 KST' */
-export const formatBaseDataAt = (baseDataAt: string) => `${formatYYYYMMDDHHmm(baseDataAt)} KST`
+/** 앱 다른 곳과 날짜 모양을 맞춘다. '2026-01-27' -> '2026.01.27' */
+const formatIsoDates = (text: string) => text.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$1.$2.$3')
+
+/** AI 설명 문장을 화면에 보여 줄 모양으로: 근거 표지를 지우고 날짜 모양을 맞춘다 */
+export const formatExplanationText = (text: string) => formatIsoDates(stripEvidenceMarks(text))
 
 /** 선택 이유. 최종 선택은 선택 이유, 초안은 작성한 의견이다. 없으면 null */
 export const getDecisionReason = (decision: Decision, run: AnalysisRunDetail) =>

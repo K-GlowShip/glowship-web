@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
+import { getRoleLabel } from '@/entities/session'
 import { analysisRunQueries, type Decision } from '@/shared/api'
 import { delayCenterPath } from '@/shared/config'
+import { Badge } from '@/shared/ui/badge'
 import { buttonVariants } from '@/shared/ui/button'
 import {
   Drawer,
@@ -16,10 +18,14 @@ import {
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
-import { formatSelectedAt, HISTORY_DISCLAIMER, HISTORY_STATUS_LABEL } from '../model/history'
+import {
+  HISTORY_DISCLAIMER,
+  HISTORY_STATUS_BADGE_VARIANT,
+  HISTORY_STATUS_LABEL,
+} from '../model/history'
 import { getDecisionOptionLabel, getDecisionTargetLabel } from '../model/history-display'
 import { HistoryAnalysisSection } from './HistoryAnalysisSection'
-import { HistoryReasonSection } from './HistoryReasonSection'
+import { HistoryTimeline } from './HistoryTimeline'
 
 interface HistoryDetailDrawerProps {
   decision: Decision | null
@@ -54,23 +60,27 @@ function HistoryDetail({ decision }: { decision: Decision }) {
 
   return (
     <>
-      <DrawerHeader>
-        <div className="flex flex-wrap items-center gap-12pxr">
-          <DrawerTitle>
-            {HISTORY_STATUS_LABEL[decision.status]}: {getDecisionOptionLabel(decision)}
-          </DrawerTitle>
+      <DrawerHeader className="bg-linear-to-br from-primary-50 via-card to-rose-50">
+        <div className="flex flex-wrap items-center gap-8pxr">
+          <p className="text-caption text-muted-foreground">
+            {decision.decidedBy.displayName} · {getRoleLabel(decision.decidedBy.roleCode)}
+          </p>
+          <Badge variant={HISTORY_STATUS_BADGE_VARIANT[decision.status]}>
+            {HISTORY_STATUS_LABEL[decision.status]}
+          </Badge>
         </div>
-        <DrawerDescription>
-          {getDecisionTargetLabel(decision)} · {decision.decidedBy.displayName} ·{' '}
-          {formatSelectedAt(decision.decidedAt)}
-        </DrawerDescription>
+        <DrawerTitle className="mt-8pxr text-h2">{getDecisionOptionLabel(decision)}</DrawerTitle>
+        <DrawerDescription>{getDecisionTargetLabel(decision)}</DrawerDescription>
       </DrawerHeader>
 
-      <DrawerBody className="flex flex-col gap-16pxr">
+      <DrawerBody className="flex flex-col gap-24pxr">
         {run ? (
           <>
-            <HistoryReasonSection decision={decision} run={run} />
-            <HistoryAnalysisSection run={run} />
+            <HistoryTimeline decision={decision} run={run} />
+            <HistoryAnalysisSection
+              run={run}
+              selectedOptionType={decision.responseOption?.optionType ?? null}
+            />
           </>
         ) : error ? (
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />

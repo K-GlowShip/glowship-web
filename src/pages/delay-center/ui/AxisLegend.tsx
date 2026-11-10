@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Tooltip } from '@/shared/ui/tooltip'
 
 import { AXIS_LEGEND_TEXT } from '../model/delay-center-text'
@@ -29,7 +30,9 @@ export function AxisLegend({ hiddenCount }: AxisLegendProps) {
         mark={<span className="h-10pxr w-20pxr rounded-full bg-danger-bg" aria-hidden="true" />}
       />
       {hiddenCount > 0 && (
-        <span className="ml-auto">그 밖의 {hiddenCount}개 상품은 아래 표에서 확인하세요.</span>
+        <span className="ml-auto">
+          그 밖의 {formatNumber(hiddenCount)}개 상품은 아래 표에서 확인하세요.
+        </span>
       )}
     </div>
   )

@@ -11,6 +11,7 @@ import type { DelayEventListItem } from '@/shared/api'
 import { EMPTY_VALUE, delayCenterPath } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm, formatMMDD } from '@/shared/lib/kst-date'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import {
   Table,
@@ -78,7 +79,7 @@ export function DelayTable({ query, listSearch }: DelayTableProps) {
                     </Link>{' '}
                     <span className="text-muted-foreground">
                       {delay.representativeSku?.productName ?? EMPTY_VALUE}
-                      {delay.skuCount > 1 && ` 외 ${delay.skuCount - 1}개`}
+                      {delay.skuCount > 1 && ` 외 ${formatNumber(delay.skuCount - 1)}개`}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -106,7 +107,9 @@ export function DelayTable({ query, listSearch }: DelayTableProps) {
                     {formatMMDD(delay.expected3plInboundDate)}
                   </TableCell>
                   <TableCell>
-                    {delay.atRiskOrderCount === null ? EMPTY_VALUE : `${delay.atRiskOrderCount}건`}
+                    {delay.atRiskOrderCount === null
+                      ? EMPTY_VALUE
+                      : `${formatNumber(delay.atRiskOrderCount)}건`}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatYYYYMMDDHHmm(delay.detectedAt)}

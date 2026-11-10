@@ -3,15 +3,16 @@ import { RefreshCw, TriangleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
-  getSyncBadge,
-  isSyncError,
-  SYNC_CARD_DOMAINS,
-  SYNC_CARD_NAME,
+  getSyncOverview,
+  SYNC_CARDS,
+  SYNC_LEVEL,
+  SYNC_SOURCE_LABEL,
 } from '@/entities/data-sync-run'
-import { dataSyncRunQueries, SYNC_STATUS } from '@/shared/api'
+import { dataSyncRunQueries } from '@/shared/api'
 import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatHHmm, formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -32,16 +33,14 @@ interface SyncStatusCardProps {
 export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
   const { data, error, isFetching, refetch } = useQuery(dataSyncRunQueries.latest())
 
-  // 서버는 원천 5종을 항상 내려준다. 카드가 있는 원천만 순서대로 고른다.
-  const runs = SYNC_CARD_DOMAINS.flatMap((domain) => {
-    const run = data?.items.find((item) => item.sourceDomain === domain)
-    return run ? [{ domain, run }] : []
-  })
+  // 서버는 원천 5종을 항상 내려준다. 시스템별 카드(ERP·WMS·TMS)로 묶어 계산한다.
+  const overview = data ? getSyncOverview(data.items) : null
+  const cards = overview?.cards ?? []
   // FR-003: 수집 오류로 필수 자료가 빠지면 이에 기대는 분석이 보류된다
-  const hasProblem = runs.some(
-    ({ run }) => isSyncError(run) || run.status === SYNC_STATUS.PARTIAL_SUCCESS,
+  const hasProblem = cards.some(
+    ({ level }) => level === SYNC_LEVEL.ERROR || level === SYNC_LEVEL.PARTIAL,
   )
-  const syncIntervalMinutes = runs[0]?.run.syncIntervalMinutes
+  const syncIntervalMinutes = overview?.syncIntervalMinutes
 
   return (
     <Card className="flex flex-col">
@@ -67,35 +66,34 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
             />
           ) : (
             <div className="flex flex-col gap-16pxr">
-              {SYNC_CARD_DOMAINS.map((domain) => (
-                <Skeleton key={domain} className="h-40pxr" />
+              {SYNC_CARDS.map(({ system }) => (
+                <Skeleton key={system} className="h-40pxr" />
               ))}
             </div>
           )
-        ) : runs.length === 0 ? (
+        ) : data.items.length === 0 ? (
           <p className="py-24pxr text-center text-muted-foreground">수집 내역이 없습니다.</p>
         ) : (
           <ul className="flex flex-col gap-16pxr">
-            {runs.map(({ domain, run }) => {
-              const badge = getSyncBadge(run)
-
-              return (
-                <li key={domain} className="flex items-center justify-between gap-12pxr">
-                  <div className="min-w-0">
-                    <p className="text-b1 font-bold">
-                      {SYNC_CARD_NAME[domain]} · {run.sourceSystemName}
-                    </p>
-                    <p className="text-caption text-muted-foreground">
-                      {run.lastSyncedAt
-                        ? `마지막 수집 ${formatFinishedAt(run.lastSyncedAt, referenceAt)} KST`
-                        : '수집 기록 없음'}
-                      {run.openIssueCount > 0 && ` · 오류 항목 ${run.openIssueCount}건`}
-                    </p>
-                  </div>
-                  <Badge variant={badge.variant}>{badge.label}</Badge>
-                </li>
-              )
-            })}
+            {cards.map((card) => (
+              <li key={card.system} className="flex items-center justify-between gap-12pxr">
+                <div className="min-w-0">
+                  <p className="text-b1 font-bold">
+                    {card.name} · {card.sourceSystemName ?? card.system}
+                  </p>
+                  <p className="text-caption text-muted-foreground">
+                    {card.lastSyncedAt
+                      ? `마지막 수집 ${formatFinishedAt(card.lastSyncedAt, referenceAt)} KST`
+                      : '수집 기록 없음'}
+                    {card.openIssueCount > 0 &&
+                      ` · 오류 항목 ${formatNumber(card.openIssueCount)}건`}
+                    {card.problemDomains.length > 0 &&
+                      ` · 확인 필요: ${card.problemDomains.map((domain) => SYNC_SOURCE_LABEL[domain]).join(' · ')}`}
+                  </p>
+                </div>
+                <Badge variant={card.badge.variant}>{card.badge.label}</Badge>
+              </li>
+            ))}
           </ul>
         )}
         {hasProblem && (

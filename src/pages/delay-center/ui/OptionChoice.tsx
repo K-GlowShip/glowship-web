@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 
+import { DECISION_TEXT } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 
 import {
@@ -98,7 +100,7 @@ export function OptionChoice({
               )}
               {opinionCount > 0 && (
                 <span className="ml-auto text-caption text-muted-foreground">
-                  팀원 의견 {opinionCount}건
+                  {DECISION_TEXT.MEMBER_OPINION} {formatNumber(opinionCount)}건
                 </span>
               )}
             </span>

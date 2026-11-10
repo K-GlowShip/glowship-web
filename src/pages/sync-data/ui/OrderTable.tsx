@@ -29,16 +29,10 @@ const COLUMN_COUNT = 8
 
 // 재고 확보일·출고 예정일·배송 예정일은 서버가 아직 계산하지 않아 항상 null이라 열을 두지 않는다.
 export function OrderTable({ query }: { query: ListQuery<Order> }) {
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const toggle = (orderId: string) =>
-    setExpandedIds((prev) => {
-      const next = new Set(prev)
-      if (!next.delete(orderId)) {
-        next.add(orderId)
-      }
-      return next
-    })
+    setExpanded((prev) => ({ ...prev, [orderId]: !prev[orderId] }))
 
   return (
     <Table className="min-w-1010pxr">
@@ -62,28 +56,31 @@ export function OrderTable({ query }: { query: ListQuery<Order> }) {
         >
           {(orders) =>
             orders.map((order) => {
-              const isExpanded = expandedIds.has(order.orderId)
+              const isExpanded = expanded[order.orderId] ?? false
               const linesId = `order-lines-${order.orderId}`
 
               return (
                 <Fragment key={order.orderId}>
-                  <TableRow>
+                  {/* 행 어디를 눌러도 열리고 닫힌다. 키보드·스크린 리더는 안의 버튼을 쓰고, 그 클릭이 행으로 전달돼 한 번만 토글된다 */}
+                  <TableRow className="cursor-pointer" onClick={() => toggle(order.orderId)}>
                     <TableCell>
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center gap-4pxr text-left outline-none focus-visible:underline"
-                        aria-expanded={isExpanded}
-                        aria-controls={linesId}
-                        aria-label={`${order.orderCode} 주문 상품 ${isExpanded ? '접기' : '펼치기'}`}
-                        onClick={() => toggle(order.orderId)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="size-16pxr shrink-0" aria-hidden="true" />
-                        ) : (
-                          <ChevronRight className="size-16pxr shrink-0" aria-hidden="true" />
-                        )}
-                        {order.orderCode}
-                      </button>
+                      <div className="flex items-center gap-4pxr">
+                        {/* 주문 번호는 버튼 밖에 둔다. 버튼 안의 글자는 드래그로 선택·복사할 수 없다 */}
+                        <button
+                          type="button"
+                          className="cursor-pointer rounded-control p-2pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
+                          aria-expanded={isExpanded}
+                          aria-controls={linesId}
+                          aria-label={`${order.orderCode} 주문 상품 ${isExpanded ? '접기' : '펼치기'}`}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="size-16pxr shrink-0" aria-hidden="true" />
+                          ) : (
+                            <ChevronRight className="size-16pxr shrink-0" aria-hidden="true" />
+                          )}
+                        </button>
+                        <span>{order.orderCode}</span>
+                      </div>
                     </TableCell>
                     <TableCell>{SALES_CHANNEL_LABEL[order.salesChannel]}</TableCell>
                     <TableCell>{formatYYYYMMDDHHmm(order.orderedAt)}</TableCell>
@@ -120,42 +117,44 @@ function OrderLines({ order }: { order: Order }) {
   }
 
   return (
-    <table className="w-full text-b2">
-      <caption className="sr-only">{order.orderCode} 주문 상품</caption>
-      <thead>
-        <tr className="text-left text-muted-foreground">
-          <th scope="col" className="w-48pxr py-4pxr font-normal">
-            #
-          </th>
-          <th scope="col" className="w-140pxr py-4pxr font-normal">
-            SKU 코드
-          </th>
-          <th scope="col" className="py-4pxr font-normal">
-            상품명
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
-            주문 수량
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
-            출고 수량
-          </th>
-          <th scope="col" className="w-100pxr py-4pxr pl-16pxr font-normal">
-            상태
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {order.lines.map((line) => (
-          <tr key={line.lineNo}>
-            <td className="py-4pxr">{line.lineNo}</td>
-            <td className="py-4pxr">{line.sku.skuCode}</td>
-            <td className="py-4pxr wrap-break-word">{line.sku.productName}</td>
-            <td className="py-4pxr text-right">{formatNumber(line.orderedQuantity)}</td>
-            <td className="py-4pxr text-right">{formatNumber(line.shippedQuantity)}</td>
-            <td className="py-4pxr pl-16pxr">{getOrderLineStatusLabel(line)}</td>
+    <div className="pl-24pxr">
+      <table className="w-full max-w-800pxr text-b2">
+        <caption className="sr-only">{order.orderCode} 주문 상품</caption>
+        <thead>
+          <tr className="text-left text-muted-foreground">
+            <th scope="col" className="w-48pxr py-4pxr font-normal">
+              #
+            </th>
+            <th scope="col" className="w-140pxr py-4pxr font-normal">
+              SKU 코드
+            </th>
+            <th scope="col" className="py-4pxr font-normal">
+              상품명
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
+              주문 수량
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr text-right font-normal">
+              출고 수량
+            </th>
+            <th scope="col" className="w-100pxr py-4pxr pl-16pxr font-normal">
+              상태
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {order.lines.map((line) => (
+            <tr key={line.lineNo}>
+              <td className="py-4pxr">{line.lineNo}</td>
+              <td className="py-4pxr">{line.sku.skuCode}</td>
+              <td className="py-4pxr wrap-break-word">{line.sku.productName}</td>
+              <td className="py-4pxr text-right">{formatNumber(line.orderedQuantity)}</td>
+              <td className="py-4pxr text-right">{formatNumber(line.shippedQuantity)}</td>
+              <td className="py-4pxr pl-16pxr">{getOrderLineStatusLabel(line)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

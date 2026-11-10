@@ -14,6 +14,7 @@ import {
 import { delayEventQueries } from '@/shared/api'
 import { EMPTY_VALUE, ROUTES, delayCenterListPath, delayCenterPath } from '@/shared/config'
 import { formatMMDD } from '@/shared/lib/kst-date'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import {
@@ -62,7 +63,7 @@ export function DelayTable() {
                 </Badge>
                 <span className="flex items-center gap-4pxr">
                   <span className="text-h3 font-bold">
-                    {counts ? `${counts[DELAY_COUNT_KEY[status]]}건` : EMPTY_VALUE}
+                    {counts ? `${formatNumber(counts[DELAY_COUNT_KEY[status]])}건` : EMPTY_VALUE}
                   </span>
                   <ChevronRight
                     className="size-16pxr text-muted-foreground group-hover:text-primary group-focus-visible:text-primary"
@@ -112,7 +113,7 @@ export function DelayTable() {
                           {delay.skuCount > 1 && (
                             <span className="text-muted-foreground">
                               {' '}
-                              외 {delay.skuCount - 1}개
+                              외 {formatNumber(delay.skuCount - 1)}개
                             </span>
                           )}
                         </TableCell>
@@ -131,7 +132,7 @@ export function DelayTable() {
                         <TableCell>
                           {delay.atRiskOrderCount === null
                             ? EMPTY_VALUE
-                            : `${delay.atRiskOrderCount}건`}
+                            : `${formatNumber(delay.atRiskOrderCount)}건`}
                         </TableCell>
                         <TableCell>
                           {status ? (

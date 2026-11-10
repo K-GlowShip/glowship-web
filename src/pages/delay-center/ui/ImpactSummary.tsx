@@ -26,7 +26,7 @@ export function ImpactSummary({ analysis }: ImpactSummaryProps) {
       return (
         <>
           <span className={cn(delayInduced > 0 && 'text-danger')}>
-            지연으로 인한 위험 주문 {delayInduced > 0 ? `${delayInduced}건` : '없음'}
+            지연으로 인한 위험 주문 {delayInduced > 0 ? `${formatNumber(delayInduced)}건` : '없음'}
           </span>
           {' · '}
           <span className="text-danger">

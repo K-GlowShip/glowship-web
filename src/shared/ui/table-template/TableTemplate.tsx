@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 
 import { cn } from '@/shared/lib/cn'
+import { formatNumber } from '@/shared/lib/format-number'
 import { Pagination } from '@/shared/ui/pagination'
 
 interface TableTemplateProps extends ComponentProps<'div'> {
@@ -40,7 +41,7 @@ export function TableTemplate({
         <div className="min-w-0">
           {Title && <h2 className="text-h3 font-bold">{Title}</h2>}
           {totalCount !== undefined && (
-            <p className="text-b2 text-muted-foreground">총 {totalCount}건</p>
+            <p className="text-b2 text-muted-foreground">총 {formatNumber(totalCount)}건</p>
           )}
         </div>
         {Controls && <div className="flex shrink-0 items-center gap-8pxr">{Controls}</div>}

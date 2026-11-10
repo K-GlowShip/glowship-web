@@ -1,3 +1,4 @@
+import { DECISION_TEXT } from '@/shared/config'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Avatar } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
@@ -13,7 +14,8 @@ export function MemberOpinions({ opinions, options }: MemberOpinionsProps) {
   return (
     <section aria-labelledby="member-opinions-title" className="flex flex-col gap-12pxr">
       <h3 id="member-opinions-title" className="text-b1 font-bold">
-        팀원 의견 <span className="text-muted-foreground">{opinions.length}</span>
+        {DECISION_TEXT.MEMBER_OPINION}{' '}
+        <span className="text-muted-foreground">{opinions.length}</span>
       </h3>
 
       {opinions.length === 0 ? (
