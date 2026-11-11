@@ -1,6 +1,6 @@
 import { Package, Plane, Ship, type LucideIcon } from 'lucide-react'
 
-import { TRANSPORT_MODE, type TransportMode } from '@/entities/delay-event'
+import { TRANSPORT_MODE, type TransportMode } from '../model/route'
 
 export interface VoyageStyle {
   Icon: LucideIcon

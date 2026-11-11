@@ -1,4 +1,4 @@
-import { STAGE_CODE, type StageCode } from '@/entities/delay-event'
+import { STAGE_CODE, type StageCode } from './stage'
 
 /**
  * 선적 여정에 표시하는 정거장. 운송 단계(명세 2절)를 진행 순서대로 놓았다.

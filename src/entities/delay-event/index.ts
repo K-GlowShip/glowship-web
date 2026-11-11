@@ -33,3 +33,15 @@ export {
   OPTION_TYPE_LABEL,
   type OptionType,
 } from './model/option-type'
+export {
+  getStepAlign,
+  getVoyageStepIndex,
+  splitRoute,
+  STEP_ALIGN,
+  toStepPosition,
+  VOYAGE_IN_TRANSIT_STEP_INDEX,
+  VOYAGE_STEPS,
+} from './model/voyage'
+export { TransportChip } from './ui/TransportChip'
+export { VoyageProgress } from './ui/VoyageProgress'
+export { getVoyageStyle } from './ui/voyage-style'

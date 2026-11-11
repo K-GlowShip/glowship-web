@@ -1,6 +1,13 @@
 import { useState } from 'react'
 
 import {
+  getStageLabel,
+  getVoyageStepIndex,
+  TransportChip,
+  VoyageProgress,
+} from '@/entities/delay-event'
+
+import {
   canDecide,
   CLIENT_ROLE,
   type ClientRole,
@@ -13,6 +20,7 @@ import {
   hasNoFeasibleOption,
   NO_OPTION,
   OPTION_TYPE,
+  STAGE_FLOW,
 } from '../model/delay-center'
 import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 import { AiExplanationCard } from './AiExplanationCard'
@@ -24,7 +32,6 @@ import { DetailChapter, DetailSubsection } from './DetailChapter'
 import { ImpactSection } from './ImpactSection'
 import { OptionCompare } from './OptionCompare'
 import { RunHistory } from './RunHistory'
-import { StageTimeline } from './StageTimeline'
 import { StatusNotice } from './StatusNotice'
 
 interface DelayDetailProps {
@@ -45,7 +52,7 @@ const DECISION_DESCRIPTION = {
  * 대응안은 02의 카드에서 고르고, 03에서 이유·의견을 적어 저장한다. 상태마다 보여 줄 섹션은 `getDetailSections`가 정한다.
  */
 export function DelayDetail({ delayCase, role }: DelayDetailProps) {
-  const { analysis } = delayCase
+  const { analysis, transportMode, stage } = delayCase
   const sections = getDetailSections(delayCase)
   // 지금 대응안을 고를 수 있는 역할. 권한이 없거나 선택할 수 없는 상태(종료·재분석 필요 등)면 null
   const decisionRole = role && canDecide(delayCase) ? role : null
@@ -70,8 +77,18 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
         title="현재 상황"
         description="선적이 어디에 있고, 어떤 상품과 주문이 위험한지 봅니다"
       >
-        <DetailSubsection id="stage-title" title="운송 단계">
-          <StageTimeline delayCase={delayCase} />
+        <DetailSubsection
+          id="stage-title"
+          title="운송 단계"
+          aside={<TransportChip transportMode={delayCase.transportMode} />}
+        >
+          {/* 입고 날짜는 머리의 요약과 날짜 축에 있어 여기에는 적지 않는다. 정거장 이름은 운송 수단에 맞는 단계 이름(해상 운송·항공 운송)을 쓴다 */}
+          <VoyageProgress
+            stepIndex={getVoyageStepIndex(stage)}
+            transportMode={transportMode}
+            stepLabels={STAGE_FLOW[transportMode].map(getStageLabel)}
+            currentLabel={getStageLabel(stage)}
+          />
         </DetailSubsection>
         {analysis && sections.includes(DETAIL_SECTION.IMPACT) && (
           <ImpactSection analysis={analysis} delayCase={delayCase} />
