@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { Navigate, Outlet } from 'react-router'
 
 import { SESSION_STATUS, useSession } from '@/entities/session'
+import { LoginSkeleton } from '@/pages/login'
 import { ROUTES } from '@/shared/config'
-
-import { RouteFallback } from './RouteFallback'
 
 /**
  * 이미 로그인했으면 대시보드로 보낸다. 로그인 페이지처럼 비로그인 사용자용 화면에 쓴다.
@@ -20,11 +19,10 @@ export function RequireGuest() {
     setHasSettled(true)
   }
   if (status === SESSION_STATUS.LOADING && !hasSettled) {
-    return <RouteFallback />
+    return <LoginSkeleton />
   }
   if (status === SESSION_STATUS.AUTHENTICATED) {
     return <Navigate to={ROUTES.DASHBOARD} replace />
   }
   return <Outlet />
-
 }
