@@ -3,6 +3,8 @@ export { login, type LoginRequest, logout } from './endpoints/auth'
 export {
   getLatestDataSyncRuns,
   type LatestSyncRun,
+  startDataSyncRun,
+  type StartedSyncRun,
   SYNC_SOURCE_DOMAIN,
   SYNC_STATUS,
   type SyncSourceDomain,

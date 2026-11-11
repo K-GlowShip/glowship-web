@@ -12,17 +12,19 @@ import { Card, CardContent } from '@/shared/ui/card'
 
 interface SyncStatusPanelProps {
   overview: SyncOverview
+  /** 동기화 요청을 보내는 중인지 */
+  isRequesting: boolean
+  onSync: () => void
 }
-
-const formatSyncedAt = (syncedAt: string | null) =>
-  syncedAt ? `${formatYYYYMMDDHHmm(syncedAt)} KST` : EMPTY_VALUE
 
 /**
  * 마지막 수집·동기화 버튼은 위쪽에 한 번만 두고, 연동 시스템(ERP·WMS·TMS)은 3열로 나란히 보여 준다.
  * 열마다 묶인 원천별 상태(주문 ● 정상, 상품 ● 정상)를 펼치지 않아도 바로 보이게 한다.
  */
-export function SyncStatusPanel({ overview }: SyncStatusPanelProps) {
+export function SyncStatusPanel({ overview, isRequesting, onSync }: SyncStatusPanelProps) {
   const { cards, lastSyncedAt, isRunning } = overview
+  // 요청을 보내는 중이거나 수집이 도는 중에는 다시 누를 수 없다(서버도 중복 요청을 409로 거절한다)
+  const isBusy = isRequesting || isRunning
 
   return (
     <Card>
@@ -30,11 +32,18 @@ export function SyncStatusPanel({ overview }: SyncStatusPanelProps) {
         <div className="flex items-center justify-between gap-16pxr">
           <div>
             <p className="text-caption text-muted-foreground">마지막 수집</p>
-            <p className="text-b1 font-bold">{formatSyncedAt(lastSyncedAt)}</p>
+            <p className="text-b1 font-bold">
+              {lastSyncedAt ? `${formatYYYYMMDDHHmm(lastSyncedAt)} KST` : EMPTY_VALUE}
+            </p>
           </div>
-          {/* TODO(GLOW-146): 전체 동기화 API 연결 전까지 비활성(요청 본문·진행 중 재요청 응답은 서버와 확정 후). 누른 뒤 latest를 다시 조회한다 */}
-          <Button variant="secondary" size="sm" disabled className="shrink-0">
-            {isRunning ? '수집 중' : '동기화'}
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={isBusy}
+            className="shrink-0"
+            onClick={onSync}
+          >
+            {isBusy ? '수집 중' : '동기화'}
           </Button>
         </div>
         <ul
