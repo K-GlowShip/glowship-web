@@ -16,7 +16,8 @@ import { MemberOpinions } from './MemberOpinions'
 interface DecisionSectionProps {
   delayCase: DelayCase
   analysis: DelayAnalysis
-  role: ClientRole
+  /** 선택 권한이 없는 계정이면 null */
+  role: ClientRole | null
 }
 
 export function DecisionSection({ delayCase, analysis, role }: DecisionSectionProps) {
@@ -51,7 +52,7 @@ export function DecisionSection({ delayCase, analysis, role }: DecisionSectionPr
               .join(' · ')}
           </p>
         </div>
-      ) : canDecide(delayCase) ? (
+      ) : role && canDecide(delayCase) ? (
         <DecisionForm
           key={delayCase.id}
           role={role}
@@ -60,7 +61,7 @@ export function DecisionSection({ delayCase, analysis, role }: DecisionSectionPr
         />
       ) : (
         <p className="rounded-card bg-background px-16pxr py-12pxr text-b2 text-muted-foreground">
-          {ANALYSIS_NOTICE.CANNOT_DECIDE}
+          {role ? ANALYSIS_NOTICE.CANNOT_DECIDE : ANALYSIS_NOTICE.NO_DECIDE_ROLE}
         </p>
       )}
     </section>

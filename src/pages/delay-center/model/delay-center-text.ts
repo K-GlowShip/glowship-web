@@ -43,6 +43,7 @@ export const ANALYSIS_NOTICE = {
   NO_RISK: '현재 등록된 주문과 기준에서는 납기 위험 주문이 없습니다.',
   NO_DELAY: '예상 입고일이 계획 입고일 이전으로 돌아왔습니다.',
   CLOSED: '종료된 지연이라 대응안 선택과 재분석을 할 수 없습니다.',
+  NO_DECIDE_ROLE: '대응안은 고객사 팀원·팀장 계정으로 선택할 수 있습니다.',
   CANNOT_DECIDE: '지금은 대응안을 선택할 수 없습니다. 위쪽 안내를 확인해 주세요.',
   NO_FEASIBLE_OPTION:
     '계획 유지 외에 실행 가능한 대응안이 없습니다. 대응안별 불가 사유를 보고 직접 검토하세요.',
@@ -51,6 +52,32 @@ export const ANALYSIS_NOTICE = {
 } as const
 
 export const DEFAULT_PROGRESS_STEP = '분석'
+
+/** 진행 중인 분석 실행 상태별 현재 단계 이름. 화면에서는 뒤에 ' 중'을 붙인다 */
+export const PROGRESS_STEP_LABEL = {
+  DETECTED: '지연 확인',
+  VALIDATING: '입력 자료 검증',
+  ANALYZING_IMPACT: '재고 영향 분석',
+  ANALYZING_OPTIONS: '대응안 분석',
+  VALIDATING_OUTPUT: '결과 검증',
+} as const
+
+/** 입력 확정 때 마지막 수집이 실패·지연이던 원천이 있을 때의 안내 */
+export const DATA_WARNING_TEXT = (sourceLabels: string[]) =>
+  `${sourceLabels.join('·')} 수집이 실패하거나 지연된 상태의 자료로 분석했습니다.`
+
+/** 자료 변경으로 재분석이 필요해진 사유(`stalePrimaryReason`, 명세 4.5 STALE 사유). 모르는 코드는 사유를 보여 주지 않는다 */
+export const STALE_REASON_LABEL: Record<string, string> = {
+  RELEVANT_ORDER_CHANGED: '주문 데이터가 변경되었습니다.',
+  RELEVANT_INVENTORY_CHANGED: '재고 데이터가 변경되었습니다.',
+  RELEVANT_INBOUND_CHANGED: '입고 예정 데이터가 변경되었습니다.',
+  RELEVANT_SKU_ATTRIBUTE_CHANGED: '상품 정보가 변경되었습니다.',
+  DELAY_SCHEDULE_CHANGED: '지연 일정이 변경되었습니다.',
+  DELAY_STAGE_CHANGED: '운송 단계가 변경되었습니다.',
+  OPERATING_RULE_CHANGED: '운영 기준이 변경되었습니다.',
+  TIME_ELAPSED: '분석 후 시간이 지났습니다.',
+  MULTIPLE_RELEVANT_CHANGES: '여러 자료가 변경되었습니다.',
+}
 
 /** 서버가 값을 주지 않을 때 보여 주는 문구 */
 export const EMPTY_TEXT = {

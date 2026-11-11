@@ -21,7 +21,8 @@ import { StatusNotice } from './StatusNotice'
 
 interface DelayDetailProps {
   delayCase: DelayCase
-  role: ClientRole
+  /** 선택 권한이 없는 계정이면 null */
+  role: ClientRole | null
 }
 
 /**

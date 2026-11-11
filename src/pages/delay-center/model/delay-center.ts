@@ -195,6 +195,10 @@ export interface DelayCase {
   finalDecision: FinalDecision | null
 }
 
+/** 로그인 사용자의 역할 코드를 선택 권한이 있는 역할로 바꾼다. 팀원·팀장이 아니면(운영자 등) 선택할 수 없어 null이다. */
+export const toClientRole = (roleCode: string | undefined): ClientRole | null =>
+  roleCode === CLIENT_ROLE.LEAD || roleCode === CLIENT_ROLE.MEMBER ? roleCode : null
+
 /** 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다. */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
 
