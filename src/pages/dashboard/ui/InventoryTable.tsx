@@ -42,12 +42,6 @@ const STATUS_BAR_COLOR: Record<InventoryStatus, string> = {
 /** 막대가 가득 차는 기준: 안전재고 일수의 이 배수만큼 남았을 때 */
 const BAR_FULL_MULTIPLE = 3
 
-const STATUS_DDAY_CLASS: Record<InventoryStatus, string> = {
-  [INVENTORY_STATUS.RISK]: 'bg-danger-bg text-danger',
-  [INVENTORY_STATUS.CAUTION]: 'bg-warning-bg text-warning',
-  [INVENTORY_STATUS.OK]: 'bg-success-bg text-success',
-}
-
 export function InventoryTable() {
   const [page, setPage] = useState(1)
   const query = useQuery(inventoryStatusQueries.list({ page, size: INVENTORY_PAGE_SIZE }))
@@ -65,7 +59,8 @@ export function InventoryTable() {
           <CardTitle as="h2">거점별 재고 현황</CardTitle>
           <InfoTip
             label="거점별 재고 현황"
-            description={`현재 재고와 평균 판매량으로 계산한 예측입니다.\n입고 예정과 지연은 반영하지 않아 지연 분석 결과와 다를 수 있습니다.`}
+            // 기준일·판매량 기간·입고 예정 미반영은 오른쪽 줄이 이미 알리므로, 거기 없는 내용(계산 방식과 다른 화면과의 차이)만 적는다
+            description={`현재 재고를 평균 판매량으로 소진한다고 가정한 날짜입니다.\n입고를 반영한 날짜는 지연 대응 센터에서 확인하세요.`}
           />
         </div>
         <dl className="flex flex-wrap justify-end gap-x-16pxr gap-y-2pxr text-caption">
@@ -89,9 +84,10 @@ export function InventoryTable() {
           <Table className="min-w-720pxr">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-380pxr">거점 / 상품</TableHead>
-                <TableHead>가용 재고(개)</TableHead>
-                <TableHead>평균 일 판매량(개)</TableHead>
+                <TableHead className="w-320pxr">상품 · 거점</TableHead>
+                {/* 수량은 자릿수를 비교하기 쉽게 오른쪽으로 맞춘다 */}
+                <TableHead className="text-right">가용 재고(개)</TableHead>
+                <TableHead className="text-right">평균 일 판매량(개)</TableHead>
                 <TableHead>
                   <InfoHeader
                     label={`안전재고${safetyStockDays === null ? '' : `(${safetyStockDays}일분)`} 하회`}
@@ -114,10 +110,18 @@ export function InventoryTable() {
                     // 같은 거점·상품은 한 행이다(명세 4.4)
                     <TableRow key={`${item.warehouse.warehouseId}-${item.sku.skuId}`}>
                       <TableCell>
-                        {getRegionLabel(item.warehouse.regionCode)} / {item.sku.productName}
+                        {/* 상품이 먼저 읽히고, 어느 거점의 재고인지는 아래에 흐리게 둔다 */}
+                        <p className="truncate font-bold">{item.sku.productName}</p>
+                        <p className="text-caption text-muted-foreground">
+                          {getRegionLabel(item.warehouse.regionCode)}
+                        </p>
                       </TableCell>
-                      <TableCell>{formatNumber(item.availableQuantity)}</TableCell>
-                      <TableCell>{formatNumber(item.averageDailySales)}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatNumber(item.availableQuantity)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatNumber(item.averageDailySales)}
+                      </TableCell>
                       <TableCell>{formatMMDD(item.safetyStockBreachDate)}</TableCell>
                       <TableCell>
                         <StockoutCell
@@ -160,7 +164,7 @@ function StockoutCell({
   safetyStockDays: number | null
 }) {
   if (!item.stockoutDate || !baseDate) {
-    return <>-</>
+    return <>{EMPTY_VALUE}</>
   }
   const daysLeft = Math.max(diffDays(baseDate, item.stockoutDate), 0)
   // 안전재고 일수를 모르면 막대를 채울 기준이 없어 비워 둔다
@@ -170,14 +174,8 @@ function StockoutCell({
     <div className="flex flex-col gap-6pxr">
       <span className="flex items-center gap-8pxr">
         {formatMMDD(item.stockoutDate)}
-        <span
-          className={cn(
-            'rounded-full px-8pxr text-caption font-bold',
-            STATUS_DDAY_CLASS[item.status],
-          )}
-        >
-          D-{daysLeft}
-        </span>
+        {/* 위험도는 같은 줄의 상태 배지와 아래 막대 색이 알리므로, 남은 일수는 색 없이 적는다 */}
+        <span className="text-caption text-muted-foreground tabular-nums">D-{daysLeft}</span>
       </span>
       <span className="relative h-6pxr w-120pxr" aria-hidden="true">
         <span className="absolute inset-0 overflow-hidden rounded-full bg-disabled">
