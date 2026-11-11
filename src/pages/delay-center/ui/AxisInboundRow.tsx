@@ -13,7 +13,8 @@ interface AxisInboundRowProps {
 
 /**
  * 맨 아래 입고 줄. 계획 입고(빈 점)와 예상 입고(채운 점)를 찍고, 지연이면 둘 사이를 지연 띠로 잇는다.
- * 점의 날짜와 이름을 선 아래에 적어서 상품 줄보다 높다. 점은 줄 위에서 14px 내려온 곳에 놓고, 점선도 거기까지만 내린다.
+ * 상품 재고 줄과 성격이 다른 줄(선적의 일정)이라, 위에 선을 긋고 선을 더 진하게 그려 구분한다.
+ * 점의 날짜와 이름을 선 아래에 적어서 상품 줄보다 높다. 점은 줄 위에서 24px 내려온 곳에 놓고, 점선도 거기까지만 내린다.
  */
 export function AxisInboundRow({
   plannedInbound,
@@ -24,16 +25,16 @@ export function AxisInboundRow({
   const { isDelayed, delayDays } = getInboundDelay(plannedInbound, expectedInbound)
 
   return (
-    <div className="flex h-76pxr" aria-hidden="true">
-      <span className="flex w-(--axis-label) shrink-0 items-start pt-6pxr text-b2 font-bold">
-        입고
+    <div className="mt-4pxr flex h-88pxr" aria-hidden="true">
+      <span className="flex w-(--axis-label) shrink-0 items-start pt-14pxr text-b2 font-bold">
+        선적 입고
       </span>
       <div className="relative flex-1">
-        <AxisGuides guides={guides} className="bottom-auto h-14pxr" />
-        <span className="absolute inset-x-0 top-14pxr h-2pxr -translate-y-1/2 bg-border" />
+        <AxisGuides guides={guides} className="bottom-auto h-24pxr" />
+        <span className="absolute inset-x-0 top-24pxr h-2pxr -translate-y-1/2 bg-input" />
         {isDelayed && (
           <span
-            className="absolute top-14pxr flex h-18pxr -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-warning-bg px-16pxr text-caption font-bold whitespace-nowrap text-warning"
+            className="absolute top-24pxr flex h-18pxr -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-warning-bg px-16pxr text-caption font-bold whitespace-nowrap text-warning"
             // 띠 끝이 둥글어서 점 중심까지만 그리면 점 앞에서 끊겨 보인다. 끝 반원(높이 18px의 절반 = 9px = 0.5625rem)만큼 더 늘려 점 안으로 넣는다
             style={{
               left: `${toPercent(plannedInbound)}%`,
@@ -70,14 +71,14 @@ function InboundMarker({ date, label, left, hollow }: InboundMarkerProps) {
     <>
       <span
         className={cn(
-          'absolute top-14pxr z-10 size-12pxr -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
+          'absolute top-24pxr z-10 size-12pxr -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background',
           hollow ? 'border-2 border-muted-foreground bg-card' : 'bg-info',
         )}
         style={{ left: `${left}%` }}
       />
       <span
         className={cn(
-          'absolute top-30pxr flex flex-col whitespace-nowrap',
+          'absolute top-40pxr flex flex-col whitespace-nowrap',
           isAxisEnd(left)
             ? '-translate-x-full items-end text-right'
             : '-translate-x-1/2 items-center text-center',

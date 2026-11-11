@@ -41,7 +41,7 @@ export const pickAxisRows = (impacts: SkuImpact[], expectedInbound: string) => {
     return estimable && firstDate !== null && toDay(firstDate) < toDay(expectedInbound)
   })
   const rows = beforeInbound.slice(0, MAX_AXIS_ROWS)
-  return { rows, hiddenCount: impacts.length - rows.length }
+  return rows
 }
 
 /** 그릴 날짜를 모두 담는 범위로 축을 잡고, 날짜의 위치와 눈금을 계산한다 */

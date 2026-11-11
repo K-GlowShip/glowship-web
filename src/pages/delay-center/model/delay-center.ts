@@ -368,6 +368,9 @@ const sumShortage = (impacts: SkuImpact[]) =>
 export const getIncreasedShortage = (impacts: SkuImpact[]) =>
   sumShortage(impacts.filter((impact) => impact.scope === SKU_SCOPE.IMPACTED))
 
+/** 대응안을 고르지 않았을 때의 값. 팀원이 의견만 저장할 때 쓴다. */
+export const NO_OPTION = ''
+
 export const NO_SECTIONS: DetailSection[] = [DETAIL_SECTION.HISTORY]
 export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT, DETAIL_SECTION.HISTORY]
 export const FULL_SECTIONS: DetailSection[] = [

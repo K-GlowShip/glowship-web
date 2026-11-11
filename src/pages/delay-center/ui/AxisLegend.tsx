@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { cn } from '@/shared/lib/cn'
-import { formatNumber } from '@/shared/lib/format-number'
 import { Tooltip } from '@/shared/ui/tooltip'
 
 import { AXIS_LEGEND_TEXT } from '../model/delay-center-text'
@@ -9,13 +8,8 @@ import { AXIS_LEGEND_TEXT } from '../model/delay-center-text'
 // TODO: 서버 연동 후 재고 영향 응답의 `safetyStockDays`로 바꾼다 (명세 4.5, 안전재고 기준 14일)
 const SAFETY_STOCK_DAYS = 14
 
-interface AxisLegendProps {
-  /** 그래프에 그리지 못해 아래 표에서만 보는 상품 수 */
-  hiddenCount: number
-}
-
-/** 날짜 축 아래의 범례. 이름을 올리면 뜻을 보여 주고, 그래프에 없는 상품이 있으면 표를 안내한다. */
-export function AxisLegend({ hiddenCount }: AxisLegendProps) {
+/** 날짜 축 아래의 범례. 이름을 올리면 뜻을 보여 준다. */
+export function AxisLegend() {
   return (
     <div className="flex flex-wrap items-center gap-x-16pxr gap-y-4pxr text-caption text-muted-foreground">
       <LegendDot
@@ -29,11 +23,6 @@ export function AxisLegend({ hiddenCount }: AxisLegendProps) {
         description={AXIS_LEGEND_TEXT.STOCKOUT_SPAN}
         mark={<span className="h-10pxr w-20pxr rounded-full bg-danger-bg" aria-hidden="true" />}
       />
-      {hiddenCount > 0 && (
-        <span className="ml-auto">
-          그 밖의 {formatNumber(hiddenCount)}개 상품은 아래 표에서 확인하세요.
-        </span>
-      )}
     </div>
   )
 }

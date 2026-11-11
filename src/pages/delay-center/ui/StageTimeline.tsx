@@ -1,23 +1,19 @@
 import { cn } from '@/shared/lib/cn'
-import { formatMMDD } from '@/shared/lib/kst-date'
 
 import { type DelayCase, STAGE_FLOW, STAGE_LABEL } from '../model/delay-center'
 import { TimelineTrack } from './TimelineTrack'
 
 interface StageTimelineProps {
-  delayCase: Pick<
-    DelayCase,
-    'transportMode' | 'stage' | 'delayDays' | 'plannedInbound' | 'expectedInbound'
-  >
+  delayCase: Pick<DelayCase, 'transportMode' | 'stage'>
 }
 
 /**
- * 선적의 운송 단계 표시줄(출항 전 → … → 입고 완료). 현재 단계를 강조하고, 마지막 칸에는 계획 입고일에서 밀린 예상 입고일을 보여 준다.
+ * 선적의 운송 단계 표시줄(출항 전 → … → 입고 완료). 현재 단계를 강조한다. 입고 날짜는 머리의 요약과 아래 날짜 축에 있어 여기에는 적지 않는다.
  * 마지막 칸은 내용 너비만큼만 차지하고 오른쪽 끝에 붙여, 입고 완료 점이 아래 날짜 축의 끝과 맞는다.
  * 운송 방식에 없는 단계가 오면(데이터 오류) 현재 위치를 알 수 없어서 그리지 않는다.
  */
 export function StageTimeline({ delayCase }: StageTimelineProps) {
-  const { transportMode, stage, delayDays, plannedInbound, expectedInbound } = delayCase
+  const { transportMode, stage } = delayCase
   const flow = STAGE_FLOW[transportMode]
   const currentIndex = flow.indexOf(stage)
   const lastIndex = flow.length - 1
@@ -50,25 +46,6 @@ export function StageTimeline({ delayCase }: StageTimelineProps) {
             </span>
             {index === currentIndex && index !== lastIndex && (
               <span className="text-caption text-primary">현재</span>
-            )}
-            {index === lastIndex && (
-              <span className="flex flex-wrap items-center justify-end gap-x-6pxr text-caption">
-                {plannedInbound !== expectedInbound && (
-                  <>
-                    <span className="text-muted-foreground line-through">
-                      {formatMMDD(plannedInbound)}
-                    </span>
-                    <span aria-hidden="true" className="text-muted-foreground">
-                      →
-                    </span>
-                  </>
-                )}
-                <span
-                  className={cn('font-bold', delayDays > 0 ? 'text-danger' : 'text-foreground')}
-                >
-                  예상 {formatMMDD(expectedInbound)}
-                </span>
-              </span>
             )}
           </div>
         </li>

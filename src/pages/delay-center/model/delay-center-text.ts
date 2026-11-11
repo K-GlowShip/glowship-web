@@ -3,7 +3,8 @@ import { DECISION_TEXT } from '@/shared/config'
 import { CLIENT_ROLE, type ClientRole } from './delay-center-code'
 
 interface DecisionFormText {
-  optionLabel: string
+  /** 대응안을 고르지 않았을 때 대응안 이름 자리에 보여 주는 문구 */
+  noOption: string
   textLabel: string
   textPlaceholder: string
   submit: string
@@ -12,13 +13,13 @@ interface DecisionFormText {
 /** 역할마다 달라지는 선택 폼 문구. 팀장은 최종 선택, 팀원은 의견·초안 저장이다. */
 export const DECISION_FORM_TEXT = {
   [CLIENT_ROLE.LEAD]: {
-    optionLabel: '최종 대응안',
+    noOption: '대응안 비교에서 카드를 눌러 선택해 주세요',
     textLabel: DECISION_TEXT.SELECTION_REASON,
     textPlaceholder: '이 대응안을 선택한 이유를 입력하세요.',
     submit: '최종 선택',
   },
   [CLIENT_ROLE.MEMBER]: {
-    optionLabel: '선택한 대응안',
+    noOption: '선택 안 함',
     textLabel: DECISION_TEXT.OPINION,
     textPlaceholder: '동료와 팀장이 참고할 의견을 입력하세요.',
     submit: '의견·초안 저장',
@@ -29,7 +30,8 @@ export const DECISION_FORM_TEXT = {
 export const ONLY_KEEP_PLAN_GUIDE =
   '실행 가능한 다른 대응안이 없어 현재 계획 유지만 선택할 수 있습니다. 실제로 다른 조치를 하실 경우 선택 이유에 적어 주세요.'
 
-export const NO_OPTION_LABEL = '선택 안 함 (의견만 저장)'
+/** 선택은 판단 기록이고 실제 출고·운송을 실행하지 않는다(명세 4.6, BR-014) */
+export const DECISION_RECORD_NOTICE = '선택은 판단 기록이며, 실제 출고·운송은 바뀌지 않습니다.'
 export const DRAFT_SAVED_MESSAGE = '의견·초안을 저장했습니다.'
 
 /** 분석 상태에 따라 보여 주는 안내 문구 */

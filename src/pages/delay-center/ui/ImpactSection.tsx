@@ -1,30 +1,36 @@
-import { type DelayAnalysis, getVisibleImpacts } from '../model/delay-center'
-import { ImpactSummary } from './ImpactSummary'
+import { type DelayAnalysis, type DelayCase, getVisibleImpacts } from '../model/delay-center'
+import { DetailSubsection } from './DetailChapter'
+import { ImpactAxis } from './ImpactAxis'
 import { ImpactTable } from './ImpactTable'
 
 interface ImpactSectionProps {
   analysis: DelayAnalysis
+  delayCase: Pick<DelayCase, 'plannedInbound' | 'expectedInbound'>
 }
 
 /**
- * 상품(SKU·창고)별 재고 영향의 정확한 숫자와 날짜를 한 표로 보여 준다. 위쪽 지연 개요 카드의 날짜 축에는
- * 같은 순서로 상품별 위치만 그려져 있다. 판정할 수 없는 값은 빈 값 문자로 표시한다.
+ * 재고 영향. 같은 상품들을 위에서는 날짜 축에 놓아 "언제 바닥나고 입고는 언제인가"를 보여 주고,
+ * 아래 표에서 정확한 숫자와 날짜를 보여 준다. 둘의 상품 순서는 같다(가장 먼저 문제가 생기는 순서).
+ * 합계(부족 수량·위험 주문)는 머리의 요약에 있어 여기서 반복하지 않는다.
  */
-export function ImpactSection({ analysis }: ImpactSectionProps) {
+export function ImpactSection({ analysis, delayCase }: ImpactSectionProps) {
   const impacts = getVisibleImpacts(analysis.impacts)
 
+  if (impacts.length === 0) {
+    return null
+  }
   return (
-    <section aria-labelledby="impact-title" className="flex flex-col gap-16pxr">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
-        <h3 id="impact-title" className="text-h3 font-bold">
-          상품별 재고 영향
-        </h3>
-        <p className="text-b2 text-muted-foreground">
-          <ImpactSummary analysis={analysis} />
-        </p>
-      </div>
-
-      {impacts.length > 0 && <ImpactTable impacts={impacts} />}
-    </section>
+    <DetailSubsection
+      id="impact-title"
+      title="재고 영향"
+      aside="가장 먼저 문제가 생기는 상품 순서입니다"
+    >
+      <ImpactAxis
+        impacts={impacts}
+        plannedInbound={delayCase.plannedInbound}
+        expectedInbound={delayCase.expectedInbound}
+      />
+      <ImpactTable impacts={impacts} />
+    </DetailSubsection>
   )
 }
