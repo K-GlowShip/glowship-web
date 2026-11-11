@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/shared/ui/card'
 
 interface SyncStatusPanelProps {
   overview: SyncOverview
+  /** 고객사 전체의 마지막 수집 시각(대시보드 요약의 `lastSyncedAt`). 원천마다 시각이 달라 이 값 하나를 쓴다(명세 4.3, C34). 아직 모르면 null */
+  lastSyncedAt: string | null
   /** 동기화 요청을 보내는 중인지 */
   isRequesting: boolean
   onSync: () => void
@@ -21,8 +23,13 @@ interface SyncStatusPanelProps {
  * 마지막 수집·동기화 버튼은 위쪽에 한 번만 두고, 연동 시스템(ERP·WMS·TMS)은 3열로 나란히 보여 준다.
  * 열마다 묶인 원천별 상태(주문 ● 정상, 상품 ● 정상)를 펼치지 않아도 바로 보이게 한다.
  */
-export function SyncStatusPanel({ overview, isRequesting, onSync }: SyncStatusPanelProps) {
-  const { cards, lastSyncedAt, isRunning, needsSync } = overview
+export function SyncStatusPanel({
+  overview,
+  lastSyncedAt,
+  isRequesting,
+  onSync,
+}: SyncStatusPanelProps) {
+  const { cards, isRunning, needsSync } = overview
   // 요청을 보내는 중이거나 수집이 도는 중에는 다시 누를 수 없다(서버도 중복 요청을 409로 거절한다)
   const isBusy = isRequesting || isRunning
 

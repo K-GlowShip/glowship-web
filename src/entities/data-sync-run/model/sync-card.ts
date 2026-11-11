@@ -142,8 +142,6 @@ export const summarizeSyncCard = (
 
 export interface SyncOverview {
   cards: readonly SyncCardSummary[]
-  /** 모든 카드 중 오래된 마지막 수집 시각 */
-  lastSyncedAt: string | null
   /** 어느 원천이든 수집 중이면 true */
   isRunning: boolean
   /** 다시 수집해야 하는 카드(수집 오류·수집 이력 없음)가 있으면 true. 일부 오류는 다시 수집해도 고쳐지지 않아 뺀다 */
@@ -158,7 +156,6 @@ export const getSyncOverview = (items: readonly LatestSyncRun[]): SyncOverview =
 
   return {
     cards,
-    lastSyncedAt: getOldestSyncedAt(cards.map((card) => card.lastSyncedAt)),
     isRunning: cards.some((card) => card.level === SYNC_LEVEL.RUNNING),
     needsSync: cards.some(
       ({ level }) => level === SYNC_LEVEL.ERROR || level === SYNC_LEVEL.NOT_CONNECTED,

@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
 import { getSyncOverview, SYNC_CARDS } from '@/entities/data-sync-run'
-import { dataSyncRunQueries, isMeQuery } from '@/shared/api'
+import { dashboardQueries, dataSyncRunQueries, isMeQuery } from '@/shared/api'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
@@ -16,6 +16,8 @@ const RUNNING_REFETCH_MS = 3000
 export function SyncDataPage() {
   const queryClient = useQueryClient()
   const { mutate: sync, isPending: isSyncing } = useSyncData()
+  // 마지막 수집 시각은 원천별 값이 아니라 고객사 전체 값(대시보드와 같은 기준 시각)을 쓴다
+  const { data: summary } = useQuery(dashboardQueries.summary())
   const { data, error, isPending, isFetching, refetch } = useQuery({
     ...dataSyncRunQueries.latest(),
     refetchInterval: (query) => {
@@ -63,7 +65,12 @@ export function SyncDataPage() {
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
         )}
         {overview && (
-          <SyncStatusPanel overview={overview} isRequesting={isSyncing} onSync={() => sync()} />
+          <SyncStatusPanel
+            overview={overview}
+            lastSyncedAt={summary?.lastSyncedAt ?? null}
+            isRequesting={isSyncing}
+            onSync={() => sync()}
+          />
         )}
       </section>
 
