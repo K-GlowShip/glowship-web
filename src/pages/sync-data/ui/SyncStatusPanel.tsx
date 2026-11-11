@@ -22,7 +22,7 @@ interface SyncStatusPanelProps {
  * 열마다 묶인 원천별 상태(주문 ● 정상, 상품 ● 정상)를 펼치지 않아도 바로 보이게 한다.
  */
 export function SyncStatusPanel({ overview, isRequesting, onSync }: SyncStatusPanelProps) {
-  const { cards, lastSyncedAt, isRunning } = overview
+  const { cards, lastSyncedAt, isRunning, needsSync } = overview
   // 요청을 보내는 중이거나 수집이 도는 중에는 다시 누를 수 없다(서버도 중복 요청을 409로 거절한다)
   const isBusy = isRequesting || isRunning
 
@@ -40,6 +40,8 @@ export function SyncStatusPanel({ overview, isRequesting, onSync }: SyncStatusPa
             variant="secondary"
             size="sm"
             loading={isBusy}
+            // 동기화는 오류 난 원천을 다시 받는 버튼이라, 모두 정상이면 누를 일이 없다
+            disabled={!isBusy && !needsSync}
             className="shrink-0"
             onClick={onSync}
           >
