@@ -28,8 +28,9 @@ import { Skeleton } from '@/shared/ui/skeleton'
 
 import { TREND_DAYS_OPTIONS } from '../model/dashboard'
 
-const PLANNED_COLOR = 'var(--color-primary-600)'
-const ACTUAL_COLOR = 'var(--color-rose-500)'
+// 실제로 일어난 값(실제 입고)은 실선과 면으로, 계획(입고 예정)은 점선으로 그린다
+const ACTUAL_COLOR = 'var(--color-primary-600)'
+const PLANNED_COLOR = 'var(--color-rose-500)'
 const TICK_STYLE = { fontSize: '0.75rem', fill: 'var(--color-muted-foreground)' }
 const CHART_ANIMATION_MS = 700
 
@@ -86,7 +87,7 @@ export function InboundTrendCard() {
         {/* 범례이면서 기간 합계다 */}
         <ul className="flex flex-wrap items-center gap-x-24pxr gap-y-4pxr text-b2 text-muted-foreground">
           <li className="flex items-center gap-6pxr">
-            <SeriesKey />
+            <SeriesKey dashed />
             입고 예정(계획일)
             {data && (
               <span className="text-b1 font-bold text-foreground">
@@ -95,7 +96,7 @@ export function InboundTrendCard() {
             )}
           </li>
           <li className="flex items-center gap-6pxr">
-            <SeriesKey dashed />
+            <SeriesKey />
             실제 입고(실제 입고일)
             {data && (
               <span className="text-b1 font-bold text-foreground">
@@ -132,8 +133,8 @@ export function InboundTrendCard() {
                 <ComposedChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
                   <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor={PLANNED_COLOR} stopOpacity={0.22} />
-                      <stop offset="1" stopColor={PLANNED_COLOR} stopOpacity={0} />
+                      <stop offset="0" stopColor={ACTUAL_COLOR} stopOpacity={0.22} />
+                      <stop offset="1" stopColor={ACTUAL_COLOR} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid vertical={false} stroke="var(--color-border)" />
@@ -170,9 +171,9 @@ export function InboundTrendCard() {
                     cursor={{ stroke: 'var(--color-input)', strokeDasharray: '3 3' }}
                   />
                   <Area
-                    name="입고 예정"
-                    dataKey="plannedCount"
-                    stroke={PLANNED_COLOR}
+                    name="실제 입고"
+                    dataKey="actualCount"
+                    stroke={ACTUAL_COLOR}
                     strokeWidth={2}
                     fill={`url(#${gradientId})`}
                     dot={days === INBOUND_TREND_DAYS.WEEK}
@@ -181,12 +182,13 @@ export function InboundTrendCard() {
                     animationDuration={CHART_ANIMATION_MS}
                   />
                   <Line
-                    name="실제 입고"
-                    dataKey="actualCount"
-                    stroke={ACTUAL_COLOR}
+                    name="입고 예정"
+                    dataKey="plannedCount"
+                    stroke={PLANNED_COLOR}
                     strokeWidth={2}
                     strokeDasharray="5 4"
-                    dot={days === INBOUND_TREND_DAYS.WEEK}
+                    // 점선에 점을 찍으면 점 테두리까지 끊겨 보여서 찍지 않는다
+                    dot={false}
                     activeDot={{ r: 5, stroke: 'var(--color-card)', strokeWidth: 2 }}
                     isAnimationActive={isAnimationActive}
                     animationDuration={CHART_ANIMATION_MS}
@@ -201,7 +203,7 @@ export function InboundTrendCard() {
   )
 }
 
-/** 계열을 가리키는 짧은 선. 실제 입고는 그래프와 같이 점선이라 색을 못 가려도 구분된다 */
+/** 계열을 가리키는 짧은 선. 입고 예정은 그래프와 같이 점선이라 색을 못 가려도 구분된다 */
 function SeriesKey({ dashed = false }: { dashed?: boolean }) {
   return (
     <span
@@ -230,12 +232,12 @@ function TrendTooltip({ active, payload }: TrendTooltipProps) {
     <div className="flex min-w-144pxr flex-col gap-4pxr rounded-control border border-border bg-card p-12pxr text-caption shadow-[0_0.5rem_1.5rem_-0.5rem_rgb(37_35_49/0.25)]">
       <p className="text-muted-foreground">{formatMMDD(point.date)}</p>
       <p className="flex items-center gap-6pxr">
-        <SeriesKey />
+        <SeriesKey dashed />
         <span className="flex-1 text-muted-foreground">입고 예정</span>
         <span className="text-b1 font-bold">{formatNumber(point.plannedCount)}건</span>
       </p>
       <p className="flex items-center gap-6pxr">
-        <SeriesKey dashed />
+        <SeriesKey />
         <span className="flex-1 text-muted-foreground">실제 입고</span>
         <span className="text-b1 font-bold">{formatNumber(point.actualCount)}건</span>
       </p>
