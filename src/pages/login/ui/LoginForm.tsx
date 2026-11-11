@@ -109,6 +109,7 @@ export function LoginForm() {
         로그인
       </Button>
 
+      {/* 이 줄의 높이를 바꾸면 `LoginSkeleton`의 자리도 맞춘다 */}
       {env.isDemoLogin && (
         <p className="text-center text-caption text-muted-foreground">
           데모 계정: {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
