@@ -18,7 +18,7 @@ import {
   parseHasFinalDecisionParam,
   STATUS_FILTER_ALL,
 } from '../model/delay-center'
-import { DelayListFilters } from './DelayListFilters'
+import { DelaySearch, DelayStatusTabs } from './DelayListFilters'
 import { DelayTable } from './DelayTable'
 
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
@@ -98,18 +98,43 @@ export function DelayCenterPage() {
       </header>
 
       <Card className="rounded-panel">
-        <CardContent className="flex flex-col gap-16pxr p-24pxr">
-          <DelayListFilters
-            keyword={keyword}
+        <CardContent className="flex flex-col gap-16pxr px-24pxr pt-12pxr pb-24pxr">
+          <DelayStatusTabs
             status={status}
             counts={data?.counts}
-            onSearch={({ keyword: nextKeyword, status: nextStatus }) =>
-              updateParams({
-                [LIST_PARAM.KEYWORD]: nextKeyword,
-                [LIST_PARAM.STATUS]: nextStatus === STATUS_FILTER_ALL ? '' : nextStatus,
-              })
+            onChange={(next) =>
+              updateParams({ [LIST_PARAM.STATUS]: next === STATUS_FILTER_ALL ? '' : next })
             }
           />
+          <div className="flex flex-wrap items-center justify-between gap-x-16pxr gap-y-8pxr">
+            <DelaySearch
+              keyword={keyword}
+              onSearch={(next) => updateParams({ [LIST_PARAM.KEYWORD]: next })}
+            />
+            <div className="flex items-center gap-8pxr">
+              <Switch
+                id="new-delay-toggle"
+                checked={isNewDelayView}
+                disabled={newDelayFrom === undefined}
+                onCheckedChange={(checked) =>
+                  updateParams(
+                    checked
+                      ? {
+                          [LIST_PARAM.FROM]: newDelayFrom ?? '',
+                          [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
+                        }
+                      : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
+                  )
+                }
+              />
+              <Label
+                htmlFor="new-delay-toggle"
+                className={isNewDelayView ? 'text-primary' : 'font-normal'}
+              >
+                새 지연 보기
+              </Label>
+            </div>
+          </div>
           {hasExtraCondition && (
             <p role="status" className="text-b2 text-muted-foreground">
               {extraConditionLabel} 건만 보고 있습니다.
@@ -117,31 +142,6 @@ export function DelayCenterPage() {
           )}
           <TableTemplate
             totalCount={data?.totalCount}
-            Controls={
-              <>
-                <Switch
-                  id="new-delay-toggle"
-                  checked={isNewDelayView}
-                  disabled={newDelayFrom === undefined}
-                  onCheckedChange={(checked) =>
-                    updateParams(
-                      checked
-                        ? {
-                            [LIST_PARAM.FROM]: newDelayFrom ?? '',
-                            [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
-                          }
-                        : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
-                    )
-                  }
-                />
-                <Label
-                  htmlFor="new-delay-toggle"
-                  className={isNewDelayView ? 'text-primary' : 'font-normal'}
-                >
-                  새 지연 보기
-                </Label>
-              </>
-            }
             page={page}
             pageCount={Math.max(1, data?.totalPages ?? 1)}
             onPageChange={(next) =>
