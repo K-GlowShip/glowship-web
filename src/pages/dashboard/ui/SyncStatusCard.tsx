@@ -38,7 +38,7 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
   const syncIntervalMinutes = overview?.syncIntervalMinutes
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col border-primary-100">
       <CardHeader>
         <CardTitle as="h2">데이터 수집 상태</CardTitle>
         <Button
@@ -78,8 +78,12 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
             {cards.map((card) => (
               <li key={card.system} className="flex items-center justify-between gap-12pxr">
                 <div className="min-w-0">
-                  <p className="text-b1 font-bold">
-                    {card.name} · {card.sourceSystemName ?? card.system}
+                  {/* 데이터 이름이 먼저 읽히고, 어느 시스템에서 오는지는 옆에 흐리게 둔다 */}
+                  <p className="flex flex-wrap items-baseline gap-x-6pxr text-b1 font-bold">
+                    {card.name}
+                    <span className="text-caption font-normal text-muted-foreground">
+                      {card.sourceSystemName ?? card.system}
+                    </span>
                   </p>
                   {getCaption(card) && (
                     <p className="text-caption text-muted-foreground">{getCaption(card)}</p>

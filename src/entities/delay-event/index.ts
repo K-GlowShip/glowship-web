@@ -9,7 +9,12 @@ export {
 export { getStageLabel, STAGE_CODE, STAGE_LABEL, type StageCode } from './model/stage'
 export { getNewDelayFrom } from './model/new-delay'
 export { getRegionLabel, REGION_CODE, REGION_LABEL, type RegionCode } from './model/region'
-export { formatRoute, TRANSPORT_MODE, type TransportMode } from './model/route'
+export {
+  formatRoute,
+  TRANSPORT_MODE,
+  TRANSPORT_MODE_LABEL,
+  type TransportMode,
+} from './model/route'
 export {
   FEASIBILITY,
   FEASIBILITY_BADGE_VARIANT,
