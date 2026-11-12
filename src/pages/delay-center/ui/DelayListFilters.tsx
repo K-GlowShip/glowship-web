@@ -79,7 +79,7 @@ export function DelaySearch({ keyword, onSearch }: DelaySearchProps) {
           onChange={(event) => setDraft(event.target.value)}
         />
       </div>
-      <Button type="submit" variant="secondary" size="lg" className="h-44pxr shrink-0">
+      <Button type="submit" size="lg" className="h-44pxr shrink-0">
         조회
       </Button>
     </form>
