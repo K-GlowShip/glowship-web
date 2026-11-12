@@ -1,8 +1,8 @@
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { type ChangeEvent, type SubmitEvent, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
-import { env, ROUTES } from '@/shared/config'
+import { env, getLoginRedirect } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -17,6 +17,7 @@ export function LoginForm() {
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+  const { search } = useLocation()
   const { mutate: submitLogin, isPending, error: loginError, reset } = useLogin()
 
   const handleChange = (field: keyof LoginFormValues) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +44,7 @@ export function LoginForm() {
       return
     }
 
-    submitLogin(values, { onSuccess: () => navigate(ROUTES.DASHBOARD, { replace: true }) })
+    submitLogin(values, { onSuccess: () => navigate(getLoginRedirect(search), { replace: true }) })
   }
 
   return (
