@@ -34,7 +34,7 @@ interface DelayDetailHeaderProps {
  * 한 선적에 상품이 여럿일 수 있어 대표 상품은 적지 않는다.
  */
 export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
-  const { mutate: reanalyze, isPending: isReanalyzing } = useReanalysis()
+  const { mutate: reanalyze, isPending: isReanalyzing } = useReanalysis(delayCase.runId)
   const { analysis, delayDays, plannedInbound, expectedInbound } = delayCase
   const impactedCount =
     analysis?.impacts.filter(({ scope }) => scope === SKU_SCOPE.IMPACTED).length ?? 0

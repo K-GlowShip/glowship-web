@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
 
 import { useSession } from '@/entities/session'
-import { analysisRunQueries, delayEventQueries, isApiError } from '@/shared/api'
+import { analysisRunQueries, delayEventQueries, isApiError, isRunInProgress } from '@/shared/api'
 import { DELAY_EVENT_ID_PARAM, ROUTES } from '@/shared/config'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -13,6 +13,8 @@ import { toDelayCase } from '../model/to-delay-case'
 import { DelayDetail } from './DelayDetail'
 
 const DELAY_EVENT_NOT_FOUND = 'DELAY_EVENT_NOT_FOUND'
+/** 분석 중인 동안 결과가 나왔는지 확인하는 간격. 서버 분석은 수십 초 걸린다 */
+const ANALYSIS_POLL_INTERVAL_MS = 3_000
 
 /** 지연 건 하나의 상세 화면. 목록에서 들어왔으면 '목록으로'가 그 목록의 검색 조건을 되살린다. */
 export function DelayDetailPage() {
@@ -21,12 +23,19 @@ export function DelayDetailPage() {
   const { me } = useSession()
   const listSearch = getListSearch(state)
 
-  const eventQuery = useQuery(delayEventQueries.detail(delayEventId))
+  // 분석이 끝나기 전에는 결과가 나올 때까지 주기적으로 다시 읽는다(탭이 가려져 있으면 쉰다)
+  const eventQuery = useQuery({
+    ...delayEventQueries.detail(delayEventId),
+    refetchInterval: ({ state }) =>
+      isRunInProgress(state.data?.runs[0]?.status) ? ANALYSIS_POLL_INTERVAL_MS : false,
+  })
   // 상세 응답의 `runs`는 최신 버전이 먼저다. 현재 실행의 결과는 실행 상세에서 읽는다
   const currentRunId = eventQuery.data?.runs[0]?.runId
   const runQuery = useQuery({
     ...analysisRunQueries.detail(currentRunId ?? ''),
     enabled: currentRunId !== undefined,
+    refetchInterval: ({ state }) =>
+      isRunInProgress(state.data?.status) ? ANALYSIS_POLL_INTERVAL_MS : false,
   })
   const delayCase = eventQuery.data ? toDelayCase(eventQuery.data, runQuery.data ?? null) : null
   const failedQuery = [eventQuery, runQuery].find(({ error }) => error)
@@ -43,7 +52,11 @@ export function DelayDetailPage() {
       </Link>
 
       {delayCase ? (
-        <DelayDetail key={delayCase.id} delayCase={delayCase} role={toClientRole(me?.roleCode)} />
+        <DelayDetail
+          key={`${delayCase.id}:${delayCase.runId}:${delayCase.status}`}
+          delayCase={delayCase}
+          role={toClientRole(me?.roleCode)}
+        />
       ) : isNotFound ? (
         <Notice>지연 건을 찾을 수 없습니다.</Notice>
       ) : failedQuery?.error ? (
