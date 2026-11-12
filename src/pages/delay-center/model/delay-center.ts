@@ -159,6 +159,8 @@ export interface DelayCase {
   productName: string | null
   /** 선적에 담긴 상품(SKU) 수 */
   skuCount: number
+  /** 현재 분석 실행의 ID. 판단·재분석 요청의 경로에 쓴다 */
+  runId: string
   /** 분석 실행 ID(`runCode`). 서버가 아직 값을 만들지 않았으면 null */
   runCode: string | null
   /** 서버가 만든 경로. 출발은 지역 코드 'KR'로 온다. 예: 'KR → LOS ANGELES' */

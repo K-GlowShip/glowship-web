@@ -195,6 +195,7 @@ export const toDelayCase = (
     shipmentCode: detail.shipment.shipmentCode,
     productName: detail.representativeSku?.productName ?? null,
     skuCount: detail.skuCount,
+    runId: run.runId,
     runCode: run.runCode,
     route: detail.route,
     transportMode: detail.transportMode as TransportMode,

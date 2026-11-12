@@ -4,6 +4,8 @@ import { getDelayEvent, getDelayEvents, type GetDelayEventsParams } from '../end
 import { LIST_STALE_TIME_MS } from './stale-time'
 
 export const delayEventQueries = {
+  /** 이 도메인의 모든 쿼리. 한꺼번에 무효화할 때 쓴다 */
+  all: ['delay-events'] as const,
   list: (params: GetDelayEventsParams) =>
     queryOptions({
       queryKey: ['delay-events', 'list', params],

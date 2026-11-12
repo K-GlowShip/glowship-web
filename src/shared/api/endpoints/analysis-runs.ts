@@ -320,3 +320,54 @@ export interface AnalysisRunDetail {
 /** 없는 실행·다른 고객사 실행은 404 `ANALYSIS_RUN_NOT_FOUND` */
 export const getAnalysisRun = (runId: string, config?: AxiosRequestConfig) =>
   API.get<AnalysisRunDetail>(`${ENDPOINT.ANALYSIS_RUNS}/${encodeURIComponent(runId)}`, config)
+
+export interface CreateMemberDraftRequest {
+  /** 같은 실행의 대응안이면 실행 가능 여부와 상관없이 고를 수 있다(명세 C24) */
+  responseOptionId?: string
+  /** 앞뒤 공백을 뺀 뒤 1~600자(명세 C25). 대응안과 의견 중 하나는 있어야 한다 */
+  opinionText?: string
+}
+
+export interface CreatedMemberDraft {
+  memberDraftId: string
+  /** ISO 8601 UTC */
+  createdAt: string
+}
+
+/** 팀원의 의견·초안 저장. 팀장은 403이다 */
+export const createMemberDraft = (runId: string, body: CreateMemberDraftRequest) =>
+  API.post<CreatedMemberDraft, CreateMemberDraftRequest>(
+    `${ENDPOINT.ANALYSIS_RUNS}/${encodeURIComponent(runId)}/drafts`,
+    body,
+  )
+
+export interface CreateFinalDecisionRequest {
+  /** 실행 가능(`FEASIBLE`)한 대응안만 고를 수 있다 */
+  responseOptionId: string
+  /** 앞뒤 공백을 뺀 뒤 1~600자(명세 C25) */
+  reasonText: string
+}
+
+export interface CreatedFinalDecision {
+  finalDecisionId: string
+  /** ISO 8601 UTC */
+  decidedAt: string
+  checkedSeq: number
+  /** 항상 `FINALIZED` */
+  status: string
+}
+
+/**
+ * 팀장의 최종 선택. 팀원은 403이다.
+ * `idempotencyKey`가 같으면 같은 본문의 재시도로 보고 저장된 결과를 돌려준다. 같은 키에 다른 본문이면 409 `IDEMPOTENCY_KEY_REUSED`다.
+ */
+export const createFinalDecision = (
+  runId: string,
+  body: CreateFinalDecisionRequest,
+  idempotencyKey: string,
+) =>
+  API.post<CreatedFinalDecision, CreateFinalDecisionRequest>(
+    `${ENDPOINT.ANALYSIS_RUNS}/${encodeURIComponent(runId)}/final-decision`,
+    body,
+    { headers: { 'Idempotency-Key': idempotencyKey } },
+  )
