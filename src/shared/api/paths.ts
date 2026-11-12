@@ -11,6 +11,7 @@ export const ENDPOINT = {
   },
   ME: '/me',
   DATA_SYNC_RUNS: {
+    ROOT: '/data-sync-runs',
     LATEST: '/data-sync-runs/latest',
   },
   SKUS: '/skus',
