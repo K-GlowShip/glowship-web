@@ -1,4 +1,4 @@
-import { PackageX, ShoppingCart, Sparkles, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import { Fragment } from 'react'
 
 import {
@@ -27,44 +27,20 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
   const { explanation } = run
 
   return (
-    <section className="flex flex-col gap-20pxr border-t border-border pt-24pxr">
-      <div>
-        <h3 className="text-h3 font-bold">당시 분석 요약</h3>
-        <p className="mt-4pxr text-caption text-muted-foreground">
-          실행 ID {run.runCode ?? EMPTY_VALUE}
-        </p>
-      </div>
-      <dl className="grid grid-cols-2 gap-16pxr">
-        <div className="flex items-center gap-12pxr rounded-card bg-primary-50 p-16pxr">
-          <span
-            className="grid size-40pxr shrink-0 place-items-center rounded-full bg-primary-100 text-primary"
-            aria-hidden="true"
-          >
-            <PackageX className="size-20pxr" />
-          </span>
-          <div>
-            <dt className="text-caption text-muted-foreground">부족 수량</dt>
-            <dd className="text-h2 font-bold">{formatNumber(getShortageTotal(run))}개</dd>
-          </div>
-        </div>
-        <div className="flex items-center gap-12pxr rounded-card bg-danger-bg p-16pxr">
-          <span
-            className="grid size-40pxr shrink-0 place-items-center rounded-full bg-card/70 text-danger"
-            aria-hidden="true"
-          >
-            <ShoppingCart className="size-20pxr" />
-          </span>
-          <div>
-            <dt className="text-caption text-muted-foreground">위험 주문</dt>
-            <dd className="text-h2 font-bold text-danger">
-              {formatNumber(run.atRiskOrders.length)}건
-            </dd>
-          </div>
-        </div>
+    <section className="flex flex-col gap-24pxr border-t border-border pt-32pxr">
+      <h3 className="text-b1 font-bold">당시 분석 요약</h3>
+      <dl className="grid grid-cols-2">
+        <Figure label="부족 수량" value={formatNumber(getShortageTotal(run))} unit="개" />
+        <Figure
+          label="위험 주문"
+          value={formatNumber(run.atRiskOrders.length)}
+          unit="건"
+          className="border-l border-border pl-24pxr"
+        />
       </dl>
       {run.responseOptions.length > 0 && (
         <div className="flex flex-col gap-12pxr">
-          <h4 className="text-b1 font-bold">대응안별 결과</h4>
+          <h4 className="text-b2 text-muted-foreground">대응안별 결과</h4>
           <div className="overflow-x-auto">
             <Table density="compact" className="min-w-520pxr">
               <TableHeader>
@@ -134,11 +110,8 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
           </div>
         </div>
       )}
-      <div className="flex flex-col gap-16pxr rounded-card bg-linear-to-br from-primary-50 to-rose-50 p-20pxr">
-        <h4 className="flex items-center gap-8pxr text-b1 font-bold">
-          <Sparkles className="size-16pxr text-primary" aria-hidden="true" />
-          AI 설명
-        </h4>
+      <div className="flex flex-col gap-12pxr rounded-card bg-linear-to-br from-primary-50 to-rose-50 p-20pxr">
+        <h4 className="text-b1 font-bold text-primary">AI 설명</h4>
         {explanation ? (
           <dl className="flex flex-col gap-12pxr text-b2">
             <div>
@@ -180,5 +153,25 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
         </ul>
       )}
     </section>
+  )
+}
+
+interface FigureProps {
+  label: string
+  value: string
+  unit: string
+  className?: string
+}
+
+/** 큰 숫자 하나. 숫자는 가늘고 크게, 단위는 숫자 어깨에 작게 올린다 */
+function Figure({ label, value, unit, className }: FigureProps) {
+  return (
+    <div className={cn('flex flex-col gap-4pxr', className)}>
+      <dt className="text-b2 text-muted-foreground">{label}</dt>
+      <dd className="flex items-start text-display font-light tracking-[-0.02em] tabular-nums">
+        {value}
+        <span className="pt-[0.25em] pl-2pxr text-b1 font-normal">{unit}</span>
+      </dd>
+    </div>
   )
 }

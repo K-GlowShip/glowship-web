@@ -44,8 +44,8 @@ export function DateRangeInput({ className, value, onChange, ...props }: DateRan
     const isPickingEnd = activeField === 'end' && start !== undefined && day >= start
 
     if (isPickingEnd) {
+      // 종료일을 골라도 달력은 닫지 않는다. 고른 기간을 확인하고 바로 고칠 수 있게 바깥 클릭이나 Esc로 닫는다.
       onChange({ start: value.start, end: picked })
-      setOpen(false)
       return
     }
     // 시작일을 고른 경우: 종료일이 새 시작일보다 빠르면 비우고, 종료일 선택으로 넘어간다.
@@ -106,6 +106,7 @@ export function DateRangeInput({ className, value, onChange, ...props }: DateRan
       </PopoverAnchor>
       <PopoverContent
         ref={contentRef}
+        align="center"
         className="w-auto"
         // 열릴 때 첫 버튼(이전 달 화살표) 대신 선택된 날이나 오늘로 포커스를 보내 방향키로 바로 움직이게 한다.
         onOpenAutoFocus={(event) => {
