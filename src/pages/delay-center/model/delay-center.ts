@@ -181,8 +181,8 @@ export interface DelayCase {
   baseDataAt: string | null
   /** 입력 확정 때 마지막 수집이 실패·지연이던 원천 안내 */
   dataNotice: string | null
-  /** 분석이 진행 중이면 현재 단계 이름 */
-  progressStep: string | null
+  /** 분석이 진행 중이면 지금이 네 단계(자료 확인 → 재고 영향 → 대응안 → 최종 점검) 중 몇 번째인지(0부터). 진행 중이 아니면 null */
+  analysisStep: number | null
   /** 현재 실행의 실패 코드. 보류·실패일 때만 값이 있고, 설명 생성만 실패했는지 가르는 데 쓴다 */
   failureCode: string | null
   /** 분석 보류·실패 사유 */

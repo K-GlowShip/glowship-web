@@ -10,6 +10,7 @@ import { Button } from '@/shared/ui/button'
 import { QueryError } from '@/shared/ui/query-error'
 
 import { getListSearch, toClientRole } from '../model/delay-center'
+import { getAnalysisPollInterval } from '../model/analysis-poll-interval'
 import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 import { toDelayCase } from '../model/to-delay-case'
 import { useAnalysisPollLimit } from '../model/use-analysis-poll-limit'
@@ -17,8 +18,6 @@ import { DelayDetail } from './DelayDetail'
 import { DelayDetailSkeleton } from './DelayDetailSkeleton'
 
 const DELAY_EVENT_NOT_FOUND = 'DELAY_EVENT_NOT_FOUND'
-/** 분석 중인 동안 결과가 나왔는지 확인하는 간격. 서버 분석은 수십 초 걸린다 */
-const ANALYSIS_POLL_INTERVAL_MS = 3_000
 
 /** 지연 건 하나의 상세 화면. 목록에서 들어왔으면 '목록으로'가 그 목록의 검색 조건을 되살린다. */
 export function DelayDetailPage() {
@@ -30,18 +29,29 @@ export function DelayDetailPage() {
   // 분석이 끝나기 전에는 결과가 나올 때까지 주기적으로 다시 읽는다(탭이 가려져 있으면 쉰다). 너무 오래 걸리면 멈추고 알린다.
   // 다시 읽을지는 조회 설정이 먼저 정해야 해서, 제한 시간이 지났는지는 아래에서 계산해 ref로 넘긴다
   const isTimedOutRef = useRef(false)
-  const pollInterval = (isInProgress: boolean) =>
-    isInProgress && !isTimedOutRef.current ? ANALYSIS_POLL_INTERVAL_MS : false
+  // 이 실행을 기다리기 시작한 시각. 오래 걸릴수록 읽는 간격을 늘린다
+  const pollStartRef = useRef<{ runId: string | undefined; startedAt: number } | null>(null)
+  const pollInterval = (runId: string | undefined, isInProgress: boolean) => {
+    if (!isInProgress || isTimedOutRef.current) {
+      return false
+    }
+    const saved = pollStartRef.current
+    const start = saved !== null && saved.runId === runId ? saved : { runId, startedAt: Date.now() }
+    pollStartRef.current = start
+    return getAnalysisPollInterval(Date.now() - start.startedAt)
+  }
   const eventQuery = useQuery({
     ...delayEventQueries.detail(delayEventId),
-    refetchInterval: ({ state }) => pollInterval(isRunInProgress(state.data?.runs[0]?.status)),
+    refetchInterval: ({ state }) =>
+      pollInterval(state.data?.runs[0]?.runId, isRunInProgress(state.data?.runs[0]?.status)),
   })
   // 상세 응답의 `runs`는 최신 버전이 먼저다. 현재 실행의 결과는 실행 상세에서 읽는다
   const currentRunId = eventQuery.data?.runs[0]?.runId
   const runQuery = useQuery({
     ...analysisRunQueries.detail(currentRunId ?? ''),
     enabled: currentRunId !== undefined,
-    refetchInterval: ({ state }) => pollInterval(isRunInProgress(state.data?.status)),
+    refetchInterval: ({ state }) =>
+      pollInterval(state.data?.runId, isRunInProgress(state.data?.status)),
   })
   const isAnalyzing =
     isRunInProgress(runQuery.data?.status) || isRunInProgress(eventQuery.data?.runs[0]?.status)

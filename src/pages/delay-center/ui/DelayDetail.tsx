@@ -13,6 +13,7 @@ import {
   type ClientRole,
   type DelayAnalysis,
   type DelayCase,
+  DELAY_STATUS,
   DETAIL_SECTION,
   getDetailSections,
   getOptionsMissingData,
@@ -24,6 +25,7 @@ import {
 } from '../model/delay-center'
 import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 import { AiExplanationCard } from './AiExplanationCard'
+import { AnalysisVoyage } from './AnalysisVoyage'
 import { AtRiskOrders } from './AtRiskOrders'
 import { DecisionForm } from './DecisionForm'
 import { DecisionSection } from './DecisionSection'
@@ -69,7 +71,15 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   return (
     <article className="flex min-w-0 flex-col gap-24pxr">
       <DelayDetailHeader delayCase={delayCase} />
-      <StatusNotice delayCase={delayCase} />
+      {delayCase.status === DELAY_STATUS.ANALYZING ? (
+        <AnalysisVoyage
+          transportMode={transportMode}
+          step={delayCase.analysisStep}
+          hasPreviousRun={delayCase.runs.length > 1}
+        />
+      ) : (
+        <StatusNotice delayCase={delayCase} />
+      )}
 
       <DetailChapter
         id="situation-title"

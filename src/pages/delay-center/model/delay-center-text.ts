@@ -38,7 +38,6 @@ export const DRAFT_SAVED_MESSAGE = '의견·초안을 저장했습니다.'
 export const ANALYSIS_NOTICE = {
   STALE: '자료가 변경되었습니다. 재분석 후 선택하세요.',
   EXPLANATION_FAILED: '설명을 만들지 못해 이 분석은 선택할 수 없습니다. 재분석이 필요합니다.',
-  IN_PROGRESS: '완료되면 대응안 비교와 선택 화면이 열립니다.',
   SLOW_TITLE: '분석이 오래 걸리고 있어요',
   SLOW_DETAIL: '잠시 뒤 다시 확인해 주세요. 계속 끝나지 않으면 담당자에게 알려 주세요.',
   SLOW_RETRY: '다시 확인',
@@ -56,15 +55,36 @@ export const ANALYSIS_NOTICE = {
     '운영 기준이나 필수 자료가 없어 판정하지 못한 대응안이 있습니다. 자료를 보완한 뒤 재분석을 요청하세요.',
 } as const
 
-export const DEFAULT_PROGRESS_STEP = '분석'
-
-/** 진행 중인 분석 실행 상태별 현재 단계 이름. 화면에서는 뒤에 ' 중'을 붙인다 */
-export const PROGRESS_STEP_LABEL = {
-  DETECTED: '지연 확인',
-  VALIDATING: '입력 자료 검증',
-  ANALYZING_IMPACT: '재고 영향 분석',
-  ANALYZING_OPTIONS: '대응안 분석',
-  VALIDATING_OUTPUT: '결과 검증',
+/**
+ * 분석 중 화면(작은 항해)의 문구. 분석 네 단계가 정거장 네 곳이다.
+ * 서버 실행 상태 다섯 개(`DETECTED`·`VALIDATING`·`ANALYZING_IMPACT`·`ANALYZING_OPTIONS`·`VALIDATING_OUTPUT`)를 이 네 단계에 맞춘다(to-delay-case.ts).
+ */
+export const ANALYSIS_VOYAGE = {
+  HEADLINE: '새 분석을 하고 있어요',
+  EXPECTATION: '보통 1분 안에 끝나요. 끝나면 대응안 비교와 선택 화면이 열려요.',
+  HISTORY: '이전 분석 결과는 이력에 그대로 남아 있어요',
+  STEPS: [
+    {
+      label: '자료 확인',
+      title: '자료를 꼼꼼히 확인하고 있어요',
+      detail: '주문·재고·입고 예정 자료를 살펴봐요',
+    },
+    {
+      label: '재고 영향',
+      title: '재고 영향을 살펴보고 있어요',
+      detail: '지연으로 부족해지는 상품과 위험한 주문을 계산해요',
+    },
+    {
+      label: '대응안',
+      title: '대응안을 만들어 보고 있어요',
+      detail: '대응안마다 실행할 수 있는지 계산해요',
+    },
+    {
+      label: '최종 점검',
+      title: '마지막으로 점검하고 있어요',
+      detail: '추천 이유를 정리하고 한 번 더 확인해요',
+    },
+  ],
 } as const
 
 /** 입력 확정 때 마지막 수집이 실패·지연이던 원천이 있을 때의 안내 */
