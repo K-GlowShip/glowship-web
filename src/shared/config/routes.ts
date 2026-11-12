@@ -49,7 +49,7 @@ const isSafeRedirect = (path: string) => {
   if (!path.startsWith('/')) {
     return false
   }
-  
+
   try {
     const { origin } = window.location
     const url = new URL(path, origin)
