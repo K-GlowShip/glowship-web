@@ -304,6 +304,12 @@ const CAN_REANALYZE: Record<DelayStatus, boolean> = {
 export const canReanalyze = (delayCase: DelayCase) =>
   !isClosed(delayCase) && CAN_REANALYZE[delayCase.status]
 
+/**
+ * 재분석 버튼을 화면에 보일지. 재분석 요청은 아직 서버에 연결되지 않아(use-reanalysis.ts의 mock) 눌러도 새 분석이 시작되지 않고,
+ * 시연 서버는 분석 자동 시작을 꺼 두고 돌린다. 실제 요청을 연결하는 작업(feat/GLOW-141-reanalysis)을 합치면서 true로 바꾼다.
+ */
+export const REANALYSIS_ENABLED = false
+
 // 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)과 상태별 고정 문구를 그대로 쓴다.
 export const RESULT_CLASS_LABEL: Record<ResultClass, string> = {
   [RESULT_CLASS.READY_ORDER_RISK]: '실주문 납기 위험',
