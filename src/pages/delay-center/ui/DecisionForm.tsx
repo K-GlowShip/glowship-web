@@ -1,6 +1,7 @@
 import { Check, Info } from 'lucide-react'
 import { type SubmitEvent, useRef, useState } from 'react'
 
+import { isUnauthorizedError } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -92,8 +93,12 @@ export function DecisionForm({
     setFeedback(null)
     // 서버는 앞뒤 공백을 뺀 값을 저장한다. 처음부터 뺀 값을 보낸다.
     const trimmed = text.trim()
-    const showServerError = (serverError: Error) =>
-      setFeedback({ optionId, error: serverError.message, isServerError: true, saved: false })
+    // 세션이 끝난 오류(401)는 토스트로 알리고 로그인 페이지로 이동하므로 폼에는 적지 않는다
+    const showServerError = (serverError: Error) => {
+      if (!isUnauthorizedError(serverError)) {
+        setFeedback({ optionId, error: serverError.message, isServerError: true, saved: false })
+      }
+    }
 
     if (isLead) {
       // 최종 선택이 끝나면 화면이 선택 완료 상태로 바뀐다
@@ -187,7 +192,7 @@ export function DecisionForm({
           type="submit"
           size="lg"
           variant={isLead ? 'primary' : 'secondary'}
-          aria-busy={isSubmitting || undefined}
+          loading={isSubmitting}
         >
           {isLead && <Check aria-hidden="true" />}
           {labels.submit}
