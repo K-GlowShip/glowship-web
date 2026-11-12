@@ -35,3 +35,41 @@ export const delayCenterNewDelaysPath = (from: string) =>
 /** 지연 건의 상세 화면 경로. 예: /delay-center/de-1024 */
 export const delayCenterPath = (delayEventId: string) =>
   `${ROUTES.DELAY_CENTER}/${encodeURIComponent(delayEventId)}`
+
+/** 로그인 뒤에 돌아갈 화면을 담는 쿼리 이름. 예: /login?redirect=%2Fdelay-center%2Fde-1024 */
+const LOGIN_REDIRECT_PARAM = 'redirect'
+
+/**
+ * 로그인 뒤에 돌아가도 되는 경로인지 확인한다. 앱 안의 경로만 허용한다.
+ * 주소는 누구나 만들 수 있어서, 확인 없이 쓰면 로그인한 사용자를 바깥 사이트로 보내는 링크를 만들 수 있다.
+ * `//example.com`처럼 `/`로 시작해도 다른 사이트로 읽히는 주소가 있어서, 브라우저와 같은 방식으로 해석해
+ * 지금 사이트와 같은 곳인지 본다. 로그인 화면은 돌아갈 곳이 아니다.
+ */
+const isSafeRedirect = (path: string) => {
+  if (!path.startsWith('/')) {
+    return false
+  }
+
+  try {
+    const { origin } = window.location
+    const url = new URL(path, origin)
+    return url.origin === origin && url.pathname.replace(/\/+$/, '') !== ROUTES.LOGIN
+  } catch {
+    return false
+  }
+}
+
+/**
+ * 로그인 화면 경로. 보던 화면(`from`)을 주면 로그인 뒤에 그곳으로 돌아가도록 주소에 담는다.
+ * 대시보드는 로그인 뒤의 기본 화면이라 담지 않는다.
+ */
+export const loginPath = (from?: string) =>
+  from && from !== '/' && from !== ROUTES.DASHBOARD && isSafeRedirect(from)
+    ? `${ROUTES.LOGIN}?${LOGIN_REDIRECT_PARAM}=${encodeURIComponent(from)}`
+    : ROUTES.LOGIN
+
+/** 로그인 뒤에 갈 경로. 로그인 화면 주소의 쿼리(`search`)에 돌아갈 화면이 있으면 그곳, 없거나 쓸 수 없으면 대시보드다. */
+export const getLoginRedirect = (search: string) => {
+  const redirect = new URLSearchParams(search).get(LOGIN_REDIRECT_PARAM)
+  return redirect && isSafeRedirect(redirect) ? redirect : ROUTES.DASHBOARD
+}
