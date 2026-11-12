@@ -4,8 +4,7 @@ import { type SubmitEvent, useState } from 'react'
 import { DELAY_COUNT_KEY } from '@/entities/delay-event'
 import type { DelayEventCounts } from '@/shared/api'
 import { DELAY_SEARCH_MAX_LENGTH } from '@/shared/config'
-import { cn } from '@/shared/lib/cn'
-import { formatNumber } from '@/shared/lib/format-number'
+import { FilterTabs, type FilterTabOption } from '@/shared/ui/tabs'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
@@ -28,7 +27,7 @@ interface DelayStatusTabsProps {
  * 누르면 바로 그 상태만 조회한다. 건수는 검색어 등 다른 조건을 반영한 값이다.
  */
 export function DelayStatusTabs({ status, counts, onChange }: DelayStatusTabsProps) {
-  const tabs: { value: DelayStatusFilter; label: string; count: number | undefined }[] = [
+  const options: FilterTabOption<DelayStatusFilter>[] = [
     { value: STATUS_FILTER_ALL, label: '전체', count: counts?.all },
     ...DELAY_STATUS_OPTIONS.map((value) => ({
       value,
@@ -38,42 +37,7 @@ export function DelayStatusTabs({ status, counts, onChange }: DelayStatusTabsPro
   ]
 
   return (
-    <div
-      role="group"
-      aria-label="상태 필터"
-      className="flex gap-4pxr overflow-x-auto border-b border-border"
-    >
-      {tabs.map((tab) => {
-        const isSelected = tab.value === status
-
-        return (
-          <button
-            key={tab.value}
-            type="button"
-            aria-pressed={isSelected}
-            onClick={() => onChange(tab.value)}
-            className={cn(
-              'relative flex shrink-0 cursor-pointer items-baseline gap-6pxr px-12pxr py-10pxr text-b1 whitespace-nowrap outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 focus-visible:ring-inset',
-              isSelected
-                ? 'font-bold text-primary after:absolute after:inset-x-0 after:bottom-0 after:h-2pxr after:bg-primary'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {tab.label}
-            {tab.count !== undefined && (
-              <span
-                className={cn(
-                  'text-caption tabular-nums',
-                  !isSelected && tab.count === 0 && 'opacity-50',
-                )}
-              >
-                {formatNumber(tab.count)}
-              </span>
-            )}
-          </button>
-        )
-      })}
-    </div>
+    <FilterTabs aria-label="상태 필터" options={options} value={status} onValueChange={onChange} />
   )
 }
 

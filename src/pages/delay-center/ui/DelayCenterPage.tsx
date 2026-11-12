@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router'
 import { getNewDelayFrom } from '@/entities/delay-event'
 import { dashboardQueries, delayEventQueries } from '@/shared/api'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { parsePageParam } from '@/shared/lib/page-param'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Label } from '@/shared/ui/label'
 import { Switch } from '@/shared/ui/switch'
@@ -38,7 +39,7 @@ export function DelayCenterPage() {
     searchParams.get(LIST_PARAM.HAS_FINAL_DECISION),
   )
   const hasExtraCondition = from !== undefined || hasFinalDecision !== undefined
-  const page = Math.max(1, Math.floor(Number(searchParams.get(LIST_PARAM.PAGE))) || 1)
+  const page = parsePageParam(searchParams.get(LIST_PARAM.PAGE))
 
   // '새 지연 보기'의 기준은 대시보드와 같이 마지막 수집 시각에서 계산한다. 수집된 데이터가 없으면 켤 수 없다
   const { data: summary } = useQuery(dashboardQueries.summary())
