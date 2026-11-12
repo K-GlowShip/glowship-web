@@ -1,68 +1,57 @@
 import { Check } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 
-import {
-  canDecide,
-  type ClientRole,
-  type DelayAnalysis,
-  type DelayCase,
-  OPTION_TYPE_LABEL,
-} from '../model/delay-center'
-import { ANALYSIS_NOTICE } from '../model/delay-center-text'
-import { DecisionForm } from './DecisionForm'
+import { type DelayAnalysis, type DelayCase, OPTION_TYPE_LABEL } from '../model/delay-center'
 import { MemberOpinions } from './MemberOpinions'
 
 interface DecisionSectionProps {
   delayCase: DelayCase
   analysis: DelayAnalysis
-  role: ClientRole
+  /** 최종 선택 전에 보여 줄 내용. 선택할 수 있으면 입력 폼, 없으면 이유 안내다 */
+  children: ReactNode
 }
 
-export function DecisionSection({ delayCase, analysis, role }: DecisionSectionProps) {
+/**
+ * 판단을 남기는 자리. 왼쪽에 팀원 의견을 두고, 오른쪽에 최종 선택 결과를 둔다.
+ * 최종 선택 전이면 오른쪽에 `children`(입력 폼이나 선택할 수 없는 이유)을 보여 준다.
+ */
+export function DecisionSection({ delayCase, analysis, children }: DecisionSectionProps) {
   const { finalDecision } = delayCase
   const finalOption = analysis.options.find((option) => option.id === finalDecision?.optionId)
 
   return (
-    <section
-      aria-labelledby="decision-title"
-      className="flex flex-col gap-20pxr border-t border-border pt-24pxr"
-    >
-      <h3 id="decision-title" className="text-h3 font-bold">
-        대응안 선택
-      </h3>
-
+    <div className="grid gap-32pxr lg:grid-cols-2">
       <MemberOpinions opinions={delayCase.opinions} options={analysis.options} />
 
-      {finalDecision ? (
-        <div className="flex flex-col gap-12pxr rounded-card bg-success-bg p-20pxr text-success">
-          <p className="flex items-center gap-6pxr text-b1 font-bold">
-            <Check className="size-18pxr" aria-hidden="true" />
-            선택 완료 · {finalOption ? OPTION_TYPE_LABEL[finalOption.type] : ''}
-          </p>
-          <p className="text-b1 whitespace-pre-wrap text-foreground">{finalDecision.reason}</p>
-          <p className="text-caption">
-            {[
-              finalDecision.author,
-              formatYYYYMMDDHHmm(finalDecision.decidedAt),
-              delayCase.runCode && `실행 ${delayCase.runCode}`,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-        </div>
-      ) : canDecide(delayCase) ? (
-        <DecisionForm
-          key={delayCase.id}
-          role={role}
-          options={analysis.options}
-          opinions={delayCase.opinions}
-        />
-      ) : (
-        <p className="rounded-card bg-background px-16pxr py-12pxr text-b2 text-muted-foreground">
-          {ANALYSIS_NOTICE.CANNOT_DECIDE}
-        </p>
-      )}
-    </section>
+      <div className="lg:border-l lg:border-border lg:pl-32pxr">
+        {finalDecision ? (
+          <div className="flex flex-col gap-12pxr">
+            <div className="flex flex-col gap-4pxr">
+              <p className="flex items-center gap-4pxr text-caption font-bold text-success">
+                <Check className="size-14pxr" aria-hidden="true" />
+                선택 완료
+              </p>
+              <p className="text-h2 font-bold">
+                {finalOption ? OPTION_TYPE_LABEL[finalOption.type] : ''}
+              </p>
+            </div>
+            <p className="text-b1 whitespace-pre-wrap text-foreground">{finalDecision.reason}</p>
+            <p className="text-caption text-muted-foreground">
+              {[
+                finalDecision.author,
+                formatYYYYMMDDHHmm(finalDecision.decidedAt),
+                delayCase.runCode && `실행 ${delayCase.runCode}`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          </div>
+        ) : (
+          children
+        )}
+      </div>
+    </div>
   )
 }

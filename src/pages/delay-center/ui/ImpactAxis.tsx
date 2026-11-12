@@ -27,7 +27,7 @@ interface ImpactAxisProps {
  * 어떤 상품을 그릴지, 날짜를 어느 위치에 놓을지는 `model/impact-axis`가 계산하고, 이 컴포넌트는 줄을 쌓기만 한다.
  */
 export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactAxisProps) {
-  const { rows, hiddenCount } = pickAxisRows(impacts, expectedInbound)
+  const rows = pickAxisRows(impacts, expectedInbound)
 
   if (rows.length === 0) {
     return (
@@ -63,7 +63,7 @@ export function ImpactAxis({ impacts, plannedInbound, expectedInbound }: ImpactA
           guides={guides}
         />
       </div>
-      <AxisLegend hiddenCount={hiddenCount} />
+      <AxisLegend />
     </div>
   )
 }

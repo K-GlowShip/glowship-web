@@ -24,13 +24,13 @@ export function RunHistory({ runs }: RunHistoryProps) {
   }
 
   return (
-    <details className="group border-t border-border pt-20pxr">
+    <details className="group rounded-panel border border-border bg-card px-32pxr py-20pxr">
       <summary className="flex cursor-pointer list-none items-center gap-8pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 [&::-webkit-details-marker]:hidden">
         <ChevronDown
           className="size-16pxr shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           aria-hidden="true"
         />
-        <h3 className="text-h3 font-bold">
+        <h3 className="text-b1 font-bold">
           분석 이력 <span className="text-muted-foreground">{runs.length}</span>
         </h3>
       </summary>

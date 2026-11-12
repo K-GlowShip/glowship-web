@@ -21,7 +21,7 @@ export function AxisStockRow({ impact, expectedInbound, toPercent, guides }: Axi
     <div className="flex h-32pxr items-center" aria-hidden="true">
       {/* 좁은 화면에서는 이름이 잘려 상품을 구분할 수 없어서 짧은 상품 코드를 보여 준다 */}
       <span
-        className="w-(--axis-label) shrink-0 truncate pr-12pxr text-b2 font-bold"
+        className="w-(--axis-label) shrink-0 truncate pr-12pxr text-b2"
         title={`${productName} (${skuCode})`}
       >
         <span className="lg:hidden">{skuCode}</span>

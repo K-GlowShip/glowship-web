@@ -9,86 +9,99 @@ import {
   CLIENT_ROLE,
   type ClientRole,
   type DelayOption,
-  getSelectableOptions,
-  type MemberOpinion,
-  OPTION_TYPE,
+  NO_OPTION,
+  OPTION_TYPE_LABEL,
 } from '../model/delay-center'
 import {
   DECISION_FORM_TEXT,
+  DECISION_RECORD_NOTICE,
   DRAFT_SAVED_MESSAGE,
   ONLY_KEEP_PLAN_GUIDE,
 } from '../model/delay-center-text'
 import { validateDecision } from '../model/validate-decision'
-import { NO_OPTION, OptionChoice } from './OptionChoice'
 
 const TEXT_MAX_LENGTH = 600
 
+/** 저장을 눌렀을 때의 결과. 어느 대응안을 고른 상태에서 나온 것인지 함께 둔다 */
+interface Feedback {
+  optionId: string
+  error: string
+  saved: boolean
+}
+
+const NO_FEEDBACK = { error: '', saved: false }
+
 interface DecisionFormProps {
   role: ClientRole
-  options: DelayOption[]
-  opinions: MemberOpinion[]
+  /** 대응안 카드에서 고른 대응안. 고르지 않았으면 undefined */
+  selectedOption: DelayOption | undefined
+  /** 팀장이 고를 수 있는 대응안이 현재 계획 유지뿐인지 */
+  onlyKeepPlan: boolean
+  /** 고른 대응안을 비운다(팀원이 의견만 저장할 때) */
+  onClearOption: () => void
 }
 
 /**
- * 팀원은 의견·초안을, 팀장은 최종 선택을 한다. 역할에 맞는 버튼 하나만 보여 준다.
+ * 팀원은 의견·초안을, 팀장은 최종 선택을 한다. 대응안은 위쪽 대응안 카드에서 고르고, 여기서는 고른 대응안을 확인하고 이유·의견을 적어 저장한다.
  * 초안은 실행 가능 여부와 상관없이 모든 대응안을 고를 수 있고 대응안과 의견 중 하나만 있으면 된다.
  * 최종 선택은 실행 가능한 대응안만 고를 수 있고 이유가 필수다.
  */
-export function DecisionForm({ role, options, opinions }: DecisionFormProps) {
+export function DecisionForm({
+  role,
+  selectedOption,
+  onlyKeepPlan,
+  onClearOption,
+}: DecisionFormProps) {
   const isLead = role === CLIENT_ROLE.LEAD
   const labels = DECISION_FORM_TEXT[role]
-  const selectable = getSelectableOptions(role, options)
-  const onlyKeepPlan = isLead && selectable.every((option) => option.type === OPTION_TYPE.KEEP_PLAN)
-  const recommendedId = selectable.find((option) => option.recommended)?.id ?? NO_OPTION
+  const optionId = selectedOption?.id ?? NO_OPTION
 
-  const [optionId, setOptionId] = useState(isLead ? recommendedId : NO_OPTION)
   const [text, setText] = useState('')
-  const [error, setError] = useState('')
-  const [saved, setSaved] = useState(false)
+  const [feedback, setFeedback] = useState<Feedback | null>(null)
   const textRef = useRef<HTMLTextAreaElement>(null)
+  // 오류·저장 안내는 그것이 나온 대응안에서만 보여 준다. 대응안을 바꾸면 따로 지우지 않아도 사라진다
+  const { error, saved } = feedback?.optionId === optionId ? feedback : NO_FEEDBACK
   // 대응안이 없다는 오류는 대응안 칸의 문제라서, 이유·의견 칸은 대응안이 있는데 오류일 때(팀원은 둘 다 없을 때)만 오류로 표시한다.
   const isTextInvalid = error !== '' && (!isLead || optionId !== NO_OPTION)
-
-  const validate = () => {
-    const message = validateDecision(role, { optionId, text })
-    setError(message)
-    return message === ''
-  }
 
   // TODO: POST /analysis-runs/{runId}/drafts(팀원), /final-decision(팀장, Idempotency-Key 필요) 연동
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!validate()) {
+    const message = validateDecision(role, { optionId, text })
+    // 저장 안내는 팀원의 초안 저장에만 보여 준다. 팀장의 최종 선택은 연동 후 선택 완료 상태로 바뀐다.
+    setFeedback({ optionId, error: message, saved: message === '' && !isLead })
+    if (message !== '') {
       // 오류를 읽은 키보드·스크린리더 사용자가 바로 고칠 수 있게 입력 칸으로 옮긴다. 이 변경은 다음 렌더 전에 반영되지 않아서 직접 계산한다.
       if (!isLead || optionId !== NO_OPTION) {
         textRef.current?.focus()
       }
-      return
     }
-    // 저장 안내는 팀원의 초안 저장에만 보여 준다. 팀장의 최종 선택은 연동 후 선택 완료 상태로 바뀐다.
-    setSaved(!isLead)
-  }
-
-  const clearFeedback = () => {
-    setError('')
-    setSaved(false)
   }
 
   return (
-    <form className="flex flex-col gap-16pxr" onSubmit={handleSubmit} noValidate>
-      <OptionChoice
-        legend={labels.optionLabel}
-        role={role}
-        options={options}
-        opinions={opinions}
-        value={optionId}
-        allowNone={!isLead}
-        guide={onlyKeepPlan ? ONLY_KEEP_PLAN_GUIDE : undefined}
-        onChange={(value) => {
-          setOptionId(value)
-          clearFeedback()
-        }}
-      />
+    <form className="flex flex-col gap-20pxr" onSubmit={handleSubmit} noValidate>
+      <div className="flex flex-col gap-4pxr">
+        <p className="text-caption text-muted-foreground">선택한 대응안</p>
+        <p className="flex flex-wrap items-baseline gap-x-12pxr gap-y-2pxr" aria-live="polite">
+          {selectedOption ? (
+            <span className="text-h2 font-bold">{OPTION_TYPE_LABEL[selectedOption.type]}</span>
+          ) : (
+            <span className="text-h3 text-muted-foreground">{labels.noOption}</span>
+          )}
+          {!isLead && selectedOption && (
+            <button
+              type="button"
+              onClick={onClearOption}
+              className="cursor-pointer rounded-control text-b2 text-muted-foreground underline outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
+            >
+              선택 해제
+            </button>
+          )}
+        </p>
+        {onlyKeepPlan && (
+          <p className="text-caption text-muted-foreground">{ONLY_KEEP_PLAN_GUIDE}</p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-8pxr">
         <Label htmlFor="decision-text">
@@ -104,7 +117,7 @@ export function DecisionForm({ role, options, opinions }: DecisionFormProps) {
           value={text}
           onChange={(event) => {
             setText(event.target.value)
-            clearFeedback()
+            setFeedback(null)
           }}
         />
         <p className="text-right text-caption text-muted-foreground">
@@ -113,16 +126,10 @@ export function DecisionForm({ role, options, opinions }: DecisionFormProps) {
       </div>
 
       {isLead && (
-        <div className="flex gap-12pxr rounded-card bg-info-bg p-16pxr text-info">
-          <Info className="mt-2pxr size-18pxr shrink-0" aria-hidden="true" />
-          <div className="flex flex-col gap-2pxr">
-            <p className="text-b1 font-bold">실제 출고는 변경되지 않습니다</p>
-            <p className="text-b2">
-              최종 선택은 의사결정 기록입니다. 실제 재고 이동과 출고는 별도 운영 절차에 따라 진행해
-              주세요.
-            </p>
-          </div>
-        </div>
+        <p className="flex items-center gap-6pxr text-caption text-muted-foreground">
+          <Info className="size-14pxr shrink-0" aria-hidden="true" />
+          {DECISION_RECORD_NOTICE}
+        </p>
       )}
 
       <div className="flex items-center justify-end gap-12pxr">
