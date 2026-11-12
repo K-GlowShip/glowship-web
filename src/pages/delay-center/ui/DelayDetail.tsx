@@ -144,6 +144,7 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
           <DecisionSection delayCase={delayCase} analysis={analysis}>
             {decisionRole ? (
               <DecisionForm
+                runId={delayCase.runId}
                 role={decisionRole}
                 selectedOption={selectable.find((option) => option.id === optionId)}
                 onlyKeepPlan={
