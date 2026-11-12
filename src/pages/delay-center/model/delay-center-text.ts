@@ -39,6 +39,9 @@ export const ANALYSIS_NOTICE = {
   STALE: '자료가 변경되었습니다. 재분석 후 선택하세요.',
   EXPLANATION_FAILED: '설명을 만들지 못해 이 분석은 선택할 수 없습니다. 재분석이 필요합니다.',
   IN_PROGRESS: '완료되면 대응안 비교와 선택 화면이 열립니다.',
+  SLOW_TITLE: '분석이 오래 걸리고 있어요',
+  SLOW_DETAIL: '잠시 뒤 다시 확인해 주세요. 계속 끝나지 않으면 담당자에게 알려 주세요.',
+  SLOW_RETRY: '다시 확인',
   NO_RESULT: '분석 결과가 없습니다.',
   REANALYZE_GUIDE: '자료를 보완한 뒤 재분석을 요청하면 새 분석이 시작됩니다.',
   ON_HOLD: '필수 자료 결손으로 분석을 보류했습니다.',
@@ -117,3 +120,12 @@ export const AXIS_LEGEND_TEXT = {
 
 /** 선택할 수 없는데 사유 코드도 없는 대응안에 보여 주는 문구 */
 export const OPTION_NOT_SELECTABLE = '선택할 수 없는 대응안입니다.'
+
+/** 재분석을 요청하기 전에 한 번 더 묻는 안내. 연달아 눌러 분석이 쌓이는 것을 막는다 */
+export const REANALYSIS_CONFIRM = {
+  TITLE: '재분석을 요청할까요?',
+  DESCRIPTION:
+    '새 분석이 시작되고 지금 결과는 이력으로 남아요. 팀원 의견은 분석마다 따로 저장돼서 새 분석에는 이어지지 않아요.',
+  CANCEL: '취소',
+  CONFIRM: '재분석 요청',
+} as const

@@ -1,4 +1,5 @@
 import { RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 
 import { TRANSPORT_MODE_LABEL } from '@/entities/delay-event'
 import { EMPTY_VALUE } from '@/shared/config'
@@ -7,6 +8,14 @@ import { formatNumber } from '@/shared/lib/format-number'
 import { formatMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog'
 
 import {
   canReanalyze,
@@ -21,6 +30,7 @@ import {
   RESULT_CLASS_LABEL,
   SKU_SCOPE,
 } from '../model/delay-center'
+import { REANALYSIS_CONFIRM } from '../model/delay-center-text'
 import { useReanalysis } from '../model/use-reanalysis'
 import { AnalysisInfo } from './AnalysisInfo'
 
@@ -35,6 +45,7 @@ interface DelayDetailHeaderProps {
  */
 export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
   const { mutate: reanalyze, isPending: isReanalyzing } = useReanalysis(delayCase.runId)
+  const [isConfirming, setIsConfirming] = useState(false)
   const { analysis, delayDays, plannedInbound, expectedInbound } = delayCase
   const impactedCount =
     analysis?.impacts.filter(({ scope }) => scope === SKU_SCOPE.IMPACTED).length ?? 0
@@ -76,13 +87,35 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
           <Button
             variant="secondary"
             aria-busy={isReanalyzing || undefined}
-            onClick={() => !isReanalyzing && reanalyze()}
+            onClick={() => !isReanalyzing && setIsConfirming(true)}
           >
             <RefreshCw className={cn(isReanalyzing && 'animate-spin')} aria-hidden="true" />
             재분석
           </Button>
         )}
       </div>
+
+      <Dialog open={isConfirming} onOpenChange={setIsConfirming}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{REANALYSIS_CONFIRM.TITLE}</DialogTitle>
+            <DialogDescription>{REANALYSIS_CONFIRM.DESCRIPTION}</DialogDescription>
+          </DialogHeader>
+          <DialogBody className="flex justify-end gap-8pxr">
+            <Button variant="secondary" onClick={() => setIsConfirming(false)}>
+              {REANALYSIS_CONFIRM.CANCEL}
+            </Button>
+            <Button
+              onClick={() => {
+                setIsConfirming(false)
+                reanalyze()
+              }}
+            >
+              {REANALYSIS_CONFIRM.CONFIRM}
+            </Button>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
 
       <dl className="grid grid-cols-2 gap-y-20pxr border-y border-primary-900/10 py-20pxr lg:grid-cols-4">
         <Figure

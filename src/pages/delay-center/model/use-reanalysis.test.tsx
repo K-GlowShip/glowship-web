@@ -25,8 +25,11 @@ const setup = () => {
   return { invalidate, ...renderHook(() => useReanalysis(RUN_ID), { wrapper }) }
 }
 
+/** 지연 상세·목록을 다시 읽도록 무효화했는지. 키 내용으로 비교한다 */
 const refetchedDelayEvents = (invalidate: ReturnType<typeof setup>['invalidate']) =>
-  invalidate.mock.calls.some(([filters]) => filters?.queryKey === delayEventQueries.all)
+  invalidate.mock.calls
+    .map(([filters]) => filters?.queryKey)
+    .some((queryKey) => JSON.stringify(queryKey) === JSON.stringify(delayEventQueries.all))
 
 beforeEach(() => {
   vi.mocked(requestReanalysis).mockResolvedValue({
