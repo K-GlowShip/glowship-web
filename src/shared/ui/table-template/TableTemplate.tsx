@@ -37,15 +37,17 @@ export function TableTemplate({
 }: TableTemplateProps) {
   return (
     <div data-slot="table-template" className={cn('flex flex-col gap-16pxr', className)} {...props}>
-      <div className="flex items-center justify-between gap-16pxr">
-        <div className="min-w-0">
-          {Title && <h2 className="text-h3 font-bold">{Title}</h2>}
-          {totalCount !== undefined && (
-            <p className="text-b2 text-muted-foreground">총 {formatNumber(totalCount)}건</p>
-          )}
+      {(Title || totalCount !== undefined || Controls) && (
+        <div className="flex items-center justify-between gap-16pxr">
+          <div className="min-w-0">
+            {Title && <h2 className="text-h3 font-bold">{Title}</h2>}
+            {totalCount !== undefined && (
+              <p className="text-b2 text-muted-foreground">총 {formatNumber(totalCount)}건</p>
+            )}
+          </div>
+          {Controls && <div className="flex shrink-0 items-center gap-8pxr">{Controls}</div>}
         </div>
-        {Controls && <div className="flex shrink-0 items-center gap-8pxr">{Controls}</div>}
-      </div>
+      )}
       <div className="overflow-x-auto">{children}</div>
       {pageCount !== undefined && (
         <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
