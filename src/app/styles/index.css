@@ -55,6 +55,10 @@
 
   --text-display: 2rem;
   --text-display--line-height: 2.75rem;
+  /* 대시보드 요약의 한 문장 카피(h1). 화면이 넓을수록 커진다(32px~48px, 1440px에서 약 43px) */
+  --text-hero: clamp(2rem, 3vw, 3rem);
+  --text-hero--line-height: 1.22;
+  --text-hero--letter-spacing: -0.03em;
   /* 대시보드 핵심 지표의 큰 숫자. 화면이 넓을수록 커진다(44px~72px) */
   --text-kpi: clamp(2.75rem, 4.2vw, 4.5rem);
   --text-kpi--line-height: 1.1;

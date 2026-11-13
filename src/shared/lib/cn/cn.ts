@@ -4,7 +4,7 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
-      text: ['kpi', 'display', 'h1', 'h2', 'h3', 'b1', 'b2', 'caption'],
+      text: ['hero', 'kpi', 'display', 'h1', 'h2', 'h3', 'b1', 'b2', 'caption'],
       spacing: [(value: string) => /^\d+pxr$/.test(value)],
       radius: ['control', 'card', 'panel'],
     },
