@@ -5,6 +5,7 @@ import {
   type AnalysisRunDetail,
   type DelayEventDetail,
   type DelayEventRun,
+  isExplanationPassed,
 } from '@/shared/api'
 import { formatYYYYMMDD } from '@/shared/lib/kst-date'
 
@@ -37,7 +38,6 @@ import { DATA_WARNING_TEXT, PROGRESS_STEP_LABEL, STALE_REASON_LABEL } from './de
 type SourceDomain = keyof typeof SYNC_SOURCE_LABEL
 
 const CALCULATED = 'CALCULATED'
-const EXPLANATION_PASSED = 'PASSED'
 
 const isResultClass = (value: string | null): value is ResultClass =>
   Object.values<string>(RESULT_CLASS).includes(value ?? '')
@@ -80,7 +80,10 @@ const toRiskOrder = (order: AnalysisRunDetail['atRiskOrders'][number]): RiskOrde
   })),
 })
 
-const toOption = (option: AnalysisRunDetail['responseOptions'][number]): DelayOption => ({
+const toOption = (
+  option: AnalysisRunDetail['responseOptions'][number],
+  explanationPassed: boolean,
+): DelayOption => ({
   id: option.responseOptionId,
   type: option.optionType as OptionType,
   feasibility: option.feasibilityStatus as Feasibility,
@@ -90,14 +93,15 @@ const toOption = (option: AnalysisRunDetail['responseOptions'][number]): DelayOp
   delayInducedRecoveredOrders: option.delayInducedRecoveredOrders,
   notRecoveredOrders: option.notRecoveredOrders,
   itemSecuredBlockedOrders: option.itemSecuredBlockedOrders,
-  recommended: option.isRecommended,
+  // 설명 검증을 통과하지 못한 실행은 서버가 추천을 주어도 추천으로 보여 주지 않는다(명세 4.5)
+  recommended: explanationPassed && option.isRecommended,
 })
 
 /** 설명 검증을 통과하지 못했으면 설명이 없다(`explanation`이 null) */
 const toExplanation = (run: AnalysisRunDetail): AiExplanation | null => {
   const { explanation } = run
 
-  if (!explanation || run.explanationValidationStatus !== EXPLANATION_PASSED) {
+  if (!explanation || !isExplanationPassed(run)) {
     return null
   }
   return {
@@ -122,11 +126,13 @@ const toAnalysis = (run: AnalysisRunDetail): DelayAnalysis | null => {
   if (!hasResult || !isResultClass(run.resultClass)) {
     return null
   }
+  const explanationPassed = isExplanationPassed(run)
+
   return {
     resultClass: run.resultClass,
     impacts: run.inventoryImpacts.map(toImpact),
     riskOrders: run.atRiskOrders.map(toRiskOrder),
-    options: run.responseOptions.map(toOption),
+    options: run.responseOptions.map((option) => toOption(option, explanationPassed)),
     explanation: toExplanation(run),
   }
 }

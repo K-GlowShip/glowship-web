@@ -7,7 +7,7 @@ import {
   getOptionTypeLabel,
   getReasonLabel,
 } from '@/entities/delay-event'
-import type { AnalysisRunDetail } from '@/shared/api'
+import { type AnalysisRunDetail, isExplanationPassed } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
@@ -25,6 +25,7 @@ interface HistoryAnalysisSectionProps {
 
 export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnalysisSectionProps) {
   const { explanation } = run
+  const explanationPassed = isExplanationPassed(run)
 
   return (
     <section className="flex flex-col gap-24pxr border-t border-border pt-32pxr">
@@ -63,7 +64,7 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
                             <span className="font-bold">
                               {getOptionTypeLabel(option.optionType)}
                             </span>
-                            {option.isRecommended && (
+                            {explanationPassed && option.isRecommended && (
                               <Badge variant="info" dot={false}>
                                 추천
                               </Badge>

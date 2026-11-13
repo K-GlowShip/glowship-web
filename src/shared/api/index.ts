@@ -54,6 +54,7 @@ export {
   type FinalDecision,
   getAnalysisRun,
   type InventoryImpact,
+  isExplanationPassed,
   type MemberDraft,
   type OptionOrderOutcome,
   type ResponseOption,

@@ -30,6 +30,15 @@ export interface FinalDecision {
   checkedSeq: number
 }
 
+const EXPLANATION_PASSED = 'PASSED'
+
+/**
+ * AI 설명이 검증을 통과한 실행인가. 설명(`explanation`)과 추천 표시(명세 4.5)는 이 실행에서만 보여 준다.
+ * 설명 생성이 실패한 실행은 서버가 대응안에 `isRecommended: true`를 주어도 추천으로 보여 주지 않는다.
+ */
+export const isExplanationPassed = (run: Pick<AnalysisRunDetail, 'explanationValidationStatus'>) =>
+  run.explanationValidationStatus === EXPLANATION_PASSED
+
 /** 분석 실행의 상태 코드(`status`). 진행 중인 단계가 앞의 다섯 개다 */
 export const ANALYSIS_RUN_STATUS = {
   DETECTED: 'DETECTED',
