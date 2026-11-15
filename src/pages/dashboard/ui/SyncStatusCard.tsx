@@ -1,15 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { RefreshCw, TriangleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
-  getSyncOverview,
   type SyncCardSummary,
   SYNC_CARDS,
   SYNC_LEVEL,
   SYNC_SOURCE_LABEL,
 } from '@/entities/data-sync-run'
-import { dataSyncRunQueries } from '@/shared/api'
+import { useSyncData, useSyncProgress } from '@/features/sync-data'
 import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
@@ -26,10 +24,10 @@ interface SyncStatusCardProps {
 }
 
 export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
-  const { data, error, isFetching, refetch } = useQuery(dataSyncRunQueries.latest())
-
-  // 서버는 원천 5종을 항상 내려준다. 시스템별 카드(ERP·WMS·TMS)로 묶어 계산한다.
-  const overview = data ? getSyncOverview(data.items) : null
+  const { data, error, isFetching, refetch, overview, isRunning } = useSyncProgress()
+  const { mutate: sync, isPending: isRequesting } = useSyncData()
+  // 요청을 보내는 중이거나 수집이 도는 중에는 다시 누를 수 없다(서버도 중복 요청을 409로 거절한다)
+  const isBusy = isRequesting || isRunning
   const cards = overview?.cards ?? []
   // FR-003: 수집 오류로 필수 자료가 빠지면 이에 기대는 분석이 보류된다
   const hasProblem = cards.some(
@@ -41,14 +39,16 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
     <Card className="flex flex-col border-primary-100">
       <CardHeader>
         <CardTitle as="h2">데이터 수집 상태</CardTitle>
+        {/* 수집 상태를 다시 읽기만 하는 것이 아니라 동기화(수집)를 요청한다. 연동 데이터 조회 화면의 '동기화'와 같다 */}
         <Button
           variant="ghost"
           size="icon"
-          aria-label={isFetching ? '수집 상태를 불러오는 중' : '수집 상태 새로고침'}
-          aria-busy={isFetching}
-          onClick={() => void refetch()}
+          aria-label={isBusy ? '데이터 수집 중' : '지금 동기화'}
+          aria-busy={isBusy}
+          disabled={isBusy}
+          onClick={() => sync()}
         >
-          <RefreshCw className={cn(isFetching && 'animate-spin motion-reduce:animate-none')} />
+          <RefreshCw className={cn(isBusy && 'animate-spin motion-reduce:animate-none')} />
         </Button>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-16pxr pt-16pxr">
