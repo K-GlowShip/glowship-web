@@ -74,7 +74,7 @@ export function DelayAlertBanner({ referenceAt }: DelayAlertBannerProps) {
           to={delayCenterNewDelaysPath(detectedFrom)}
           className={cn(ACTION_CLASS_NAME, ACTION_COLOR_CLASS_NAME)}
         >
-          지연 대응 센터에서 보기 →
+          새 지연 보기 →
         </Link>
       )}
     </div>
