@@ -131,7 +131,10 @@ export function InventoryTable() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Badge variant={INVENTORY_STATUS_BADGE_VARIANT[item.status]}>
+                        <Badge
+                          variant={INVENTORY_STATUS_BADGE_VARIANT[item.status]}
+                          pulse={item.status === INVENTORY_STATUS.RISK}
+                        >
                           {INVENTORY_STATUS_LABEL[item.status]}
                         </Badge>
                       </TableCell>

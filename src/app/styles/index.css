@@ -169,6 +169,19 @@
     }
   }
 
+  /*
+   * 선적 여정 진행 막대와 현재 정거장 표시가 함께 천천히 앞으로 나아간다(막대 grow-x의 두 배쯤).
+   * 둘이 같은 시간·곡선이라 막대 끝과 표시가 어긋나지 않는다. 쓰는 쪽이 origin-left를 함께 준다
+   */
+  --animate-voyage-grow: grow-x 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-voyage-move: voyage-move 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes voyage-move {
+    from {
+      left: 0;
+    }
+  }
+
   /* Popover: 닫힘 애니메이션이 끝날 때까지 Radix가 언마운트를 기다린다 */
   --animate-popover-in: popover-in 150ms ease-out;
   --animate-popover-out: popover-out 100ms ease-in forwards;

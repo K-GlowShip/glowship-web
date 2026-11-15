@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { dashboardQueries, delayEventQueries, shipmentQueries, TRANSPORT_MODE } from '@/shared/api'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
-import { Skeleton } from '@/shared/ui/skeleton'
 
 import { HERO_MOOD, toHeroCopy, type HeroMood } from '../model/hero-copy'
 import { isFullyFetched, ROUTE_MAP_FETCH_SIZE, toTransportSummaries } from '../model/hero-route'
@@ -48,7 +47,14 @@ export function HeroRouteContent() {
   return (
     <div className="relative flex min-h-320pxr flex-col justify-between gap-24pxr p-32pxr">
       <div className="flex max-w-560pxr flex-col gap-16pxr">
-        <HeroDateline lastSyncedAt={summary?.lastSyncedAt ?? null} className="text-primary" />
+        {/* 불러오는 동안(또는 실패했을 때)에는 날짜줄을 비운다. 값이 없는 것과 아직 안 온 것은 다르다 */}
+        {summary ? (
+          <HeroDateline lastSyncedAt={summary.lastSyncedAt} className="text-primary" />
+        ) : (
+          <p className="invisible text-b2" aria-hidden="true">
+            &nbsp;
+          </p>
+        )}
         {copy ? (
           <HeroHeadline
             copy={copy}
@@ -62,7 +68,12 @@ export function HeroRouteContent() {
             불러올 수 없어요
           </h1>
         ) : (
-          <Skeleton className="h-120pxr w-4/5 bg-primary-100" aria-busy="true" />
+          // 아무것도 그리지 않되, 한 문장(두 줄)이 들어올 높이만 잡아 데이터가 와도 아래가 밀리지 않게 한다
+          <h1 className="invisible text-hero font-light" aria-hidden="true">
+            &nbsp;
+            <br />
+            &nbsp;
+          </h1>
         )}
       </div>
 

@@ -42,7 +42,10 @@ export function VoyageProgress({
 
   return (
     <div className="@container">
-      {stepIndex !== null && <VoyageTrack stepIndex={stepIndex} transportMode={transportMode} />}
+      {/* 단계가 바뀌면 막대와 현재 표시가 함께 처음부터 다시 나아가도록 key를 준다(막대만 점프하고 표시만 미끄러지지 않게) */}
+      {stepIndex !== null && (
+        <VoyageTrack key={stepIndex} stepIndex={stepIndex} transportMode={transportMode} />
+      )}
       {/* 정거장 이름을 선의 각 점 바로 아래에 둔다. 선과 같은 만큼 좌우를 들여 위치를 맞춘다 */}
       <div className="px-14pxr text-caption">
         <ol className="relative h-18pxr">
@@ -84,7 +87,7 @@ function VoyageTrack({ stepIndex, transportMode }: { stepIndex: number; transpor
         <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-primary-200" />
         <span
           className={cn(
-            'absolute top-1/2 left-0 h-2pxr origin-left -translate-y-1/2 animate-grow-x rounded-full bg-linear-to-r motion-reduce:animate-none',
+            'absolute top-1/2 left-0 h-2pxr origin-left -translate-y-1/2 animate-voyage-grow rounded-full bg-linear-to-r motion-reduce:animate-none',
             fill,
           )}
           style={{ width: toStepPosition(stepIndex) }}
@@ -92,7 +95,10 @@ function VoyageTrack({ stepIndex, transportMode }: { stepIndex: number; transpor
         {VOYAGE_STEPS.map(({ label }, index) => (
           <span
             key={label}
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+            className={cn(
+              'absolute top-1/2 -translate-x-1/2 -translate-y-1/2',
+              index === stepIndex && 'animate-voyage-move motion-reduce:animate-none',
+            )}
             style={{ left: toStepPosition(index) }}
           >
             {index === stepIndex ? (
