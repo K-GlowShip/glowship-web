@@ -2,11 +2,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
 import { getSyncOverview, SYNC_CARDS } from '@/entities/data-sync-run'
+import { useSyncData } from '@/features/sync-data'
 import { dashboardQueries, dataSyncRunQueries, isMeQuery } from '@/shared/api'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
-import { useSyncData } from '../model/use-sync-data'
 import { SyncDataTabs } from './SyncDataTabs'
 import { SyncStatusPanel } from './SyncStatusPanel'
 
