@@ -36,6 +36,11 @@ const TREND_ICON: Record<KpiTrend, LucideIcon | null> = {
 const GRID_CLASS =
   'grid gap-y-24pxr border-t border-primary-900/10 pt-24pxr sm:grid-cols-2 lg:grid-cols-4'
 
+// 지표 한 칸. 넓은 화면에서는 지표 사이를 세로선으로 나눈다. 두 줄로 접히는 폭에서는 선 없이 간격만 둔다.
+// 로딩 중 자리 표시도 같은 칸을 써서 지표가 도착해도 높이와 선이 달라지지 않는다
+const ITEM_CLASS =
+  'flex flex-col gap-8pxr border-primary-900/10 pr-16pxr lg:border-l lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0'
+
 export function KpiCards() {
   // 헤더의 기준 시각과 같은 요약 query다. 같은 키라서 요청은 한 번만 나간다
   const { data, error, isFetching, refetch } = useQuery(dashboardQueries.summary())
@@ -46,9 +51,9 @@ export function KpiCards() {
         {error ? (
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
         ) : (
-          <div className={cn(GRID_CLASS, 'gap-x-24pxr')}>
+          <div className={GRID_CLASS}>
             {Object.values(KPI_ID).map((id) => (
-              <Skeleton key={id} className="h-104pxr bg-white/60" />
+              <KpiSkeletonItem key={id} />
             ))}
           </div>
         )}
@@ -65,13 +70,23 @@ export function KpiCards() {
   )
 }
 
+/** 지표 칸과 같은 세 줄(이름, 큰 숫자, 설명). 숫자 줄은 실제와 같은 글자 크기를 써서 화면 폭에 따라 높이가 함께 변한다 */
+function KpiSkeletonItem() {
+  return (
+    <div className={ITEM_CLASS}>
+      <Skeleton className="h-22pxr w-2/5 bg-white/60" />
+      <Skeleton className="w-3/5 bg-white/60 text-kpi">&nbsp;</Skeleton>
+      <Skeleton className="h-18pxr w-1/3 bg-white/60" />
+    </div>
+  )
+}
+
 function KpiItem({ kpi }: { kpi: Kpi }) {
   const { label, value, unit, fractionDigits, caption, tone, trend, isAlert } = kpi
   const TrendIcon = TREND_ICON[trend]
 
   return (
-    // 넓은 화면에서는 지표 사이를 세로선으로 나눈다. 두 줄로 접히는 폭에서는 선 없이 간격만 둔다
-    <div className="flex flex-col gap-8pxr border-primary-900/10 pr-16pxr lg:border-l lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0">
+    <div className={ITEM_CLASS}>
       <p className="text-b2 text-muted-foreground">{label}</p>
       {/* 숫자는 크고 가늘게, 단위는 화장품 용량 표기처럼 숫자 머리 높이에 작게 올린다 */}
       <p
