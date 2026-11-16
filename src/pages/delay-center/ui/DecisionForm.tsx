@@ -69,6 +69,8 @@ export function DecisionForm({
   const saveDraft = useSaveDraft(runId)
   const finalDecision = useFinalDecision(runId)
   const isSubmitting = saveDraft.isPending || finalDecision.isPending
+  // 요청 중 상태(`isSubmitting`)는 다음 렌더에야 반영돼서, 같은 틱에 연달아 들어온 두 번째 제출은 막지 못한다. 요청을 보내는 순간 바로 바뀌는 값으로 한 번 더 막는다
+  const isRequestInFlight = useRef(false)
   // 오류·저장 안내는 그것이 나온 대응안에서만 보여 준다. 대응안을 바꾸면 따로 지우지 않아도 사라진다
   const { error, saved, isServerError } = feedback?.optionId === optionId ? feedback : NO_FEEDBACK
   // 대응안이 없다는 오류는 대응안 칸의 문제라서, 이유·의견 칸은 대응안이 있는데 오류일 때(팀원은 둘 다 없을 때)만 오류로 표시한다.
@@ -76,7 +78,7 @@ export function DecisionForm({
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isSubmitting) {
+    if (isSubmitting || isRequestInFlight.current) {
       return
     }
 
@@ -91,6 +93,10 @@ export function DecisionForm({
     }
 
     setFeedback(null)
+    isRequestInFlight.current = true
+    const releaseRequest = () => {
+      isRequestInFlight.current = false
+    }
     // 서버는 앞뒤 공백을 뺀 값을 저장한다. 처음부터 뺀 값을 보낸다.
     const trimmed = text.trim()
     // 세션이 끝난 오류(401)는 토스트로 알리고 로그인 페이지로 이동하므로 폼에는 적지 않는다
@@ -104,7 +110,7 @@ export function DecisionForm({
       // 최종 선택이 끝나면 화면이 선택 완료 상태로 바뀐다
       finalDecision.mutate(
         { responseOptionId: optionId, reasonText: trimmed },
-        { onError: showServerError },
+        { onError: showServerError, onSettled: releaseRequest },
       )
     } else {
       saveDraft.mutate(
@@ -118,6 +124,7 @@ export function DecisionForm({
             setFeedback({ optionId, error: '', saved: true })
           },
           onError: showServerError,
+          onSettled: releaseRequest,
         },
       )
     }

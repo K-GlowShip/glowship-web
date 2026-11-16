@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -113,6 +113,26 @@ describe('DecisionForm 역할별 요청', () => {
       ),
     )
     expect(createMemberDraft).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['팀장의 최종 선택', CLIENT_ROLE.LEAD, createFinalDecision],
+    ['팀원의 초안 저장', CLIENT_ROLE.MEMBER, createMemberDraft],
+  ] as const)('%s 버튼을 같은 틱에 두 번 눌러도 요청은 한 번만 보낸다', async (_, role, api) => {
+    renderForm(role)
+    await userEvent.type(screen.getByRole('textbox'), '재고 영향이 가장 적습니다')
+    const button = screen.getByRole('button', {
+      name: role === CLIENT_ROLE.LEAD ? '최종 선택' : '의견·초안 저장',
+    })
+
+    // 한 act 안에서 연달아 눌러서, 첫 클릭의 요청 중 상태가 화면에 반영되기 전에 두 번째 클릭이 들어오게 한다
+    act(() => {
+      button.click()
+      button.click()
+    })
+
+    await waitFor(() => expect(api).toHaveBeenCalled())
+    expect(api).toHaveBeenCalledTimes(1)
   })
 
   it('검증에 실패하면 요청을 보내지 않고 문구를 보여 준다', async () => {
