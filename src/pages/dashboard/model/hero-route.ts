@@ -20,9 +20,6 @@ import {
 export const ROUTE_MAP_WIDTH = 900
 export const ROUTE_MAP_HEIGHT = 300
 
-/** 범례 건수를 셀 목록(선적·지연 이벤트)을 한 번에 받는 수(서버 최대). 그 이상은 건수에 빠진다 */
-export const ROUTE_MAP_FETCH_SIZE = 100
-
 /** 지도와 범례에 쓰는 항구 코드. 한글·영문 지명을 섞지 않고 공항·항만 코드로 통일한다 */
 const PORT_CODE = {
   BUSAN: 'PUS',
@@ -174,7 +171,7 @@ interface TransportSummary {
 const TRANSPORT_ORDER: string[] = [TRANSPORT_MODE.OCEAN, TRANSPORT_MODE.AIR]
 
 /**
- * 목록을 빠짐없이 받았는가. 서버가 한 번에 주는 최대 수를 넘는 선적·이벤트가 있으면 첫 페이지만으로는
+ * 목록을 빠짐없이 받았는가. 모든 페이지를 받아도 한꺼번에 받는 상한(`fetchAllPages`)을 넘는 선적·이벤트가 있으면
  * 건수가 틀리므로, 범례는 틀린 숫자를 보이지 않고 비운다
  */
 export const isFullyFetched = (page: Pick<Page<unknown>, 'items' | 'totalCount'>) =>

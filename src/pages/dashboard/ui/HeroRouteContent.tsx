@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
 
 import { HERO_MOOD, toHeroCopy, type HeroMood } from '../model/hero-copy'
-import { isFullyFetched, ROUTE_MAP_FETCH_SIZE, toTransportSummaries } from '../model/hero-route'
+import { isFullyFetched, toTransportSummaries } from '../model/hero-route'
 import { HeroDateline, HeroHeadline } from './HeroHeadline'
 import { RouteMap } from './RouteMap'
 
@@ -29,13 +29,13 @@ const UNKNOWN_LEGEND_DOT_CLASS = 'bg-primary'
 export function HeroRouteContent() {
   // 지표와 같은 요약 query다. 같은 키라서 요청은 한 번만 나간다
   const { data: summary, error } = useQuery(dashboardQueries.summary())
-  // 범례 건수를 셀 선적. 입고 전 선적만 세고, 서버가 한 번에 주는 최대 수만 받는다
-  const { data: shipments } = useQuery(shipmentQueries.list({ size: ROUTE_MAP_FETCH_SIZE }))
+  // 범례 건수를 셀 선적. 입고 전 선적만 센다. 입고 완료 선적이 많아도 모든 페이지를 받아서 센다
+  const { data: shipments } = useQuery(shipmentQueries.listAll())
   // 확인이 필요한 지연 수. 헤드라인(요약)과 같은 기준으로 세려고 지연 이벤트 목록에서 직접 센다.
   // 아직 없거나 실패하면 그 부분만 비우고 나머지 범례는 그대로 보인다
-  const { data: delayEvents } = useQuery(delayEventQueries.list({ size: ROUTE_MAP_FETCH_SIZE }))
+  const { data: delayEvents } = useQuery(delayEventQueries.listAll())
   const copy = summary ? toHeroCopy(summary) : null
-  // 한 페이지에 다 담기지 않으면 건수가 틀리므로 선적이 넘치면 범례를 비우고, 이벤트가 넘치면 확인 필요 건수만 비운다
+  // 상한까지 받아도 다 담기지 않으면 건수가 틀리므로 선적이 넘치면 범례를 비우고, 이벤트가 넘치면 확인 필요 건수만 비운다
   const summaries =
     shipments && isFullyFetched(shipments)
       ? toTransportSummaries(

@@ -1,6 +1,7 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 
 import { getDelayEvent, getDelayEvents, type GetDelayEventsParams } from '../endpoints/delay-events'
+import { fetchAllPages, MAX_PAGE_SIZE } from '../fetch-all-pages'
 import { LIST_STALE_TIME_MS } from './stale-time'
 
 export const delayEventQueries = {
@@ -12,6 +13,16 @@ export const delayEventQueries = {
       queryFn: ({ signal }) => getDelayEvents(params, { signal }),
       staleTime: LIST_STALE_TIME_MS,
       placeholderData: keepPreviousData,
+    }),
+  /** 모든 지연 이벤트. 건수를 세는 화면용이다. 많으면 앞쪽만 받는다 */
+  listAll: (params: Omit<GetDelayEventsParams, 'page' | 'size'> = {}) =>
+    queryOptions({
+      queryKey: ['delay-events', 'all', params],
+      queryFn: ({ signal }) =>
+        fetchAllPages((page) =>
+          getDelayEvents({ ...params, page, size: MAX_PAGE_SIZE }, { signal }),
+        ),
+      staleTime: LIST_STALE_TIME_MS,
     }),
   detail: (delayEventId: string) =>
     queryOptions({

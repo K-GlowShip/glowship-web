@@ -130,6 +130,7 @@ export { orderQueries } from './queries/orders'
 export { shipmentQueries } from './queries/shipments'
 export { skuQueries } from './queries/skus'
 export { API, fetcher } from './fetcher'
+export { fetchAllPages, MAX_PAGE_SIZE } from './fetch-all-pages'
 export type { Page, PageParams } from './page'
 export { ENDPOINT } from './paths'
 export type {
