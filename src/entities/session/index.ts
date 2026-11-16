@@ -1,3 +1,5 @@
+export { isInternalRole } from './model/role'
 export { getRoleLabel } from './model/role-label'
 export { clearSession, markLoggedIn, SESSION_STATUS, useSession } from './model/session'
 export { useLogout } from './model/use-logout'
+export { type AssignedCompany, useAssignedCompanies } from './model/use-assigned-companies'
