@@ -1,0 +1,133 @@
+import axios, {
+  AxiosError,
+  type AxiosAdapter,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import { describe, expect, it, vi } from 'vitest'
+
+import { installRefreshInterceptor } from './refresh-interceptor'
+
+interface Reply {
+  status: number
+  data?: unknown
+}
+
+/** 요청 경로별로 정해 둔 응답을 차례로 돌려주는 가짜 서버. 호출 기록도 남긴다 */
+const setup = (replies: Record<string, Reply[]>) => {
+  const calls: string[] = []
+  const adapter: AxiosAdapter = async (config: InternalAxiosRequestConfig) => {
+    const url = config.url ?? ''
+    calls.push(url)
+    const reply = replies[url]?.shift() ?? { status: 200 }
+    const response = {
+      status: reply.status,
+      statusText: '',
+      data: reply.data ?? null,
+      headers: {},
+      config,
+    }
+    if (reply.status >= 400) {
+      throw new AxiosError('failed', String(reply.status), config, null, response)
+    }
+    return response
+  }
+  const instance: AxiosInstance = axios.create({ adapter })
+  installRefreshInterceptor(instance)
+
+  return { instance, calls, countOf: (url: string) => calls.filter((call) => call === url).length }
+}
+
+describe('installRefreshInterceptor', () => {
+  it('401이면 재발급한 뒤 원래 요청을 다시 보내 그 응답을 돌려준다', async () => {
+    const { instance, countOf } = setup({
+      '/orders': [{ status: 401 }, { status: 200, data: 'ok' }],
+      '/auth/refresh': [{ status: 204 }],
+    })
+
+    const response = await instance.get('/orders')
+
+    expect(response.data).toBe('ok')
+    expect(countOf('/auth/refresh')).toBe(1)
+    expect(countOf('/orders')).toBe(2)
+  })
+
+  it('동시에 여러 요청이 401을 받아도 재발급은 한 번만 보낸다', async () => {
+    const { instance, countOf } = setup({
+      '/orders': [{ status: 401 }, { status: 200, data: 'a' }],
+      '/skus': [{ status: 401 }, { status: 200, data: 'b' }],
+      '/auth/refresh': [{ status: 204 }],
+    })
+
+    const [orders, skus] = await Promise.all([instance.get('/orders'), instance.get('/skus')])
+
+    expect([orders.data, skus.data]).toEqual(['a', 'b'])
+    expect(countOf('/auth/refresh')).toBe(1)
+  })
+
+  it('재발급이 실패하면 원래 요청의 401을 그대로 던지고 다시 보내지 않는다', async () => {
+    const { instance, countOf } = setup({
+      '/orders': [{ status: 401 }],
+      '/auth/refresh': [{ status: 401 }],
+    })
+
+    await expect(instance.get('/orders')).rejects.toMatchObject({
+      config: { url: '/orders' },
+      response: { status: 401 },
+    })
+    expect(countOf('/orders')).toBe(1)
+  })
+
+  it('다시 보낸 요청이 또 401이면 반복하지 않는다', async () => {
+    const { instance, countOf } = setup({
+      '/orders': [{ status: 401 }, { status: 401 }],
+      '/auth/refresh': [{ status: 204 }],
+    })
+
+    await expect(instance.get('/orders')).rejects.toMatchObject({ response: { status: 401 } })
+    expect(countOf('/auth/refresh')).toBe(1)
+    expect(countOf('/orders')).toBe(2)
+  })
+
+  it.each(['/auth/login', '/auth/logout', '/auth/signup', '/auth/refresh'])(
+    '%s 요청의 401은 재발급 대상이 아니다',
+    async (url) => {
+      const { instance, calls } = setup({ [url]: [{ status: 401 }] })
+
+      await expect(instance.post(url)).rejects.toMatchObject({ response: { status: 401 } })
+      expect(calls).toEqual([url])
+    },
+  )
+
+  it('401이 아닌 오류는 건드리지 않는다', async () => {
+    const { instance, calls } = setup({ '/orders': [{ status: 500 }] })
+
+    await expect(instance.get('/orders')).rejects.toMatchObject({ response: { status: 500 } })
+    expect(calls).toEqual(['/orders'])
+  })
+
+  it('재발급 뒤 다시 보내는 요청도 본문과 헤더를 그대로 유지한다', async () => {
+    const seen = vi.fn()
+    const { instance } = setup({
+      '/final': [{ status: 401 }, { status: 200 }],
+      '/auth/refresh': [{ status: 204 }],
+    })
+    instance.interceptors.request.use((config) => {
+      if (config.url === '/final') {
+        seen(config.headers.get('Idempotency-Key'), config.data)
+      }
+      return config
+    })
+
+    await instance.post(
+      '/final',
+      { reasonText: '이유' },
+      { headers: { 'Idempotency-Key': 'key-1' } },
+    )
+
+    expect(seen).toHaveBeenCalledTimes(2)
+    expect(seen).toHaveBeenNthCalledWith(1, 'key-1', { reasonText: '이유' })
+    expect(seen.mock.calls[1][0]).toBe('key-1')
+    expect(JSON.parse(seen.mock.calls[1][1] as string)).toEqual({ reasonText: '이유' })
+  })
+})

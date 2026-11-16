@@ -3,6 +3,7 @@ import axios, { type AxiosRequestConfig } from 'axios'
 import { env } from '@/shared/config'
 
 import { toApiError } from './error'
+import { installRefreshInterceptor } from './refresh-interceptor'
 import { getVersionUrl } from './version'
 
 const API_PREFIX = '/api'
@@ -22,6 +23,10 @@ fetcher.interceptors.request.use((config) => {
   }
   return config
 })
+
+// 접근 토큰이 만료돼 401을 받으면 재발급 뒤 원래 요청을 다시 보낸다. 오류를 ApiError로 바꾸기 전에 원본 오류가 필요해서 아래 변환보다 먼저 등록한다.
+// 데모 로그인이 켜져 있어도 데모 계정이 아닌 로그인은 서버 세션이므로 항상 등록한다. 데모 세션은 요청이 가지 않아 영향이 없다.
+installRefreshInterceptor(fetcher)
 
 // 모든 실패 응답을 ApiError로 통일한다
 fetcher.interceptors.response.use(
