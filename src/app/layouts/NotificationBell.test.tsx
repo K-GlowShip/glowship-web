@@ -3,18 +3,17 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { getDashboardSummary } from '@/shared/api/endpoints/dashboard'
-import { getDelayEvents } from '@/shared/api/endpoints/delay-events'
+import { getDashboardSummary, getDelayEvents } from '@/shared/api'
 
 import { NotificationBell } from './NotificationBell'
 
 // 쿼리 정의가 엔드포인트 모듈을 직접 가져오므로 그 모듈을 대체한다
 vi.mock('@/shared/api/endpoints/dashboard', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/api/endpoints/dashboard')>()),
+  ...(await importOriginal<Record<string, unknown>>()),
   getDashboardSummary: vi.fn(),
 }))
 vi.mock('@/shared/api/endpoints/delay-events', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/api/endpoints/delay-events')>()),
+  ...(await importOriginal<Record<string, unknown>>()),
   getDelayEvents: vi.fn(),
 }))
 
