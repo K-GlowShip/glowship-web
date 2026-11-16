@@ -4,13 +4,17 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { installRefreshInterceptor } from './refresh-interceptor'
 
 interface Reply {
   status: number
   data?: unknown
+  /** 응답을 이 약속이 풀릴 때까지 늦춘다 */
+  wait?: Promise<void>
+  /** true면 서버 응답 없이 네트워크 오류로 실패한다 */
+  networkError?: boolean
 }
 
 /** 요청 경로별로 정해 둔 응답을 차례로 돌려주는 가짜 서버. 호출 기록도 남긴다 */
@@ -20,6 +24,10 @@ const setup = (replies: Record<string, Reply[]>) => {
     const url = config.url ?? ''
     calls.push(url)
     const reply = replies[url]?.shift() ?? { status: 200 }
+    await reply.wait
+    if (reply.networkError) {
+      throw new AxiosError('Network Error', AxiosError.ERR_NETWORK, config)
+    }
     const response = {
       status: reply.status,
       statusText: '',
@@ -37,6 +45,10 @@ const setup = (replies: Record<string, Reply[]>) => {
 
   return { instance, calls, countOf: (url: string) => calls.filter((call) => call === url).length }
 }
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 describe('installRefreshInterceptor', () => {
   it('401이면 재발급한 뒤 원래 요청을 다시 보내 그 응답을 돌려준다', async () => {
@@ -65,6 +77,35 @@ describe('installRefreshInterceptor', () => {
     expect(countOf('/auth/refresh')).toBe(1)
   })
 
+  it('재발급이 끝나기 전에 보낸 요청의 뒤늦은 401은 재발급 없이 바로 다시 보낸다', async () => {
+    let now = 1
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+    let releaseSlow: () => void = () => undefined
+    const { instance, calls, countOf } = setup({
+      '/slow': [
+        { status: 401, wait: new Promise<void>((resolve) => (releaseSlow = resolve)) },
+        { status: 200, data: 'slow' },
+      ],
+      '/orders': [{ status: 401 }, { status: 200 }],
+      '/auth/refresh': [{ status: 204 }],
+    })
+
+    // 시각 1에 보낸 느린 요청이 아직 돌아오지 않은 사이, 다른 요청이 401을 받아 재발급이 끝난다
+    const slow = instance.get('/slow')
+    // 요청 인터셉터는 다음 틱에 돌아서, 서버에 닿은 것을 확인한 뒤에 시각을 바꾼다
+    await vi.waitFor(() => expect(calls).toEqual(['/slow']))
+    now = 2
+    await instance.get('/orders')
+    expect(countOf('/auth/refresh')).toBe(1)
+
+    now = 3
+    releaseSlow()
+
+    expect((await slow).data).toBe('slow')
+    expect(countOf('/auth/refresh')).toBe(1)
+    expect(countOf('/slow')).toBe(2)
+  })
+
   it('재발급이 실패하면 원래 요청의 401을 그대로 던지고 다시 보내지 않는다', async () => {
     const { instance, countOf } = setup({
       '/orders': [{ status: 401 }],
@@ -76,6 +117,38 @@ describe('installRefreshInterceptor', () => {
       response: { status: 401 },
     })
     expect(countOf('/orders')).toBe(1)
+  })
+
+  it.each([401, 403])(
+    '서버가 재발급을 거절하면(%i) 다음 로그인 전까지 다시 시도하지 않는다',
+    async (status) => {
+      const { instance, countOf } = setup({
+        '/orders': [{ status: 401 }, { status: 401 }, { status: 200 }],
+        '/skus': [{ status: 401 }],
+        '/auth/login': [{ status: 200 }],
+        '/auth/refresh': [{ status }, { status: 204 }],
+      })
+
+      await expect(instance.get('/orders')).rejects.toMatchObject({ response: { status: 401 } })
+      await expect(instance.get('/skus')).rejects.toMatchObject({ response: { status: 401 } })
+      expect(countOf('/auth/refresh')).toBe(1)
+
+      // 다시 로그인하면 재발급을 다시 시도한다
+      await instance.post('/auth/login')
+      await expect(instance.get('/orders')).resolves.toMatchObject({ status: 200 })
+      expect(countOf('/auth/refresh')).toBe(2)
+    },
+  )
+
+  it('네트워크 오류로 재발급이 실패한 것은 거절이 아니라서 다음 401에서 다시 시도한다', async () => {
+    const { instance, countOf } = setup({
+      '/orders': [{ status: 401 }, { status: 401 }, { status: 200 }],
+      '/auth/refresh': [{ status: 0, networkError: true }, { status: 204 }],
+    })
+
+    await expect(instance.get('/orders')).rejects.toMatchObject({ response: { status: 401 } })
+    await expect(instance.get('/orders')).resolves.toMatchObject({ status: 200 })
+    expect(countOf('/auth/refresh')).toBe(2)
   })
 
   it('다시 보낸 요청이 또 401이면 반복하지 않는다', async () => {
