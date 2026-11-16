@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRef } from 'react'
 
 import { type ApiError, isUnauthorizedError, requestReanalysis } from '@/shared/api'
 import { toastError } from '@/shared/ui/toast'
@@ -12,11 +13,13 @@ const HTTP_CONFLICT = 409
  * 요청이 받아들여지면 새 실행이 `DETECTED`로 만들어지고 분석은 서버에서 이어서 돈다. 화면은 새 실행을 읽어 분석 중으로 바뀐다.
  * 409(이미 진행 중·현재 실행이 아님·이미 선택됨 등)는 화면이 오래된 것이라 실패해도 다시 읽고, 이유를 알린다.
  * 다시 읽기가 끝날 때까지 요청이 진행 중으로 남아, 버튼이 사라지기 전에 눌러 두 번 요청하지 않는다.
+ * 진행 중 상태(`isPending`)는 다음 렌더에야 바뀌어서 같은 틱에 연달아 부르는 것은 막지 못하므로, `mutate`는 요청 중이면 무시한다.
  */
 export const useReanalysis = (runId: string) => {
   const refresh = useRefreshDelay()
+  const isRequested = useRef(false)
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => requestReanalysis(runId),
     onSuccess: refresh,
     onError: (error: ApiError) => {
@@ -27,4 +30,18 @@ export const useReanalysis = (runId: string) => {
       }
     },
   })
+
+  const mutate = () => {
+    if (isRequested.current) {
+      return
+    }
+    isRequested.current = true
+    mutation.mutate(undefined, {
+      onSettled: () => {
+        isRequested.current = false
+      },
+    })
+  }
+
+  return { ...mutation, mutate }
 }

@@ -27,43 +27,46 @@ export function DelayDetailPage() {
   const listSearch = getListSearch(state)
 
   // 분석이 끝나기 전에는 결과가 나올 때까지 주기적으로 다시 읽는다(탭이 가려져 있으면 쉰다). 너무 오래 걸리면 멈추고 알린다.
-  // 다시 읽을지는 조회 설정이 먼저 정해야 해서, 제한 시간이 지났는지는 아래에서 계산해 ref로 넘긴다
+  // 다시 읽을지는 조회 설정이 먼저 정해야 해서, 제한 시간이 지났는지와 기다리기 시작한 시각은 아래에서 계산해 ref로 넘긴다.
+  // 설정 쪽 함수는 이 ref를 읽기만 한다
   const isTimedOutRef = useRef(false)
   // 이 실행을 기다리기 시작한 시각. 오래 걸릴수록 읽는 간격을 늘린다
-  const pollStartRef = useRef<{ runId: string | undefined; startedAt: number } | null>(null)
-  const pollInterval = (runId: string | undefined, isInProgress: boolean) => {
-    if (!isInProgress || isTimedOutRef.current) {
-      return false
-    }
-    const saved = pollStartRef.current
-    const start = saved !== null && saved.runId === runId ? saved : { runId, startedAt: Date.now() }
-    pollStartRef.current = start
-    return getAnalysisPollInterval(Date.now() - start.startedAt)
-  }
+  const pollStartRef = useRef<number | null>(null)
+  const pollInterval = (isInProgress: boolean) =>
+    !isInProgress || isTimedOutRef.current
+      ? false
+      : getAnalysisPollInterval(
+          pollStartRef.current === null ? 0 : Date.now() - pollStartRef.current,
+        )
   const eventQuery = useQuery({
     ...delayEventQueries.detail(delayEventId),
-    refetchInterval: ({ state }) =>
-      pollInterval(state.data?.runs[0]?.runId, isRunInProgress(state.data?.runs[0]?.status)),
+    refetchInterval: ({ state }) => pollInterval(isRunInProgress(state.data?.runs[0]?.status)),
   })
   // 상세 응답의 `runs`는 최신 버전이 먼저다. 현재 실행의 결과는 실행 상세에서 읽는다
   const currentRunId = eventQuery.data?.runs[0]?.runId
   const runQuery = useQuery({
     ...analysisRunQueries.detail(currentRunId ?? ''),
     enabled: currentRunId !== undefined,
-    refetchInterval: ({ state }) =>
-      pollInterval(state.data?.runId, isRunInProgress(state.data?.status)),
+    refetchInterval: ({ state }) => pollInterval(isRunInProgress(state.data?.status)),
   })
   const isAnalyzing =
     isRunInProgress(runQuery.data?.status) || isRunInProgress(eventQuery.data?.runs[0]?.status)
   const pollLimit = useAnalysisPollLimit(isAnalyzing, currentRunId)
+
   useEffect(() => {
     isTimedOutRef.current = pollLimit.isTimedOut
   }, [pollLimit.isTimedOut])
+
+  useEffect(() => {
+    pollStartRef.current = isAnalyzing ? Date.now() : null
+  }, [isAnalyzing, currentRunId])
+
   const retryPolling = () => {
     pollLimit.restart()
     void eventQuery.refetch()
     void runQuery.refetch()
   }
+  
   const delayCase = eventQuery.data ? toDelayCase(eventQuery.data, runQuery.data ?? null) : null
   const failedQuery = [eventQuery, runQuery].find(({ error }) => error)
   const isNotFound = isApiError(eventQuery.error) && eventQuery.error.code === DELAY_EVENT_NOT_FOUND

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -54,6 +54,29 @@ describe('useReanalysis', () => {
     expect(requestReanalysis).toHaveBeenCalledWith(RUN_ID)
     expect(refetchedDelayEvents(invalidate)).toBe(true)
     expect(toastError).not.toHaveBeenCalled()
+  })
+
+  it('같은 틱에 두 번 불러도 요청은 한 번만 보낸다', async () => {
+    const { result } = setup()
+
+    // 한 act 안에서 연달아 불러서, 첫 호출의 진행 중 상태가 반영되기 전에 두 번째 호출이 들어오게 한다
+    act(() => {
+      result.current.mutate()
+      result.current.mutate()
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(requestReanalysis).toHaveBeenCalledTimes(1)
+  })
+
+  it('요청이 끝나면 다시 요청할 수 있다', async () => {
+    const { result } = setup()
+
+    act(() => result.current.mutate())
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    act(() => result.current.mutate())
+
+    await waitFor(() => expect(requestReanalysis).toHaveBeenCalledTimes(2))
   })
 
   it('이미 진행 중이라 거절되면(409) 이유를 알리고 화면을 다시 읽는다', async () => {
