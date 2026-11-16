@@ -1,5 +1,6 @@
 export { getSyncBadge, getSyncLevel, isSyncError, SYNC_LEVEL } from './model/sync-badge'
 export {
+  getNewestSyncedAt,
   getOldestSyncedAt,
   getSyncOverview,
   SYNC_CARDS,

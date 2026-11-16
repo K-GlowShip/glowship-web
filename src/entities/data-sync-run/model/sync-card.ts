@@ -85,6 +85,14 @@ export interface SyncCardSummary {
   sources: readonly SyncSourceSummary[]
 }
 
+/** 시각 목록 중 가장 최근 값. 값이 하나도 없으면 null */
+export const getNewestSyncedAt = (times: readonly (string | null)[]): string | null =>
+  times.reduce<string | null>(
+    (newest, time) =>
+      time !== null && (newest === null || Date.parse(time) > Date.parse(newest)) ? time : newest,
+    null,
+  )
+
 /** 시각 목록 중 가장 오래된 값. 하나라도 비어 있거나 목록이 비면 null */
 export const getOldestSyncedAt = (times: readonly (string | null)[]): string | null => {
   let oldest: string | null = null
