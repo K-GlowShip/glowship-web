@@ -17,7 +17,10 @@ interface ImpactTableProps {
   impacts: SkuImpact[]
 }
 
-/** 상품(SKU·창고)별 부족 수량과 안전재고 하회·재고 소진 날짜, 품절 일수. 판정할 수 없는 상품은 한 칸으로 합쳐 안내한다. */
+/**
+ * 상품(SKU·창고)별 부족 수량과 안전재고 하회·재고 소진 날짜, 품절 일수. 판정할 수 없는 상품은 한 칸으로 합쳐 안내한다.
+ * 행 순서(가장 먼저 문제가 생기는 순)는 위 일정판과 같고, 그 기준은 SKU 열 머리에 적는다.
+ */
 export function ImpactTable({ impacts }: ImpactTableProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   // 지연으로 부족이 늘었거나 판정할 수 없는 상품을 먼저 보여 준다. 나머지(안전재고 하회만 있는 상품)는 접어 둔다
@@ -33,7 +36,12 @@ export function ImpactTable({ impacts }: ImpactTableProps) {
       <Table density="compact" className="min-w-640pxr">
         <TableHeader>
           <TableRow>
-            <TableHead>상품</TableHead>
+            <TableHead>
+              SKU
+              <span className="block text-caption font-normal text-muted-foreground">
+                먼저 문제가 생기는 순
+              </span>
+            </TableHead>
             <TableHead className="w-120pxr text-right">
               <span className="inline-flex items-center justify-end gap-4pxr">
                 부족 수량
