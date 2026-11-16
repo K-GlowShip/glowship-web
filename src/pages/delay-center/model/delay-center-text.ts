@@ -61,7 +61,7 @@ export const ANALYSIS_NOTICE = {
  */
 export const ANALYSIS_VOYAGE = {
   HEADLINE: '새 분석을 하고 있어요',
-  EXPECTATION: '보통 1분 안에 끝나요. 끝나면 대응안 비교와 선택 화면이 열려요.',
+  EXPECTATION: '곧 끝나요. 끝나면 대응안 비교와 선택 화면이 열려요.',
   HISTORY: '이전 분석 결과는 이력에 그대로 남아 있어요',
   STEPS: [
     {
