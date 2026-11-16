@@ -1,3 +1,4 @@
+import { LnbBrand } from '@/app/layouts/LnbBrand'
 import { PageSkeleton } from '@/app/layouts/PageSkeleton'
 import { Skeleton } from '@/shared/ui/skeleton'
 
@@ -5,10 +6,16 @@ import { Skeleton } from '@/shared/ui/skeleton'
 export function RouteFallback() {
   return (
     <div className="flex h-screen">
-      <aside className="flex w-200pxr shrink-0 flex-col gap-8pxr border-r border-border bg-card p-16pxr">
-        {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="h-41pxr rounded-card" />
-        ))}
+      <aside className="flex w-200pxr shrink-0 flex-col border-r border-border bg-card">
+        {/* 실제 사이드바(AppLnb)처럼 맨 위에 로고 줄을 두고 메뉴 뼈대는 그 아래에 둔다 */}
+        <div className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr">
+          <LnbBrand />
+        </div>
+        <div className="flex flex-col gap-8pxr p-16pxr">
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-41pxr rounded-card" />
+          ))}
+        </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="h-64pxr shrink-0 border-b border-border bg-card" />

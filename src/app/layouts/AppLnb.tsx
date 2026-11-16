@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router'
 
 import { cn } from '@/shared/lib/cn'
 
+import { LnbBrand } from './LnbBrand'
 import type { NavItem } from './nav-items'
 
 interface AppLnbProps {
@@ -18,8 +19,7 @@ export function AppLnb({ items, homePath }: AppLnbProps) {
         to={homePath}
         className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
       >
-        <img src="/favicon.svg" alt="" className="h-28pxr w-auto" />
-        <span className="text-h3 font-bold text-primary">GlowShip</span>
+        <LnbBrand />
       </Link>
       <nav aria-label="주 메뉴" className="flex flex-col gap-8pxr overflow-y-auto p-16pxr">
         {items.map(({ to, label, icon: Icon }) => (
