@@ -2,7 +2,6 @@ import { type ChangeEvent, type SubmitEvent, useRef, useState } from 'react'
 
 import { type CreatedClientUser, isUnauthorizedError } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
-import { Card } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 
 import {
@@ -18,15 +17,14 @@ import {
   EMPTY_CLIENT_USER_FORM,
   validateClientUser,
 } from '../model/validate-client-user'
-import { CompanyField, type CompanyOption } from './CompanyField'
 import { CreatedSummary } from './CreatedSummary'
 import { FieldError, FormField, RequiredMark } from './FormField'
 import { PasswordInput } from './PasswordInput'
 import { RoleSelector } from './RoleSelector'
 
 interface CreateClientUserFormProps {
-  /** 계정을 만들 수 있는 고객사. 비어 있지 않다 */
-  companies: [CompanyOption, ...CompanyOption[]]
+  /** 계정을 만들 고객사 ID */
+  companyId: string
 }
 
 type TextField = 'email' | 'password' | 'displayName'
@@ -47,16 +45,13 @@ const toServerErrors = (code: string, message: string): FormErrors => {
 }
 
 /** 담당 고객사에 팀원·팀장 계정을 만드는 폼. 만들고 나면 만든 계정을 보여 주고 이어서 다른 계정을 만들 수 있다. */
-export function CreateClientUserForm({ companies }: CreateClientUserFormProps) {
+export function CreateClientUserForm({ companyId }: CreateClientUserFormProps) {
   const [values, setValues] = useState<ClientUserFormValues>(EMPTY_CLIENT_USER_FORM)
   const [errors, setErrors] = useState<FormErrors>({})
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [created, setCreated] = useState<CreatedClientUser | null>(null)
-  const [companyId, setCompanyId] = useState(companies[0].companyId)
   const firstFieldRef = useRef<HTMLInputElement>(null)
   const { mutate: create, isPending } = useCreateClientUser()
-  // 고르지 않았거나 고른 고객사가 목록에서 사라졌으면 첫 고객사로 본다
-  const company = companies.find((option) => option.companyId === companyId) ?? companies[0]
 
   const update = (next: ClientUserFormValues) => {
     setValues(next)
@@ -81,7 +76,7 @@ export function CreateClientUserForm({ companies }: CreateClientUserFormProps) {
     }
 
     create(
-      { companyId: company.companyId, values },
+      { companyId, values },
       {
         onSuccess: setCreated,
         onError: (error) => {
@@ -101,12 +96,6 @@ export function CreateClientUserForm({ companies }: CreateClientUserFormProps) {
     setCreated(null)
   }
 
-  // 다른 고객사의 계정을 만들 때 앞서 입력한 값이 딸려 가지 않도록 비운다
-  const handleCompanyChange = (nextCompanyId: string) => {
-    setCompanyId(nextCompanyId)
-    resetForm()
-  }
-
   const handleCreateAnother = () => {
     resetForm()
     // 폼이 다시 그려진 뒤에 첫 칸(이름)으로 돌아온다
@@ -118,72 +107,66 @@ export function CreateClientUserForm({ companies }: CreateClientUserFormProps) {
   }
 
   return (
-    <Card className="p-24pxr">
-      <form className="flex flex-col gap-20pxr" onSubmit={handleSubmit} noValidate>
-        <p className="text-caption text-muted-foreground">
-          <RequiredMark /> 모든 항목은 필수입니다.
-        </p>
+    <form className="flex flex-col gap-20pxr" onSubmit={handleSubmit} noValidate>
+      <p className="text-caption text-muted-foreground">
+        <RequiredMark /> 모든 항목은 필수입니다.
+      </p>
 
-        <CompanyField
-          companies={companies}
-          value={company.companyId}
-          onChange={handleCompanyChange}
-        />
+      <RoleSelector
+        value={values.roleCode}
+        onChange={(roleCode) => update({ ...values, roleCode })}
+      />
 
-        <RoleSelector
-          value={values.roleCode}
-          onChange={(roleCode) => update({ ...values, roleCode })}
-        />
+      <FormField id="client-user-name" label="이름" error={errors.displayName}>
+        {(inputProps) => (
+          <Input
+            {...inputProps}
+            ref={firstFieldRef}
+            // 드로어가 열리면 바로 입력할 수 있게 한다. 포커스가 이미 안에 있어서 Radix가 닫기 버튼으로 옮기지 않는다
+            autoFocus
+            autoComplete="off"
+            placeholder="예: 홍길동"
+            maxLength={DISPLAY_NAME_MAX_LENGTH + INPUT_LENGTH_MARGIN}
+            value={values.displayName}
+            onChange={handleChange('displayName')}
+          />
+        )}
+      </FormField>
 
-        <FormField id="client-user-name" label="이름" error={errors.displayName}>
-          {(inputProps) => (
-            <Input
-              {...inputProps}
-              ref={firstFieldRef}
-              autoComplete="off"
-              placeholder="예: 홍길동"
-              maxLength={DISPLAY_NAME_MAX_LENGTH + INPUT_LENGTH_MARGIN}
-              value={values.displayName}
-              onChange={handleChange('displayName')}
-            />
-          )}
-        </FormField>
+      <FormField id="client-user-email" label="이메일" error={errors.email}>
+        {(inputProps) => (
+          <Input
+            {...inputProps}
+            type="email"
+            autoComplete="off"
+            placeholder="name@company.com"
+            maxLength={EMAIL_MAX_LENGTH + INPUT_LENGTH_MARGIN}
+            value={values.email}
+            onChange={handleChange('email')}
+          />
+        )}
+      </FormField>
 
-        <FormField id="client-user-email" label="이메일" error={errors.email}>
-          {(inputProps) => (
-            <Input
-              {...inputProps}
-              type="email"
-              autoComplete="off"
-              placeholder="name@company.com"
-              maxLength={EMAIL_MAX_LENGTH + INPUT_LENGTH_MARGIN}
-              value={values.email}
-              onChange={handleChange('email')}
-            />
-          )}
-        </FormField>
+      <FormField
+        id="client-user-password"
+        label="초기 비밀번호"
+        help="영문·숫자 6~16자로 정하고, 사용자에게 전달해 주세요."
+        error={errors.password}
+      >
+        {(inputProps) => (
+          <PasswordInput
+            {...inputProps}
+            value={values.password}
+            onChange={handleChange('password')}
+          />
+        )}
+      </FormField>
 
-        <FormField
-          id="client-user-password"
-          label="초기 비밀번호"
-          help="영문·숫자 6~16자로 정하고, 사용자에게 전달해 주세요."
-          error={errors.password}
-        >
-          {(inputProps) => (
-            <PasswordInput
-              {...inputProps}
-              value={values.password}
-              onChange={handleChange('password')}
-            />
-          )}
-        </FormField>
+      {errors.form && <FieldError id="client-user-form-error">{errors.form}</FieldError>}
 
-        {errors.form && <FieldError id="client-user-form-error">{errors.form}</FieldError>}
-
-        <Button type="submit" size="lg" loading={isPending} className="w-full">
-          계정 만들기
-        </Button>
-      </form>
-    </Card>
+      <Button type="submit" size="lg" loading={isPending} className="w-full">
+        계정 만들기
+      </Button>
+    </form>
   )
 }

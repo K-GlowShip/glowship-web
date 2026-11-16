@@ -7,7 +7,7 @@ export const ROUTES = {
   DECISION_HISTORY: '/decision-history',
   SYNC_DATA: '/sync-data',
   ADMIN_HOME: '/admin',
-  ADMIN_USERS_NEW: '/admin/users/new',
+  ADMIN_USERS: '/admin/users',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]

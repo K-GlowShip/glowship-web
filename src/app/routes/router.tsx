@@ -77,12 +77,12 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: ROUTES.ADMIN_HOME,
-                element: <Navigate to={ROUTES.ADMIN_USERS_NEW} replace />,
+                element: <Navigate to={ROUTES.ADMIN_USERS} replace />,
               },
               {
-                path: ROUTES.ADMIN_USERS_NEW,
+                path: ROUTES.ADMIN_USERS,
                 lazy: async () => ({
-                  Component: (await import('@/pages/admin-users')).CreateClientUserPage,
+                  Component: (await import('@/pages/admin-users')).ClientUsersPage,
                 }),
               },
             ],
