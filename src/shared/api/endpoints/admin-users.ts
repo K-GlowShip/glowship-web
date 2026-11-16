@@ -1,4 +1,7 @@
+import type { AxiosRequestConfig } from 'axios'
+
 import { API } from '../fetcher'
+import type { Page, PageParams } from '../page'
 import { ENDPOINT } from '../paths'
 import { ROLE_CODE } from './me'
 
@@ -38,3 +41,34 @@ export interface CreatedClientUser {
  */
 export const createClientUser = (body: CreateClientUserRequest) =>
   API.post<CreatedClientUser, CreateClientUserRequest>(ENDPOINT.ADMIN.USERS, body)
+
+export const USER_STATUS = {
+  ACTIVE: 'ACTIVE',
+  DISABLED: 'DISABLED',
+} as const
+
+export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS]
+
+/** 고객사 계정 목록의 한 행 */
+export interface ClientUser {
+  userId: string
+  email: string
+  displayName: string
+  roleCode: ClientRoleCode
+  status: UserStatus
+  createdAt: string
+}
+
+export interface GetClientUsersParams extends PageParams {
+  /** 필수. 요청자가 배정된 고객사 */
+  companyId: string
+  roleCode?: ClientRoleCode
+  status?: UserStatus
+}
+
+/**
+ * 고객사의 Client 계정 목록(`GET /admin/users`, 명세 4.1). 생성 시각 내림차순이다.
+ * 관리자(`ADMIN`)만 호출할 수 있고, 미배정 고객사는 403 `FORBIDDEN`이다.
+ */
+export const getClientUsers = (params: GetClientUsersParams, config?: AxiosRequestConfig) =>
+  API.get<Page<ClientUser>>(ENDPOINT.ADMIN.USERS, { ...config, params })

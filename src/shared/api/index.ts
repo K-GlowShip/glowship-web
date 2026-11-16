@@ -2,9 +2,14 @@ export { ApiError, CLIENT_ERROR, isApiError, isUnauthorizedError } from './error
 export {
   CLIENT_ROLE_CODE,
   type ClientRoleCode,
+  type ClientUser,
   createClientUser,
   type CreatedClientUser,
   type CreateClientUserRequest,
+  getClientUsers,
+  type GetClientUsersParams,
+  USER_STATUS,
+  type UserStatus,
 } from './endpoints/admin-users'
 export { login, type LoginRequest, logout } from './endpoints/auth'
 export {
@@ -139,6 +144,7 @@ export { inventoryStatusQueries } from './queries/inventory-status'
 export { isMeQuery, meQueryOptions } from './queries/me'
 export { orderQueries } from './queries/orders'
 export { shipmentQueries } from './queries/shipments'
+export { adminUserQueries } from './queries/admin-users'
 export { skuQueries } from './queries/skus'
 export { API, fetcher } from './fetcher'
 export { fetchAllPages, MAX_PAGE_SIZE } from './fetch-all-pages'
