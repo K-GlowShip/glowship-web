@@ -47,3 +47,17 @@ export interface LatestSyncRun {
 /** 원천 유형별 마지막 수집 상태를 조회한다. 고객사 사용자 전용이다. */
 export const getLatestDataSyncRuns = (config?: AxiosRequestConfig) =>
   API.get<{ items: LatestSyncRun[] }>(ENDPOINT.DATA_SYNC_RUNS.LATEST, config)
+
+/** 수동 동기화가 시작한 원천 하나의 수집 실행. 적용은 응답 뒤 서버가 이어서 하므로 처음 상태는 `RUNNING`이다 */
+export interface StartedSyncRun {
+  sourceDomain: SyncSourceDomain
+  dataSyncRunId: string
+  status: SyncStatus
+}
+
+/**
+ * 수동 동기화를 시작한다. 본문 없이 보내면 한 번에 다섯 원천을 함께 수집한다(명세 4.3, D16).
+ * 응답은 202이고 결과는 `getLatestDataSyncRuns`를 다시 조회해서 본다.
+ * 고객사에 실행 중인 수집이 있으면 `409 SYNC_IN_PROGRESS`이고 아무것도 시작하지 않는다.
+ */
+export const startDataSyncRun = () => API.post<StartedSyncRun[]>(ENDPOINT.DATA_SYNC_RUNS.ROOT)

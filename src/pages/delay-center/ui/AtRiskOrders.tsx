@@ -4,6 +4,7 @@ import { formatNumber } from '@/shared/lib/format-number'
 import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 
+import { DetailSubsection } from './DetailChapter'
 import {
   ATTRIBUTION_LABEL,
   countRiskOrdersByAttribution,
@@ -36,21 +37,23 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
     .join(' · ')
 
   return (
-    <section aria-labelledby="risk-orders-title" className="flex flex-col gap-12pxr">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
-        <h3 id="risk-orders-title" className="text-h3 font-bold">
+    <DetailSubsection
+      id="risk-orders-title"
+      title={
+        <>
           위험 주문 <span className="text-muted-foreground">{orders.length}</span>
-        </h3>
-        <p className="text-b2 text-muted-foreground">{summary}</p>
-      </div>
-      {/* 주문이 많아도 상세가 길어지지 않게 영역 높이를 제한하고, 넘치면 이 안에서만 스크롤한다. 바깥 틀의 테두리로 영역을 구분하고, 스크롤바는 얇게 틀 안쪽에 둔다 */}
-      <div className="rounded-card border border-border bg-background p-4pxr">
-        <div className="max-h-450pxr scrollbar-thin [scrollbar-color:color-mix(in_srgb,var(--color-muted-foreground)_40%,transparent)_transparent] overflow-y-auto p-8pxr">
-          <ul className="flex flex-col gap-8pxr">
+        </>
+      }
+      aside={summary}
+    >
+      {/* 주문이 많아도 상세가 길어지지 않게 영역 높이를 제한하고, 넘치면 이 안에서만 스크롤한다. 상자를 겹치지 않고 위아래 선과 줄 사이 선으로만 나눈다 */}
+      <div className="border-t border-border">
+        <div className="max-h-360pxr scrollbar-thin [scrollbar-color:color-mix(in_srgb,var(--color-muted-foreground)_40%,transparent)_transparent] overflow-y-auto">
+          <ul className="flex flex-col">
             {sortRiskOrders(orders).map((order) => (
-              <li key={order.orderCode}>
-                <details className="group rounded-card border border-border bg-card">
-                  <summary className="flex cursor-pointer list-none items-center gap-12pxr px-16pxr py-12pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 [&::-webkit-details-marker]:hidden">
+              <li key={order.orderCode} className="border-b border-border last:border-b-0">
+                <details className="group">
+                  <summary className="flex cursor-pointer list-none items-center gap-12pxr px-12pxr py-12pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 [&::-webkit-details-marker]:hidden">
                     <ChevronDown
                       className="size-16pxr shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
                       aria-hidden="true"
@@ -68,10 +71,8 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                       약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
                     </span>
                   </summary>
-                  <p className="border-t border-border px-16pxr pt-12pxr text-b2 text-foreground">
-                    {order.riskReason}
-                  </p>
-                  <div className="flex flex-col gap-4pxr px-16pxr py-12pxr">
+                  <p className="pr-12pxr pl-40pxr text-b2 text-foreground">{order.riskReason}</p>
+                  <div className="flex flex-col gap-4pxr py-12pxr pr-12pxr pl-40pxr">
                     <p className="text-caption font-bold text-muted-foreground">주문 상품</p>
                     <ul className="flex flex-col gap-4pxr">
                       {order.lines.map((line) => (
@@ -94,6 +95,6 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
           </ul>
         </div>
       </div>
-    </section>
+    </DetailSubsection>
   )
 }

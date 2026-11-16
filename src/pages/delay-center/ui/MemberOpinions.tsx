@@ -13,23 +13,21 @@ interface MemberOpinionsProps {
 export function MemberOpinions({ opinions, options }: MemberOpinionsProps) {
   return (
     <section aria-labelledby="member-opinions-title" className="flex flex-col gap-12pxr">
-      <h3 id="member-opinions-title" className="text-b1 font-bold">
+      <h4 id="member-opinions-title" className="text-b1 font-bold">
         {DECISION_TEXT.MEMBER_OPINION}{' '}
         <span className="text-muted-foreground">{opinions.length}</span>
-      </h3>
+      </h4>
 
       {opinions.length === 0 ? (
-        <p className="rounded-card bg-background px-16pxr py-20pxr text-center text-b2 text-muted-foreground">
-          아직 팀원 의견이 없습니다.
-        </p>
+        <p className="text-b2 text-muted-foreground">아직 팀원 의견이 없습니다.</p>
       ) : (
-        <ul className="flex flex-col gap-8pxr">
+        <ul className="flex flex-col">
           {opinions.map((opinion) => {
             const option = options.find(({ id }) => id === opinion.optionId)
             return (
               <li
                 key={opinion.id}
-                className="flex gap-12pxr rounded-card border border-border bg-card p-16pxr"
+                className="flex gap-12pxr border-b border-border py-16pxr first:pt-0 last:border-b-0 last:pb-0"
               >
                 <Avatar aria-hidden="true">{opinion.author[0]}</Avatar>
                 <div className="flex min-w-0 flex-1 flex-col gap-6pxr">

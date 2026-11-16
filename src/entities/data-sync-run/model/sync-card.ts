@@ -85,6 +85,14 @@ export interface SyncCardSummary {
   sources: readonly SyncSourceSummary[]
 }
 
+/** 시각 목록 중 가장 최근 값. 값이 하나도 없으면 null */
+export const getNewestSyncedAt = (times: readonly (string | null)[]): string | null =>
+  times.reduce<string | null>(
+    (newest, time) =>
+      time !== null && (newest === null || Date.parse(time) > Date.parse(newest)) ? time : newest,
+    null,
+  )
+
 /** 시각 목록 중 가장 오래된 값. 하나라도 비어 있거나 목록이 비면 null */
 export const getOldestSyncedAt = (times: readonly (string | null)[]): string | null => {
   let oldest: string | null = null
@@ -142,8 +150,6 @@ export const summarizeSyncCard = (
 
 export interface SyncOverview {
   cards: readonly SyncCardSummary[]
-  /** 모든 카드 중 오래된 마지막 수집 시각 */
-  lastSyncedAt: string | null
   /** 어느 원천이든 수집 중이면 true */
   isRunning: boolean
   /** 자동 수집 주기(분). 내려온 값이 없으면 null */
@@ -156,7 +162,6 @@ export const getSyncOverview = (items: readonly LatestSyncRun[]): SyncOverview =
 
   return {
     cards,
-    lastSyncedAt: getOldestSyncedAt(cards.map((card) => card.lastSyncedAt)),
     isRunning: cards.some((card) => card.level === SYNC_LEVEL.RUNNING),
     syncIntervalMinutes: items[0]?.syncIntervalMinutes ?? null,
   }

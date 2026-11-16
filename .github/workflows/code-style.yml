@@ -51,3 +51,7 @@ jobs:
       - name: Type check & Build
         if: steps.check.outputs.enabled == 'true'
         run: pnpm build
+
+      - name: Test
+        if: steps.check.outputs.enabled == 'true'
+        run: pnpm test

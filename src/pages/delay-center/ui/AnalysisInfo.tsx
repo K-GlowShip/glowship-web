@@ -12,7 +12,7 @@ export function AnalysisInfo({ delayCase }: AnalysisInfoProps) {
   const latestRun = delayCase.runs.find((run) => run.isLatest)
 
   return (
-    <div className="flex flex-col gap-4pxr text-b2 text-muted-foreground">
+    <div className="flex flex-col gap-4pxr text-caption text-muted-foreground">
       <p>
         {[
           delayCase.runCode &&

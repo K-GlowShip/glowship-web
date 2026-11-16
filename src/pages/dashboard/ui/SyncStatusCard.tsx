@@ -1,17 +1,16 @@
-import { useQuery } from '@tanstack/react-query'
 import { RefreshCw, TriangleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
-  getSyncOverview,
+  type SyncCardSummary,
   SYNC_CARDS,
   SYNC_LEVEL,
   SYNC_SOURCE_LABEL,
 } from '@/entities/data-sync-run'
-import { dataSyncRunQueries } from '@/shared/api'
+import { useSyncData, useSyncProgress } from '@/features/sync-data'
 import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
-import { formatHHmm, formatYYYYMMDD, formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
 import { formatNumber } from '@/shared/lib/format-number'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -19,22 +18,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { QueryError } from '@/shared/ui/query-error'
 import { Skeleton } from '@/shared/ui/skeleton'
 
-/** 기준 시각과 같은 날이면 시각만, 다른 날이면 날짜를 붙여서 어제 수집한 값이 오늘 시각처럼 읽히지 않게 한다 */
-const formatFinishedAt = (finishedAt: string, referenceAt: string | null) =>
-  referenceAt === null || formatYYYYMMDD(finishedAt) === formatYYYYMMDD(referenceAt)
-    ? formatHHmm(finishedAt)
-    : formatYYYYMMDDHHmm(finishedAt).slice('YYYY.'.length)
-
 interface SyncStatusCardProps {
-  /** 화면의 기준 시각(`lastSyncedAt`). 수집 시각이 이 날이 아니면 날짜를 함께 보여 준다 */
+  /** 고객사 전체의 마지막 수집 시각(대시보드 요약의 `lastSyncedAt`). 원천마다 수집 시각이 달라 카드마다 적지 않고 한 번만 보여 준다(명세 4.3, C34) */
   referenceAt: string | null
 }
 
 export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
-  const { data, error, isFetching, refetch } = useQuery(dataSyncRunQueries.latest())
-
-  // 서버는 원천 5종을 항상 내려준다. 시스템별 카드(ERP·WMS·TMS)로 묶어 계산한다.
-  const overview = data ? getSyncOverview(data.items) : null
+  const { data, error, isFetching, refetch, overview, isRunning } = useSyncProgress()
+  const { mutate: sync, isPending: isRequesting } = useSyncData()
+  // 요청을 보내는 중이거나 수집이 도는 중에는 다시 누를 수 없다(서버도 중복 요청을 409로 거절한다)
+  const isBusy = isRequesting || isRunning
   const cards = overview?.cards ?? []
   // FR-003: 수집 오류로 필수 자료가 빠지면 이에 기대는 분석이 보류된다
   const hasProblem = cards.some(
@@ -43,20 +36,27 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
   const syncIntervalMinutes = overview?.syncIntervalMinutes
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col border-primary-100">
       <CardHeader>
         <CardTitle as="h2">데이터 수집 상태</CardTitle>
+        {/* 수집 상태를 다시 읽기만 하는 것이 아니라 동기화(수집)를 요청한다. 연동 데이터 조회 화면의 '동기화'와 같다 */}
         <Button
           variant="ghost"
           size="icon"
-          aria-label={isFetching ? '수집 상태를 불러오는 중' : '수집 상태 새로고침'}
-          aria-busy={isFetching}
-          onClick={() => void refetch()}
+          aria-label={isBusy ? '데이터 수집 중' : '지금 동기화'}
+          aria-busy={isBusy}
+          disabled={isBusy}
+          onClick={() => sync()}
         >
-          <RefreshCw className={cn(isFetching && 'animate-spin motion-reduce:animate-none')} />
+          <RefreshCw className={cn(isBusy && 'animate-spin motion-reduce:animate-none')} />
         </Button>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-16pxr pt-16pxr">
+        {referenceAt && (
+          <p className="text-caption text-muted-foreground">
+            마지막 수집 {formatYYYYMMDDHHmm(referenceAt)} KST
+          </p>
+        )}
         {!data ? (
           error ? (
             <QueryError
@@ -78,18 +78,16 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
             {cards.map((card) => (
               <li key={card.system} className="flex items-center justify-between gap-12pxr">
                 <div className="min-w-0">
-                  <p className="text-b1 font-bold">
-                    {card.name} · {card.sourceSystemName ?? card.system}
+                  {/* 데이터 이름이 먼저 읽히고, 어느 시스템에서 오는지는 옆에 흐리게 둔다 */}
+                  <p className="flex flex-wrap items-baseline gap-x-6pxr text-b1 font-bold">
+                    {card.name}
+                    <span className="text-caption font-normal text-muted-foreground">
+                      {card.sourceSystemName ?? card.system}
+                    </span>
                   </p>
-                  <p className="text-caption text-muted-foreground">
-                    {card.lastSyncedAt
-                      ? `마지막 수집 ${formatFinishedAt(card.lastSyncedAt, referenceAt)} KST`
-                      : '수집 기록 없음'}
-                    {card.openIssueCount > 0 &&
-                      ` · 오류 항목 ${formatNumber(card.openIssueCount)}건`}
-                    {card.problemDomains.length > 0 &&
-                      ` · 확인 필요: ${card.problemDomains.map((domain) => SYNC_SOURCE_LABEL[domain]).join(' · ')}`}
-                  </p>
+                  {getCaption(card) && (
+                    <p className="text-caption text-muted-foreground">{getCaption(card)}</p>
+                  )}
                 </div>
                 <Badge variant={card.badge.variant}>{card.badge.label}</Badge>
               </li>
@@ -117,3 +115,14 @@ export function SyncStatusCard({ referenceAt }: SyncStatusCardProps) {
     </Card>
   )
 }
+
+/** 카드 이름 아래의 보조 문구. 마지막 수집 시각은 위에 한 번만 있어서, 수집 기록이 없거나 오류가 있을 때만 적는다 */
+const getCaption = (card: SyncCardSummary) =>
+  [
+    card.lastSyncedAt === null && '수집 기록 없음',
+    card.openIssueCount > 0 && `오류 항목 ${formatNumber(card.openIssueCount)}건`,
+    card.problemDomains.length > 0 &&
+      `확인 필요: ${card.problemDomains.map((domain) => SYNC_SOURCE_LABEL[domain]).join(' · ')}`,
+  ]
+    .filter(Boolean)
+    .join(' · ')

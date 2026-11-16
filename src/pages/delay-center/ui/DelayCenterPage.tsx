@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router'
 import { getNewDelayFrom } from '@/entities/delay-event'
 import { dashboardQueries, delayEventQueries } from '@/shared/api'
 import { formatYYYYMMDDHHmm } from '@/shared/lib/kst-date'
+import { parsePageParam } from '@/shared/lib/page-param'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Label } from '@/shared/ui/label'
 import { Switch } from '@/shared/ui/switch'
@@ -18,7 +19,7 @@ import {
   parseHasFinalDecisionParam,
   STATUS_FILTER_ALL,
 } from '../model/delay-center'
-import { DelayListFilters } from './DelayListFilters'
+import { DelaySearch, DelayStatusTabs } from './DelayListFilters'
 import { DelayTable } from './DelayTable'
 
 const isStatusFilter = (value: string): value is DelayStatusFilter =>
@@ -38,7 +39,7 @@ export function DelayCenterPage() {
     searchParams.get(LIST_PARAM.HAS_FINAL_DECISION),
   )
   const hasExtraCondition = from !== undefined || hasFinalDecision !== undefined
-  const page = Math.max(1, Math.floor(Number(searchParams.get(LIST_PARAM.PAGE))) || 1)
+  const page = parsePageParam(searchParams.get(LIST_PARAM.PAGE))
 
   // '새 지연 보기'의 기준은 대시보드와 같이 마지막 수집 시각에서 계산한다. 수집된 데이터가 없으면 켤 수 없다
   const { data: summary } = useQuery(dashboardQueries.summary())
@@ -98,18 +99,43 @@ export function DelayCenterPage() {
       </header>
 
       <Card className="rounded-panel">
-        <CardContent className="flex flex-col gap-16pxr p-24pxr">
-          <DelayListFilters
-            keyword={keyword}
+        <CardContent className="flex flex-col gap-16pxr px-24pxr pt-12pxr pb-24pxr">
+          <DelayStatusTabs
             status={status}
             counts={data?.counts}
-            onSearch={({ keyword: nextKeyword, status: nextStatus }) =>
-              updateParams({
-                [LIST_PARAM.KEYWORD]: nextKeyword,
-                [LIST_PARAM.STATUS]: nextStatus === STATUS_FILTER_ALL ? '' : nextStatus,
-              })
+            onChange={(next) =>
+              updateParams({ [LIST_PARAM.STATUS]: next === STATUS_FILTER_ALL ? '' : next })
             }
           />
+          <div className="flex flex-wrap items-center justify-between gap-x-16pxr gap-y-8pxr">
+            <DelaySearch
+              keyword={keyword}
+              onSearch={(next) => updateParams({ [LIST_PARAM.KEYWORD]: next })}
+            />
+            <div className="flex items-center gap-8pxr">
+              <Switch
+                id="new-delay-toggle"
+                checked={isNewDelayView}
+                disabled={newDelayFrom === undefined}
+                onCheckedChange={(checked) =>
+                  updateParams(
+                    checked
+                      ? {
+                          [LIST_PARAM.FROM]: newDelayFrom ?? '',
+                          [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
+                        }
+                      : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
+                  )
+                }
+              />
+              <Label
+                htmlFor="new-delay-toggle"
+                className={isNewDelayView ? 'text-primary' : 'font-normal'}
+              >
+                새 지연 보기
+              </Label>
+            </div>
+          </div>
           {hasExtraCondition && (
             <p role="status" className="text-b2 text-muted-foreground">
               {extraConditionLabel} 건만 보고 있습니다.
@@ -117,31 +143,6 @@ export function DelayCenterPage() {
           )}
           <TableTemplate
             totalCount={data?.totalCount}
-            Controls={
-              <>
-                <Switch
-                  id="new-delay-toggle"
-                  checked={isNewDelayView}
-                  disabled={newDelayFrom === undefined}
-                  onCheckedChange={(checked) =>
-                    updateParams(
-                      checked
-                        ? {
-                            [LIST_PARAM.FROM]: newDelayFrom ?? '',
-                            [LIST_PARAM.HAS_FINAL_DECISION]: 'false',
-                          }
-                        : { [LIST_PARAM.FROM]: '', [LIST_PARAM.HAS_FINAL_DECISION]: '' },
-                    )
-                  }
-                />
-                <Label
-                  htmlFor="new-delay-toggle"
-                  className={isNewDelayView ? 'text-primary' : 'font-normal'}
-                >
-                  새 지연 보기
-                </Label>
-              </>
-            }
             page={page}
             pageCount={Math.max(1, data?.totalPages ?? 1)}
             onPageChange={(next) =>

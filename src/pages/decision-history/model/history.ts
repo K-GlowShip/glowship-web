@@ -7,6 +7,7 @@ import {
   type GetDecisionsParams,
   SKU_SCOPE,
 } from '@/shared/api'
+import { SEARCH_MAX_LENGTH } from '@/shared/config'
 import { toUtcDayStart, toUtcNextDayStart } from '@/shared/lib/kst-date'
 
 export interface HistoryFilter {
@@ -31,6 +32,58 @@ export const HISTORY_STATUS_BADGE_VARIANT = {
 } as const satisfies Record<DecisionStatus, 'success' | 'neutral' | 'warning'>
 
 export const HISTORY_STATUS_OPTIONS = Object.keys(HISTORY_STATUS_LABEL) as DecisionStatus[]
+
+/** 이력 목록의 조회 조건을 담는 주소 파라미터 이름. 새로고침·뒤로 가기에서도 조건이 유지되도록 주소에 담는다. */
+export const HISTORY_PARAM = {
+  START_DATE: 'start',
+  END_DATE: 'end',
+  KEYWORD: 'q',
+  STATUS: 'status',
+  PAGE: 'page',
+} as const
+
+const isDecisionStatus = (value: string | null): value is DecisionStatus =>
+  value !== null && (HISTORY_STATUS_OPTIONS as string[]).includes(value)
+
+/** 주소의 날짜 값. 실제로 있는 'YYYY-MM-DD'가 아니면 쓰지 않는다(`toUtcDayStart`가 잘못된 날짜에 빈 문자열을 준다). */
+const parseDateParam = (value: string | null) => (value && toUtcDayStart(value) ? value : '')
+
+/** 주소에서 조회 조건을 읽는다. 알 수 없는 상태나 잘못된 날짜는 비운 것으로 본다. */
+export const parseHistoryFilter = (params: URLSearchParams): HistoryFilter => {
+  const status = params.get(HISTORY_PARAM.STATUS)
+
+  return {
+    startDate: parseDateParam(params.get(HISTORY_PARAM.START_DATE)),
+    endDate: parseDateParam(params.get(HISTORY_PARAM.END_DATE)),
+    keyword: (params.get(HISTORY_PARAM.KEYWORD) ?? '').slice(0, SEARCH_MAX_LENGTH),
+    status: isDecisionStatus(status) ? status : '',
+  }
+}
+
+/** 두 조회 조건이 같은지. 같은 조건으로 "조회"를 다시 눌렀는지, 주소가 바뀌어 입력 칸을 맞춰야 하는지 가릴 때 쓴다. */
+export const isSameHistoryFilter = (a: HistoryFilter, b: HistoryFilter) =>
+  a.startDate === b.startDate &&
+  a.endDate === b.endDate &&
+  a.keyword === b.keyword &&
+  a.status === b.status
+
+/** 조회 조건을 주소 파라미터로 바꾼다. 비어 있거나 기본값인 조건은 싣지 않는다. */
+export const toHistoryParams = (filter: HistoryFilter, page = 1) => {
+  const params = new URLSearchParams()
+  const entries: [string, string][] = [
+    [HISTORY_PARAM.START_DATE, filter.startDate],
+    [HISTORY_PARAM.END_DATE, filter.endDate],
+    [HISTORY_PARAM.KEYWORD, filter.keyword.trim()],
+    [HISTORY_PARAM.STATUS, filter.status],
+    [HISTORY_PARAM.PAGE, page > 1 ? String(page) : ''],
+  ]
+  for (const [key, value] of entries) {
+    if (value) {
+      params.set(key, value)
+    }
+  }
+  return params
+}
 
 /** 서버 `size`는 1~100. 화면은 10행씩 보여 준다 */
 export const HISTORY_PAGE_SIZE = 10

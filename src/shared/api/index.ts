@@ -3,6 +3,8 @@ export { login, type LoginRequest, logout } from './endpoints/auth'
 export {
   getLatestDataSyncRuns,
   type LatestSyncRun,
+  startDataSyncRun,
+  type StartedSyncRun,
   SYNC_SOURCE_DOMAIN,
   SYNC_STATUS,
   type SyncSourceDomain,
@@ -43,9 +45,16 @@ export {
   type AnalysisTarget,
   type AtRiskOrder,
   type AtRiskOrderLine,
+  createFinalDecision,
+  type CreateFinalDecisionRequest,
+  createMemberDraft,
+  type CreateMemberDraftRequest,
+  type CreatedFinalDecision,
+  type CreatedMemberDraft,
   type FinalDecision,
   getAnalysisRun,
   type InventoryImpact,
+  isExplanationPassed,
   type MemberDraft,
   type OptionOrderOutcome,
   type ResponseOption,
@@ -121,6 +130,7 @@ export { orderQueries } from './queries/orders'
 export { shipmentQueries } from './queries/shipments'
 export { skuQueries } from './queries/skus'
 export { API, fetcher } from './fetcher'
+export { fetchAllPages, MAX_PAGE_SIZE } from './fetch-all-pages'
 export type { Page, PageParams } from './page'
 export { ENDPOINT } from './paths'
 export type {

@@ -159,6 +159,8 @@ export interface DelayCase {
   productName: string | null
   /** 선적에 담긴 상품(SKU) 수 */
   skuCount: number
+  /** 현재 분석 실행의 ID. 판단·재분석 요청의 경로에 쓴다 */
+  runId: string
   /** 분석 실행 ID(`runCode`). 서버가 아직 값을 만들지 않았으면 null */
   runCode: string | null
   /** 서버가 만든 경로. 출발은 지역 코드 'KR'로 온다. 예: 'KR → LOS ANGELES' */
@@ -194,6 +196,10 @@ export interface DelayCase {
   opinions: MemberOpinion[]
   finalDecision: FinalDecision | null
 }
+
+/** 로그인 사용자의 역할 코드를 선택 권한이 있는 역할로 바꾼다. 팀원·팀장이 아니면(운영자 등) 선택할 수 없어 null이다. */
+export const toClientRole = (roleCode: string | undefined): ClientRole | null =>
+  roleCode === CLIENT_ROLE.LEAD || roleCode === CLIENT_ROLE.MEMBER ? roleCode : null
 
 /** 상태 필터에 보여 주는 옵션. 모든 상태를 고를 수 있게 한다. */
 export const DELAY_STATUS_OPTIONS = Object.keys(DELAY_STATUS_LABEL) as DelayStatus[]
@@ -298,6 +304,12 @@ const CAN_REANALYZE: Record<DelayStatus, boolean> = {
 export const canReanalyze = (delayCase: DelayCase) =>
   !isClosed(delayCase) && CAN_REANALYZE[delayCase.status]
 
+/**
+ * 재분석 버튼을 화면에 보일지. 재분석 요청은 아직 서버에 연결되지 않아(use-reanalysis.ts의 mock) 눌러도 새 분석이 시작되지 않고,
+ * 시연 서버는 분석 자동 시작을 꺼 두고 돌린다. 실제 요청을 연결하는 작업(feat/GLOW-141-reanalysis)을 합치면서 true로 바꾼다.
+ */
+export const REANALYSIS_ENABLED = false
+
 // 표시명은 API 명세 2절 라벨 사전(labels/ko-v1)과 상태별 고정 문구를 그대로 쓴다.
 export const RESULT_CLASS_LABEL: Record<ResultClass, string> = {
   [RESULT_CLASS.READY_ORDER_RISK]: '실주문 납기 위험',
@@ -363,6 +375,9 @@ const sumShortage = (impacts: SkuImpact[]) =>
 /** 지연으로 인한 부족 증가분. `IMPACTED` 행만 더한다(기준선 부족이 섞이지 않게 지연 증분만 쓴다). */
 export const getIncreasedShortage = (impacts: SkuImpact[]) =>
   sumShortage(impacts.filter((impact) => impact.scope === SKU_SCOPE.IMPACTED))
+
+/** 대응안을 고르지 않았을 때의 값. 팀원이 의견만 저장할 때 쓴다. */
+export const NO_OPTION = ''
 
 export const NO_SECTIONS: DetailSection[] = [DETAIL_SECTION.HISTORY]
 export const NO_RISK_SECTIONS: DetailSection[] = [DETAIL_SECTION.IMPACT, DETAIL_SECTION.HISTORY]

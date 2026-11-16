@@ -11,7 +11,7 @@ export function AxisGuides({ guides, className }: AxisGuidesProps) {
   return guides.map((left) => (
     <span
       key={left}
-      className={cn('absolute inset-y-0 border-l border-dashed border-border', className)}
+      className={cn('absolute inset-y-0 z-1 border-l border-dashed border-border', className)}
       style={{ left: `${left}%` }}
     />
   ))
