@@ -11,6 +11,9 @@ export const ENDPOINT = {
     REFRESH: '/auth/refresh',
   },
   ME: '/me',
+  ADMIN: {
+    USERS: '/admin/users',
+  },
   DATA_SYNC_RUNS: {
     ROOT: '/data-sync-runs',
     LATEST: '/data-sync-runs/latest',

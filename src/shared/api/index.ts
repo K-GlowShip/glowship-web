@@ -1,4 +1,11 @@
 export { ApiError, CLIENT_ERROR, isApiError, isUnauthorizedError } from './error'
+export {
+  CLIENT_ROLE_CODE,
+  type ClientRoleCode,
+  createClientUser,
+  type CreatedClientUser,
+  type CreateClientUserRequest,
+} from './endpoints/admin-users'
 export { login, type LoginRequest, logout } from './endpoints/auth'
 export {
   getLatestDataSyncRuns,
