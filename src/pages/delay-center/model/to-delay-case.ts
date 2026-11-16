@@ -32,7 +32,7 @@ import {
   type RiskAttribution,
   type SkuScope,
 } from './delay-center-code'
-import { DATA_WARNING_TEXT, PROGRESS_STEP_LABEL, STALE_REASON_LABEL } from './delay-center-text'
+import { DATA_WARNING_TEXT, STALE_REASON_LABEL } from './delay-center-text'
 
 /** 수집 원천 코드. 라벨 사전의 키와 같다 */
 type SourceDomain = keyof typeof SYNC_SOURCE_LABEL
@@ -184,6 +184,18 @@ const toDataNotice = (warnings: AnalysisRunDetail['inputBasis']['dataWarnings'])
       )
 
 /**
+ * 진행 중인 실행 상태가 분석 네 단계(자료 확인 → 재고 영향 → 대응안 → 최종 점검) 중 몇 번째인지.
+ * 시작 직후(`DETECTED`)와 입력 검증(`VALIDATING`)은 모두 첫 단계다.
+ */
+const ANALYSIS_STEP: Partial<Record<string, number>> = {
+  [ANALYSIS_RUN_STATUS.DETECTED]: 0,
+  [ANALYSIS_RUN_STATUS.VALIDATING]: 0,
+  [ANALYSIS_RUN_STATUS.ANALYZING_IMPACT]: 1,
+  [ANALYSIS_RUN_STATUS.ANALYZING_OPTIONS]: 2,
+  [ANALYSIS_RUN_STATUS.VALIDATING_OUTPUT]: 3,
+}
+
+/**
  * 지연 상세(`GET /delay-events/{id}`)와 현재 분석 실행(`GET /analysis-runs/{runId}`)을 화면 모델로 바꾼다.
  * 실행이 없거나 모르는 상태면 상태를 정할 수 없어 null이다.
  */
@@ -214,7 +226,7 @@ export const toDelayCase = (
     closedAt: detail.closedAt,
     baseDataAt: run.inputBasis.dataBasisAt,
     dataNotice: toDataNotice(run.inputBasis.dataWarnings),
-    progressStep: PROGRESS_STEP_LABEL[run.status as keyof typeof PROGRESS_STEP_LABEL] ?? null,
+    analysisStep: ANALYSIS_STEP[run.status] ?? null,
     failureCode: run.failureCode,
     failureMessage: run.failureMessage,
     staleReason:

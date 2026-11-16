@@ -9,7 +9,7 @@ import {
   RESULT_CLASS,
 } from '../model/delay-center'
 import { FAILURE_CODE } from '../model/delay-center-code'
-import { ANALYSIS_NOTICE, DEFAULT_PROGRESS_STEP } from '../model/delay-center-text'
+import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 
 interface StatusNoticeProps {
   delayCase: DelayCase
@@ -61,11 +61,8 @@ const getNotice = (delayCase: DelayCase): Notice | null => {
 
   switch (status) {
     case DELAY_STATUS.ANALYZING:
-      return {
-        tone: 'info',
-        title: `${delayCase.progressStep ?? DEFAULT_PROGRESS_STEP} 중`,
-        detail: ANALYSIS_NOTICE.IN_PROGRESS,
-      }
+      // 분석 중 안내는 작은 항해 화면(AnalysisVoyage)이 맡는다
+      return null
     case DELAY_STATUS.NO_DELAY:
       return { tone: 'neutral', title: ANALYSIS_NOTICE.NO_DELAY }
     case DELAY_STATUS.ON_HOLD:

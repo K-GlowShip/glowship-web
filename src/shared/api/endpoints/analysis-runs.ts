@@ -55,6 +55,18 @@ export const ANALYSIS_RUN_STATUS = {
   FINALIZED: 'FINALIZED',
 } as const
 
+const IN_PROGRESS_STATUSES = new Set<string>([
+  ANALYSIS_RUN_STATUS.DETECTED,
+  ANALYSIS_RUN_STATUS.VALIDATING,
+  ANALYSIS_RUN_STATUS.ANALYZING_IMPACT,
+  ANALYSIS_RUN_STATUS.ANALYZING_OPTIONS,
+  ANALYSIS_RUN_STATUS.VALIDATING_OUTPUT,
+])
+
+/** 분석이 아직 끝나지 않은 상태인지. 끝나면 결과나 종료 상태로 바뀐다 */
+export const isRunInProgress = (status: string | undefined) =>
+  status !== undefined && IN_PROGRESS_STATUSES.has(status)
+
 /** 재고 영향의 범위. 지연 증분이 있거나 위험 주문에 들어간 SKU(`IMPACTED`), 증분은 없지만 안전재고 아래로 내려가는 SKU(`WATCH`), 지연 선적에만 있는 나머지(`SHIPMENT_ONLY`) */
 export const SKU_SCOPE = {
   IMPACTED: 'IMPACTED',
@@ -379,4 +391,24 @@ export const createFinalDecision = (
     `${ENDPOINT.ANALYSIS_RUNS}/${encodeURIComponent(runId)}/final-decision`,
     body,
     { headers: { 'Idempotency-Key': idempotencyKey } },
+  )
+
+export interface RequestReanalysisBody {
+  /** 앞뒤 공백을 뺀 뒤 비면 null로 저장된다. 600자 이하(명세 C41) */
+  requestReason?: string
+}
+
+/** 재분석으로 만든 새 실행. 분석은 서버에서 이어서 돌고 상태는 `DETECTED`로 시작한다 */
+export interface RequestedReanalysis {
+  runId: string
+  versionNo: number
+  parentRunId: string
+  status: string
+}
+
+/** 재분석 요청(202). `runId`는 현재 실행이어야 한다 */
+export const requestReanalysis = (runId: string, body: RequestReanalysisBody = {}) =>
+  API.post<RequestedReanalysis, RequestReanalysisBody>(
+    `${ENDPOINT.ANALYSIS_RUNS}/${encodeURIComponent(runId)}/reanalysis`,
+    body,
   )
