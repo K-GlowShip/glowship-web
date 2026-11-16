@@ -1,6 +1,5 @@
 import { type ChangeEvent, type SubmitEvent, useRef, useState } from 'react'
 
-import type { AssignedCompany } from '@/entities/session'
 import { type CreatedClientUser, isUnauthorizedError } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -19,13 +18,15 @@ import {
   EMPTY_CLIENT_USER_FORM,
   validateClientUser,
 } from '../model/validate-client-user'
+import { CompanyField, type CompanyOption } from './CompanyField'
 import { CreatedSummary } from './CreatedSummary'
 import { FieldError, FormField, RequiredMark } from './FormField'
 import { PasswordInput } from './PasswordInput'
 import { RoleSelector } from './RoleSelector'
 
 interface CreateClientUserFormProps {
-  company: AssignedCompany
+  /** 계정을 만들 수 있는 고객사. 비어 있지 않다 */
+  companies: [CompanyOption, ...CompanyOption[]]
 }
 
 type TextField = 'email' | 'password' | 'displayName'
@@ -46,13 +47,16 @@ const toServerErrors = (code: string, message: string): FormErrors => {
 }
 
 /** 담당 고객사에 팀원·팀장 계정을 만드는 폼. 만들고 나면 만든 계정을 보여 주고 이어서 다른 계정을 만들 수 있다. */
-export function CreateClientUserForm({ company }: CreateClientUserFormProps) {
+export function CreateClientUserForm({ companies }: CreateClientUserFormProps) {
   const [values, setValues] = useState<ClientUserFormValues>(EMPTY_CLIENT_USER_FORM)
   const [errors, setErrors] = useState<FormErrors>({})
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [created, setCreated] = useState<CreatedClientUser | null>(null)
+  const [companyId, setCompanyId] = useState(companies[0].companyId)
   const firstFieldRef = useRef<HTMLInputElement>(null)
   const { mutate: create, isPending } = useCreateClientUser()
+  // 고르지 않았거나 고른 고객사가 목록에서 사라졌으면 첫 고객사로 본다
+  const company = companies.find((option) => option.companyId === companyId) ?? companies[0]
 
   const update = (next: ClientUserFormValues) => {
     setValues(next)
@@ -90,11 +94,21 @@ export function CreateClientUserForm({ company }: CreateClientUserFormProps) {
     )
   }
 
-  const handleCreateAnother = () => {
+  const resetForm = () => {
     setValues(EMPTY_CLIENT_USER_FORM)
     setErrors({})
     setHasSubmitted(false)
     setCreated(null)
+  }
+
+  // 다른 고객사의 계정을 만들 때 앞서 입력한 값이 딸려 가지 않도록 비운다
+  const handleCompanyChange = (nextCompanyId: string) => {
+    setCompanyId(nextCompanyId)
+    resetForm()
+  }
+
+  const handleCreateAnother = () => {
+    resetForm()
     // 폼이 다시 그려진 뒤에 첫 칸(이름)으로 돌아온다
     setTimeout(() => firstFieldRef.current?.focus())
   }
@@ -110,10 +124,11 @@ export function CreateClientUserForm({ company }: CreateClientUserFormProps) {
           <RequiredMark /> 모든 항목은 필수입니다.
         </p>
 
-        <div className="flex flex-col gap-4pxr">
-          <p className="text-b2 font-bold text-foreground">고객사</p>
-          <p className="text-b1 text-foreground">{company.companyName}</p>
-        </div>
+        <CompanyField
+          companies={companies}
+          value={company.companyId}
+          onChange={handleCompanyChange}
+        />
 
         <RoleSelector
           value={values.roleCode}

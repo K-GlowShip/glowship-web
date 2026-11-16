@@ -91,7 +91,7 @@ export {
   type InventoryItem,
   type InventoryPage,
 } from './endpoints/inventory'
-export { getMe, type Me, ROLE_CODE, type RoleCode } from './endpoints/me'
+export { type AssignedCompany, getMe, type Me, ROLE_CODE, type RoleCode } from './endpoints/me'
 export {
   getOrders,
   type GetOrdersParams,

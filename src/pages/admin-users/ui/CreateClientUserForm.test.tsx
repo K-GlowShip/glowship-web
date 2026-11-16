@@ -18,7 +18,7 @@ const COMPANY = { companyId: 'company-1', companyName: 'A Beauty' }
 const renderForm = () =>
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <CreateClientUserForm company={COMPANY} />
+      <CreateClientUserForm companies={[COMPANY]} />
     </QueryClientProvider>,
   )
 
