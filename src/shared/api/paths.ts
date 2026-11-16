@@ -8,6 +8,7 @@ export const ENDPOINT = {
     SIGNUP: '/auth/signup',
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh',
   },
   ME: '/me',
   DATA_SYNC_RUNS: {
