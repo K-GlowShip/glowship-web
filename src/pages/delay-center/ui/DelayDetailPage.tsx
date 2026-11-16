@@ -66,7 +66,7 @@ export function DelayDetailPage() {
     void eventQuery.refetch()
     void runQuery.refetch()
   }
-  
+
   const delayCase = eventQuery.data ? toDelayCase(eventQuery.data, runQuery.data ?? null) : null
   const failedQuery = [eventQuery, runQuery].find(({ error }) => error)
   const isNotFound = isApiError(eventQuery.error) && eventQuery.error.code === DELAY_EVENT_NOT_FOUND
