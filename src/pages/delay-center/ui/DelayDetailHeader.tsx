@@ -26,7 +26,6 @@ import {
   formatRoute,
   getIncreasedShortage,
   RESULT_CLASS_BADGE_VARIANT,
-  REANALYSIS_ENABLED,
   RESULT_CLASS_LABEL,
   SKU_SCOPE,
 } from '../model/delay-center'
@@ -83,7 +82,7 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
               .join(' · ')}
           </p>
         </div>
-        {REANALYSIS_ENABLED && canReanalyze(delayCase) && (
+        {canReanalyze(delayCase) && (
           <Button
             variant="secondary"
             aria-busy={isReanalyzing || undefined}
