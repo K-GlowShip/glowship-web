@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import { ADMIN_NAV_ITEMS, NAV_ITEMS } from '@/app/layouts/nav-items'
 import { LoginPage } from '@/pages/login'
+import { NotFoundPage } from '@/pages/not-found'
 import { ROUTES } from '@/shared/config'
 
 import { RequireAuth } from './RequireAuth'
@@ -97,5 +98,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: '*', element: <Navigate to={ROUTES.LOGIN} replace /> },
+  { path: '*', element: <NotFoundPage /> },
 ])
