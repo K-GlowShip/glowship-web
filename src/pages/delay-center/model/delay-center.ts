@@ -22,6 +22,7 @@ import {
   REASON_CODE,
   RESULT_CLASS,
   RISK_ATTRIBUTION,
+  ORDER_OUTCOME,
   SKU_SCOPE,
   DETAIL_SECTION,
   type DelayStatus,
@@ -33,6 +34,7 @@ import {
   type ReasonCode,
   type ResultClass,
   type RiskAttribution,
+  type OrderOutcomeCode,
   type SkuScope,
   type DetailSection,
 } from './delay-center-code'
@@ -40,6 +42,17 @@ import {
 export * from './delay-center-code'
 
 export { DELAY_STATUS_BADGE_VARIANT, DELAY_STATUS_LABEL, STAGE_LABEL }
+
+/** 대응안 기준 위험 주문 한 줄(품목)의 결과. 주문 하나는 품목마다 한 줄씩 가진다. */
+export interface OptionLineOutcome {
+  /** 위험 주문 품목 행의 id(`RiskOrderLine.riskLineId`와 같은 값) */
+  riskLineId: string
+  outcome: OrderOutcomeCode
+  /** 회복하지 못한 사유 코드. 회복이면 null */
+  notRecoveredReason: string | null
+  /** 'YYYY-MM-DD'(한국 날짜). 대응해도 배송일을 알 수 없으면 null */
+  expectedDate: string | null
+}
 
 export interface DelayOption {
   id: string
@@ -56,9 +69,13 @@ export interface DelayOption {
   /** 남는 위험 주문 중 일부 품목만 확보되어 납기를 못 맞추는 주문 수. 화면에서는 "일부 품목만 확보"로 쓴다(부분 회복이라고 쓰지 않는다). */
   itemSecuredBlockedOrders: number | null
   recommended: boolean
+  /** 위험 주문 품목별 결과. 서버가 주지 않으면 빈 배열이다. */
+  outcomes: OptionLineOutcome[]
 }
 
 export interface RiskOrderLine {
+  /** 이 품목의 위험 주문 행 id. 대응안별 결과(`outcomes`)와 잇는 키다. */
+  riskLineId: string
   lineNo: number
   skuCode: string
   productName: string
@@ -252,6 +269,39 @@ export const sortRiskOrders = (orders: RiskOrder[]) =>
       b.expectedDate.localeCompare(a.expectedDate) ||
       a.orderCode.localeCompare(b.orderCode),
   )
+
+/** 대응안을 적용했을 때 위험 주문 하나의 결과 */
+export type OrderResult =
+  | { kind: typeof ORDER_OUTCOME.RECOVERED; expectedDate: string | null }
+  | {
+      kind: typeof ORDER_OUTCOME.NOT_RECOVERED
+      /** 품목 중 회복하지 못한 첫 품목의 사유 코드 */
+      reason: string | null
+    }
+
+/**
+ * 위험 주문이 그 대응안에서 회복되는지 보여 준다. 품목이 모두 회복돼야 주문이 회복이고(하나라도 못 하면 남은 위험),
+ * 회복 주문의 배송일은 가장 늦은 품목 기준이다. 대응안에 이 주문의 결과가 없으면 null이다(결과 없이 지어내지 않는다).
+ */
+export const getOrderResult = (order: RiskOrder, option: DelayOption): OrderResult | null => {
+  const lineIds = new Set(order.lines.map(({ riskLineId }) => riskLineId))
+  const outcomes = option.outcomes.filter(({ riskLineId }) => lineIds.has(riskLineId))
+
+  if (outcomes.length === 0) {
+    return null
+  }
+  const notRecovered = outcomes.find(({ outcome }) => outcome === ORDER_OUTCOME.NOT_RECOVERED)
+
+  if (notRecovered) {
+    return { kind: ORDER_OUTCOME.NOT_RECOVERED, reason: notRecovered.notRecoveredReason }
+  }
+  const dates = outcomes.flatMap(({ expectedDate }) => (expectedDate ? [expectedDate] : []))
+
+  return {
+    kind: ORDER_OUTCOME.RECOVERED,
+    expectedDate: dates.length === outcomes.length ? dates.sort().at(-1)! : null,
+  }
+}
 
 /** 귀속별 위험 주문 수 */
 export const countRiskOrdersByAttribution = (orders: RiskOrder[]) => ({

@@ -29,6 +29,7 @@ const option: DelayOption = {
   notRecoveredOrders: null,
   itemSecuredBlockedOrders: null,
   recommended: true,
+  outcomes: [],
 }
 
 const apiError = (status: number, code: string, message = '서버 메시지') =>

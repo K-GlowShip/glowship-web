@@ -26,6 +26,7 @@ import type {
 import {
   type Feasibility,
   type OptionType,
+  type OrderOutcomeCode,
   type ReasonCode,
   RESULT_CLASS,
   type ResultClass,
@@ -73,6 +74,7 @@ const toRiskOrder = (order: AnalysisRunDetail['atRiskOrders'][number]): RiskOrde
   promisedDate: formatYYYYMMDD(order.promisedDeliveryAt),
   expectedDate: formatYYYYMMDD(order.expectedDeliveryAt),
   lines: order.lines.map((line) => ({
+    riskLineId: line.atRiskOrderId,
     lineNo: line.lineNo,
     skuCode: line.sku.skuCode,
     productName: line.sku.productName,
@@ -95,6 +97,12 @@ const toOption = (
   itemSecuredBlockedOrders: option.itemSecuredBlockedOrders,
   // 설명 검증을 통과하지 못한 실행은 서버가 추천을 주어도 추천으로 보여 주지 않는다(명세 4.5)
   recommended: explanationPassed && option.isRecommended,
+  outcomes: option.outcomes.map((outcome) => ({
+    riskLineId: outcome.atRiskOrderId,
+    outcome: outcome.outcome as OrderOutcomeCode,
+    notRecoveredReason: outcome.notRecoveredReason,
+    expectedDate: outcome.expectedDeliveryAt ? formatYYYYMMDD(outcome.expectedDeliveryAt) : null,
+  })),
 })
 
 /** 설명 검증을 통과하지 못했으면 설명이 없다(`explanation`이 null) */
