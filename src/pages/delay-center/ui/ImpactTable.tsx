@@ -42,10 +42,10 @@ export function ImpactTable({ impacts }: ImpactTableProps) {
                 먼저 문제가 생기는 순
               </span>
             </TableHead>
-            <TableHead className="w-120pxr text-right">
+            <TableHead className="w-170pxr text-right">
               <span className="inline-flex items-center justify-end gap-4pxr">
-                부족 수량
-                <InfoTip label="부족 수량" description={IMPACT_TEXT.SHORTAGE_DESCRIPTION} />
+                부족 수량 예측값
+                <InfoTip label="부족 수량 예측값" description={IMPACT_TEXT.SHORTAGE_DESCRIPTION} />
               </span>
               <span className="block text-caption font-normal text-muted-foreground">
                 (지연 영향)

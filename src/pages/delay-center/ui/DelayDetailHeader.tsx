@@ -130,7 +130,7 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
           caption={delayDays > 0 ? `계획보다 ${delayDays}일 늦음` : '계획대로 입고'}
         />
         <Figure
-          label="부족 수량"
+          label="부족 수량 예측값"
           value={analysis ? formatNumber(getIncreasedShortage(analysis.impacts)) : EMPTY_VALUE}
           unit={analysis ? '개' : undefined}
           caption={
