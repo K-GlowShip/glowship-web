@@ -44,12 +44,12 @@ interface DetailSubsectionProps {
   children: ReactNode
 }
 
-/** 영역 안의 한 묶음. 제목 크기를 통일하고 묶음 사이를 가는 선으로 나눠서, 영역 → 묶음 → 내용의 단계가 보이게 한다. */
+/** 영역 안의 한 묶음. 제목 크기를 통일하고 묶음 사이를 선 대신 넉넉한 여백으로 나눠서, 영역 → 묶음 → 내용의 단계가 보이게 한다. */
 export function DetailSubsection({ id, title, aside, children }: DetailSubsectionProps) {
   return (
     <section
       aria-labelledby={id}
-      className="flex min-w-0 flex-col gap-16pxr border-t border-border pt-24pxr first-of-type:border-t-0 first-of-type:pt-0"
+      className="flex min-w-0 flex-col gap-16pxr pt-32pxr first-of-type:pt-0"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
         <h4 id={id} className="text-h3 font-bold">
