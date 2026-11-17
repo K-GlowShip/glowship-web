@@ -299,7 +299,7 @@ export type OrderResult =
 
 /**
  * 위험 주문이 그 대응안에서 회복되는지 보여 준다. 품목이 모두 회복돼야 주문이 회복이고(하나라도 못 하면 남은 위험),
- * 회복 주문의 배송일은 가장 늦은 품목 기준이다. 대응안에 이 주문의 결과가 없으면 null이다(결과 없이 지어내지 않는다).
+ * 회복 주문의 배송일은 가장 늦은 품목 기준이다. 대응안에 이 주문의 결과가 없거나 일부 품목만 있거나 모르는 값이면 null이다(결과 없이 지어내지 않는다).
  */
 export const getOrderResult = (order: RiskOrder, option: DelayOption): OrderResult | null => {
   const lineIds = new Set(order.lines.map(({ riskLineId }) => riskLineId))
@@ -312,6 +312,14 @@ export const getOrderResult = (order: RiskOrder, option: DelayOption): OrderResu
 
   if (notRecovered) {
     return { kind: ORDER_OUTCOME.NOT_RECOVERED, reason: notRecovered.notRecoveredReason }
+  }
+  // 회복은 모든 품목의 결과가 와서 전부 회복일 때만 보인다. 품목 결과가 빠졌거나 모르는 값이 있으면 결과를 모르는 것으로 둔다.
+  const isAllRecovered =
+    outcomes.length >= order.lines.length &&
+    outcomes.every(({ outcome }) => outcome === ORDER_OUTCOME.RECOVERED)
+
+  if (!isAllRecovered) {
+    return null
   }
   const dates = outcomes.flatMap(({ expectedDate }) => (expectedDate ? [expectedDate] : []))
 
