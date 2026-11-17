@@ -13,7 +13,7 @@ interface DetailChapterProps {
 
 /**
  * 지연 상세의 큰 영역 하나(현재 상황 → 대응안 → 선택). 번호와 제목으로 읽는 순서를 드러내고,
- * 안쪽 내용은 상자를 더 만들지 않고 가는 선과 여백으로만 나눈다.
+ * 안쪽 내용은 상자를 더 만들지 않고 여백으로 나눈다.
  */
 export function DetailChapter({ id, step, title, description, children }: DetailChapterProps) {
   return (

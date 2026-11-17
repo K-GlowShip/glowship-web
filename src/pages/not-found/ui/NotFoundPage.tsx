@@ -44,14 +44,13 @@ export function NotFoundPage() {
           </p>
         </div>
 
-        <div className="mt-40pxr flex flex-col items-center gap-12pxr motion-safe:animate-rise motion-safe:[animation-delay:320ms]">
-          <Button size="lg" className="w-200pxr" onClick={() => navigate(ROUTES.DASHBOARD)}>
-            홈으로
-          </Button>
-          <Button variant="link" size="sm" onClick={() => navigate(-1)}>
-            이전 페이지로
-          </Button>
-        </div>
+        <Button
+          size="lg"
+          className="mt-40pxr w-200pxr motion-safe:animate-rise motion-safe:[animation-delay:320ms]"
+          onClick={() => navigate(ROUTES.DASHBOARD)}
+        >
+          홈으로
+        </Button>
       </div>
     </main>
   )

@@ -9,21 +9,21 @@ import {
 } from '@/shared/api'
 import { formatYYYYMMDD } from '@/shared/lib/kst-date'
 
-import type {
-  AiExplanation,
-  AnalysisRunSummary,
-  DelayAnalysis,
-  DelayCase,
-  DelayOption,
-  FinalDecision,
-  MemberOpinion,
-  RiskOrder,
-  SkuImpact,
-  StageCode,
-  TransportMode,
-  WarehouseRegion,
+import {
+  type AiExplanation,
+  type AnalysisRunSummary,
+  type DelayAnalysis,
+  type DelayCase,
+  type DelayOption,
+  type FinalDecision,
+  type MemberOpinion,
+  type RiskOrder,
+  type SkuImpact,
+  sortOptions,
+  type StageCode,
+  type TransportMode,
+  type WarehouseRegion,
 } from './delay-center'
-import { sortOptions } from './delay-center'
 import {
   type Feasibility,
   type OptionType,
