@@ -1,23 +1,28 @@
 import { Link, NavLink } from 'react-router'
 
-import { ROUTES } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 
-import { NAV_ITEMS } from './nav-items'
+import { LnbBrand } from './LnbBrand'
+import type { NavItem } from './nav-items'
 
-export function AppLnb() {
+interface AppLnbProps {
+  items: readonly NavItem[]
+  /** 로고를 누르면 가는 화면 */
+  homePath: string
+}
+
+export function AppLnb({ items, homePath }: AppLnbProps) {
   return (
     <aside className="flex w-200pxr shrink-0 flex-col border-r border-border bg-card">
       {/* 높이를 오른쪽 헤더(AppGnb)와 맞춘다 */}
       <Link
-        to={ROUTES.DASHBOARD}
+        to={homePath}
         className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30"
       >
-        <img src="/favicon.svg" alt="" className="h-28pxr w-auto" />
-        <span className="text-h3 font-bold text-primary">GlowShip</span>
+        <LnbBrand />
       </Link>
       <nav aria-label="주 메뉴" className="flex flex-col gap-8pxr overflow-y-auto p-16pxr">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+        {items.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

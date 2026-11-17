@@ -1,4 +1,16 @@
 export { ApiError, CLIENT_ERROR, isApiError, isUnauthorizedError } from './error'
+export {
+  CLIENT_ROLE_CODE,
+  type ClientRoleCode,
+  type ClientUser,
+  createClientUser,
+  type CreatedClientUser,
+  type CreateClientUserRequest,
+  getClientUsers,
+  type GetClientUsersParams,
+  USER_STATUS,
+  type UserStatus,
+} from './endpoints/admin-users'
 export { login, type LoginRequest, logout } from './endpoints/auth'
 export {
   getLatestDataSyncRuns,
@@ -84,7 +96,20 @@ export {
   type InventoryItem,
   type InventoryPage,
 } from './endpoints/inventory'
-export { getMe, type Me, ROLE_CODE, type RoleCode } from './endpoints/me'
+export { type AssignedCompany, getMe, type Me, ROLE_CODE, type RoleCode } from './endpoints/me'
+export {
+  createOperatingRuleSet,
+  type CreateOperatingRuleSetRequest,
+  type CreatedOperatingRuleSet,
+  DAY_BASIS,
+  type DayBasis,
+  getOperatingRuleSets,
+  LEAD_TIME_TYPE,
+  type LeadTime,
+  type LeadTimeType,
+  type OperatingRuleSet,
+  type RuleSetAuthor,
+} from './endpoints/operating-rules'
 export {
   getOrders,
   type GetOrdersParams,
@@ -132,6 +157,8 @@ export { inventoryStatusQueries } from './queries/inventory-status'
 export { isMeQuery, meQueryOptions } from './queries/me'
 export { orderQueries } from './queries/orders'
 export { shipmentQueries } from './queries/shipments'
+export { adminUserQueries } from './queries/admin-users'
+export { operatingRuleQueries } from './queries/operating-rules'
 export { skuQueries } from './queries/skus'
 export { API, fetcher } from './fetcher'
 export { fetchAllPages, MAX_PAGE_SIZE } from './fetch-all-pages'
