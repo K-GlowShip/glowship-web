@@ -1,8 +1,8 @@
 import type { ClientRoleCode } from '@/shared/api'
 import { cn } from '@/shared/lib/cn'
+import { RequiredMark } from '@/shared/ui/form-field'
 
 import { CLIENT_ROLE_OPTIONS } from '../model/client-user-text'
-import { RequiredMark } from './FormField'
 
 interface RoleSelectorProps {
   value: ClientRoleCode

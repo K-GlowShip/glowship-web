@@ -2,6 +2,8 @@ import { type ChangeEvent, type SubmitEvent, useRef, useState } from 'react'
 
 import { type CreatedClientUser, isUnauthorizedError } from '@/shared/api'
 import { Button } from '@/shared/ui/button'
+import { DrawerBody, DrawerFooter } from '@/shared/ui/drawer'
+import { FieldError, FormField, RequiredMark } from '@/shared/ui/form-field'
 import { Input } from '@/shared/ui/input'
 
 import {
@@ -18,7 +20,6 @@ import {
   validateClientUser,
 } from '../model/validate-client-user'
 import { CreatedSummary } from './CreatedSummary'
-import { FieldError, FormField, RequiredMark } from './FormField'
 import { PasswordInput } from './PasswordInput'
 import { RoleSelector } from './RoleSelector'
 
@@ -103,70 +104,77 @@ export function CreateClientUserForm({ companyId }: CreateClientUserFormProps) {
   }
 
   if (created) {
-    return <CreatedSummary user={created} onCreateAnother={handleCreateAnother} />
+    return (
+      <DrawerBody>
+        <CreatedSummary user={created} onCreateAnother={handleCreateAnother} />
+      </DrawerBody>
+    )
   }
 
   return (
-    <form className="flex flex-col gap-20pxr" onSubmit={handleSubmit} noValidate>
-      <p className="text-caption text-muted-foreground">
-        <RequiredMark /> 모든 항목은 필수입니다.
-      </p>
+    <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} noValidate>
+      <DrawerBody className="flex flex-col gap-20pxr">
+        <p className="text-caption text-muted-foreground">
+          <RequiredMark /> 모든 항목은 필수입니다.
+        </p>
 
-      <RoleSelector
-        value={values.roleCode}
-        onChange={(roleCode) => update({ ...values, roleCode })}
-      />
+        <RoleSelector
+          value={values.roleCode}
+          onChange={(roleCode) => update({ ...values, roleCode })}
+        />
 
-      <FormField id="client-user-name" label="이름" error={errors.displayName}>
-        {(inputProps) => (
-          <Input
-            {...inputProps}
-            ref={firstFieldRef}
-            // 드로어가 열리면 바로 입력할 수 있게 한다. 포커스가 이미 안에 있어서 Radix가 닫기 버튼으로 옮기지 않는다
-            autoFocus
-            autoComplete="off"
-            placeholder="예: 홍길동"
-            maxLength={DISPLAY_NAME_MAX_LENGTH + INPUT_LENGTH_MARGIN}
-            value={values.displayName}
-            onChange={handleChange('displayName')}
-          />
-        )}
-      </FormField>
+        <FormField id="client-user-name" label="이름" error={errors.displayName}>
+          {(inputProps) => (
+            <Input
+              {...inputProps}
+              ref={firstFieldRef}
+              // 드로어가 열리면 바로 입력할 수 있게 한다. 포커스가 이미 안에 있어서 Radix가 닫기 버튼으로 옮기지 않는다
+              autoFocus
+              autoComplete="off"
+              placeholder="예: 홍길동"
+              maxLength={DISPLAY_NAME_MAX_LENGTH + INPUT_LENGTH_MARGIN}
+              value={values.displayName}
+              onChange={handleChange('displayName')}
+            />
+          )}
+        </FormField>
 
-      <FormField id="client-user-email" label="이메일" error={errors.email}>
-        {(inputProps) => (
-          <Input
-            {...inputProps}
-            type="email"
-            autoComplete="off"
-            placeholder="name@company.com"
-            maxLength={EMAIL_MAX_LENGTH + INPUT_LENGTH_MARGIN}
-            value={values.email}
-            onChange={handleChange('email')}
-          />
-        )}
-      </FormField>
+        <FormField id="client-user-email" label="이메일" error={errors.email}>
+          {(inputProps) => (
+            <Input
+              {...inputProps}
+              type="email"
+              autoComplete="off"
+              placeholder="name@company.com"
+              maxLength={EMAIL_MAX_LENGTH + INPUT_LENGTH_MARGIN}
+              value={values.email}
+              onChange={handleChange('email')}
+            />
+          )}
+        </FormField>
 
-      <FormField
-        id="client-user-password"
-        label="초기 비밀번호"
-        help="영문·숫자 6~16자로 정하고, 사용자에게 전달해 주세요."
-        error={errors.password}
-      >
-        {(inputProps) => (
-          <PasswordInput
-            {...inputProps}
-            value={values.password}
-            onChange={handleChange('password')}
-          />
-        )}
-      </FormField>
+        <FormField
+          id="client-user-password"
+          label="초기 비밀번호"
+          help="영문·숫자 6~16자로 정하고, 사용자에게 전달해 주세요."
+          error={errors.password}
+        >
+          {(inputProps) => (
+            <PasswordInput
+              {...inputProps}
+              value={values.password}
+              onChange={handleChange('password')}
+            />
+          )}
+        </FormField>
+      </DrawerBody>
 
-      {errors.form && <FieldError id="client-user-form-error">{errors.form}</FieldError>}
-
-      <Button type="submit" size="lg" loading={isPending} className="w-full">
-        계정 만들기
-      </Button>
+      <DrawerFooter className="flex flex-col gap-12pxr">
+        {errors.form && <FieldError id="client-user-form-error">{errors.form}</FieldError>}
+        <Button type="submit" loading={isPending} className="self-end">
+          계정 만들기
+        </Button>
+      </DrawerFooter>
     </form>
   )
 }

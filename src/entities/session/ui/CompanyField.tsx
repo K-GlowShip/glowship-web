@@ -12,18 +12,19 @@ interface CompanyFieldProps {
   onChange: (companyId: string) => void
 }
 
-/** 계정을 만들 고객사. 고객사가 여럿이면 선택 상자, 하나면 이름만 보여 준다 */
+/** 화면이 다루는 고객사. 이름표와 값을 한 줄에 두고, 고객사가 여럿이면 선택 상자, 하나면 이름만 보여 준다 */
 export function CompanyField({ companies, value, onChange }: CompanyFieldProps) {
   const labelId = useId()
 
   return (
-    <div className="flex flex-col gap-4pxr">
-      <p id={labelId} className="text-b2 font-bold text-foreground">
+    <div className="flex items-center gap-12pxr">
+      <p id={labelId} className="shrink-0 text-b2 text-muted-foreground">
         고객사
       </p>
       {companies.length > 1 ? (
         <Dropdown
           aria-labelledby={labelId}
+          className="w-220pxr"
           options={companies.map(({ companyId, companyName }) => ({
             value: companyId,
             label: companyName,
@@ -32,7 +33,7 @@ export function CompanyField({ companies, value, onChange }: CompanyFieldProps) 
           onChange={onChange}
         />
       ) : (
-        <p className="text-b1 text-foreground">{companies[0].companyName}</p>
+        <p className="text-b1 font-bold text-foreground">{companies[0].companyName}</p>
       )}
     </div>
   )

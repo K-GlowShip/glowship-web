@@ -1,6 +1,6 @@
+import type { CompanyOption } from '@/entities/session'
 import {
   Drawer,
-  DrawerBody,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
@@ -8,7 +8,6 @@ import {
 } from '@/shared/ui/drawer'
 
 import { CreateClientUserForm } from './CreateClientUserForm'
-import type { CompanyOption } from './CompanyField'
 
 interface CreateClientUserDrawerProps {
   company: CompanyOption
@@ -26,14 +25,12 @@ export function CreateClientUserDrawer({
 }: CreateClientUserDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent onCloseAutoFocus={onCloseAutoFocus}>
+      <DrawerContent className="w-520pxr" onCloseAutoFocus={onCloseAutoFocus}>
         <DrawerHeader>
           <DrawerTitle>계정 만들기</DrawerTitle>
           <DrawerDescription>{company.companyName}에 팀장·팀원 계정을 만듭니다.</DrawerDescription>
         </DrawerHeader>
-        <DrawerBody>
-          <CreateClientUserForm companyId={company.companyId} />
-        </DrawerBody>
+        <CreateClientUserForm companyId={company.companyId} />
       </DrawerContent>
     </Drawer>
   )

@@ -16,9 +16,9 @@ import { ClientUsersPage } from './ClientUsersPage'
 const mockCompanies = vi.hoisted(() => ({ current: [] as AssignedCompany[] }))
 const getClientUsers = vi.hoisted(() => vi.fn())
 
-vi.mock('@/entities/session', () => ({
+vi.mock('@/entities/session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/entities/session')>()),
   useAssignedCompanies: () => mockCompanies.current,
-  getRoleLabel: (code: string) => (code === 'CLIENT_LEAD' ? '팀장' : '팀원'),
 }))
 
 // 서버 요청 대신 목록 응답을 정하려고 공개 API의 목록 쿼리만 바꾼다
@@ -75,6 +75,15 @@ const renderPage = (companies: AssignedCompany[]) => {
 // jsdom에는 없어서, 선택 상자가 열릴 때 강조된 항목으로 스크롤하는 호출이 막힌다
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()
+  // 역할 탭이 밑줄 위치를 재려고 쓰는데 jsdom에는 없다
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  )
 })
 
 beforeEach(() => {
@@ -101,7 +110,7 @@ describe('ClientUsersPage', () => {
 
     expect(await screen.findByText('홍길동')).toBeTruthy()
     expect(screen.getByText('lead@client.com')).toBeTruthy()
-    expect(screen.getByText('팀장')).toBeTruthy()
+    expect(within(screen.getByRole('table')).getByText('팀장')).toBeTruthy()
     expect(screen.getByText('사용 중')).toBeTruthy()
     expect(lastParams()).toMatchObject({ companyId: 'id-A Beauty', page: 1 })
   })
@@ -145,14 +154,12 @@ describe('ClientUsersPage', () => {
     renderPage([company('A Beauty')])
     await screen.findByText('홍길동')
 
-    await userEvent.click(screen.getByRole('combobox', { name: '역할' }))
-    await userEvent.click(screen.getByRole('option', { name: '팀원' }))
+    await userEvent.click(screen.getByRole('tab', { name: '팀원' }))
     await waitFor(() => expect(lastParams()?.roleCode).toBe(CLIENT_ROLE_CODE.CLIENT_MEMBER))
 
-    await userEvent.click(screen.getByRole('combobox', { name: '역할' }))
-    await userEvent.click(screen.getByRole('option', { name: '전체' }))
+    await userEvent.click(screen.getByRole('tab', { name: '전체' }))
     // 처음과 같은 조건이라 캐시된 목록을 쓰고 새 요청은 나가지 않는다
-    expect(screen.getByRole('combobox', { name: '역할' }).textContent).toContain('전체')
+    expect(screen.getByRole('tab', { name: '전체' }).getAttribute('aria-selected')).toBe('true')
     expect(getClientUsers).toHaveBeenCalledTimes(2)
   })
 })
