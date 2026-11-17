@@ -46,7 +46,9 @@ export function RuleSetForm({ companyId, base, onSaved }: RuleSetFormProps) {
   const { mutate: save, isPending } = useCreateOperatingRuleSet()
   const baseLeadTimes = base?.leadTimes ?? []
 
-  // 오늘 이전·오늘부터 적용하는 버전은 저장 즉시 쓰이므로, 선택 대기 중인 분석이 재분석 필요가 된다(명세 4.2)
+  // 서버 기준으로 이미 적용되는 버전은 저장 즉시 쓰이므로, 선택 대기 중인 분석이 재분석 필요가 된다(명세 4.2).
+  // 서버의 "오늘"은 판단 시각이라 데모에서는 가상 시각이다. 화면은 그 값을 몰라서 브라우저 날짜로 미리 알리기만 하고,
+  // 문구는 "서버 기준으로 ~되면"이라고 적어 어긋나는 날짜에서도 거짓이 되지 않게 한다
   const isAppliedNow = values.effectiveDate !== '' && values.effectiveDate <= getTodayUtc()
 
   const update = (patch: Partial<RuleSetFormValues>) => {
@@ -135,8 +137,8 @@ export function RuleSetForm({ companyId, base, onSaved }: RuleSetFormProps) {
               role="status"
               className="mt-12pxr rounded-card bg-warning-bg p-12pxr text-b2 text-warning"
             >
-              오늘이나 그 전부터 적용하면 저장하는 즉시 쓰입니다. 이 고객사에서 선택을 기다리는
-              분석은 재분석이 필요한 상태로 바뀝니다.
+              서버 기준으로 오늘이나 그 전부터 적용되면 저장하는 즉시 쓰이고, 이 고객사에서 선택을
+              기다리는 분석은 재분석이 필요한 상태로 바뀝니다.
             </p>
           )}
         </section>

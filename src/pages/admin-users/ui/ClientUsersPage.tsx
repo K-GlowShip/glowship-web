@@ -62,7 +62,8 @@ function ClientUsersContent({ companies }: { companies: [AssignedCompany, ...Ass
             <div>
               <p className="text-b2 text-muted-foreground">조회된 계정</p>
               {/* 숫자는 크고 가늘게, 단위는 숫자 머리 높이에 작게 올린다(대시보드 지표와 같은 표기) */}
-              <p className="flex items-start text-display font-light tracking-[-0.03em] tabular-nums">
+              {/* 불러오는 동안 Skeleton(div)이 들어가므로 p가 아니라 div로 둔다 */}
+              <div className="flex items-start text-display font-light tracking-[-0.03em] tabular-nums">
                 {totalCount === undefined ? (
                   <Skeleton className="w-48pxr">&nbsp;</Skeleton>
                 ) : (
@@ -73,7 +74,7 @@ function ClientUsersContent({ companies }: { companies: [AssignedCompany, ...Ass
                     </span>
                   </>
                 )}
-              </p>
+              </div>
             </div>
             {company.canManageClientAccounts ? (
               <Button onClick={() => drawer.show(company)}>
