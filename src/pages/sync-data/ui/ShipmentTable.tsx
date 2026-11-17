@@ -25,7 +25,12 @@ const formatRepresentativeSku = ({ representativeSku, skuCount }: Shipment) => {
     : representativeSku.skuCode
 }
 
-export function ShipmentTable({ query }: { query: ListQuery<Shipment> }) {
+interface ShipmentTableProps {
+  query: ListQuery<Shipment>
+  onSelect: (shipment: Shipment) => void
+}
+
+export function ShipmentTable({ query, onSelect }: ShipmentTableProps) {
   return (
     <Table className="min-w-1380pxr">
       <TableHeader>
@@ -47,8 +52,20 @@ export function ShipmentTable({ query }: { query: ListQuery<Shipment> }) {
         <TableQueryRows query={query} colSpan={11} emptyMessage="조건에 맞는 선적이 없습니다.">
           {(shipments) =>
             shipments.map((shipment) => (
-              <TableRow key={shipment.shipmentId}>
-                <TableCell className="whitespace-nowrap">{shipment.shipmentCode}</TableCell>
+              <TableRow
+                key={shipment.shipmentId}
+                className="cursor-pointer hover:bg-background"
+                onClick={() => onSelect(shipment)}
+              >
+                <TableCell className="whitespace-nowrap">
+                  <button
+                    type="button"
+                    className="cursor-pointer text-left outline-none focus-visible:underline"
+                    aria-label={`${shipment.shipmentCode} 상세 보기`}
+                  >
+                    {shipment.shipmentCode}
+                  </button>
+                </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {TRANSPORT_MODE_LABEL[shipment.transportMode]}
                 </TableCell>

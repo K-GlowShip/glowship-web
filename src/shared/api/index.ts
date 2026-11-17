@@ -121,10 +121,15 @@ export {
   type SalesChannel,
 } from './endpoints/orders'
 export {
+  getShipment,
   getShipments,
   type GetShipmentsParams,
+  type PlannedBasis,
+  type ScheduleObservation,
   SHIPMENT_STAGE,
   type Shipment,
+  type ShipmentDetail,
+  type ShipmentLine,
   type ShipmentStage,
   TRANSPORT_MODE,
   type TransportMode,
