@@ -141,7 +141,7 @@ export function OptionCompare({
         )}
 
         {opinionCount > 0 && (
-          <p className="mt-auto text-caption text-muted-foreground">
+          <p className="mt-auto text-b2 font-bold text-primary">
             {DECISION_TEXT.MEMBER_OPINION} {formatNumber(opinionCount)}건
           </p>
         )}
