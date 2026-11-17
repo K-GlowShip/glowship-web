@@ -13,9 +13,16 @@ import {
   toInitialFormValues,
   validateRuleSetForm,
 } from '../model/operating-rule-form'
-import { getLeadTimeName, SUPPORTED_SALES_BASIS_DAYS } from '../model/operating-rule-text'
+import {
+  getLeadTimeName,
+  OPERATING_RULE_ERROR,
+  SEA_TRANSIT_NOTE,
+  SUPPORTED_SALES_BASIS_DAYS,
+  toLeadTimeMatrices,
+} from '../model/operating-rule-text'
 import { useCreateOperatingRuleSet } from '../model/use-create-operating-rule-set'
 import { DaysInput } from './DaysInput'
+import { LeadTimeMatrixTable } from './LeadTimeMatrixTable'
 import { PartialPolicyField } from './PartialPolicyField'
 import { SettingRow } from './SettingRow'
 
@@ -25,6 +32,8 @@ interface RuleSetFormProps {
   base: OperatingRuleSet | undefined
   onSaved: () => void
 }
+
+const LEAD_TIME_ERROR_ID = 'rule-lead-time-error'
 
 /** 서버가 시각을 UTC 날짜로 비교하므로 같은 기준의 오늘이다 */
 const getTodayUtc = () => new Date().toISOString().slice(0, 10)
@@ -129,35 +138,59 @@ export function RuleSetForm({ companyId, base, onSaved }: RuleSetFormProps) {
           )}
         </section>
 
-        <section aria-labelledby="rule-lead-times-title">
-          <h3 id="rule-lead-times-title" className="text-b1 font-bold">
-            리드타임
-          </h3>
-          <p className="pb-4pxr text-caption text-muted-foreground">
-            달력일 기준입니다. 항목과 창고는 현재 버전과 같고 일수만 바꿀 수 있습니다.
-          </p>
+        <section aria-labelledby="rule-lead-times-title" className="flex flex-col gap-16pxr">
+          <div>
+            <h3 id="rule-lead-times-title" className="text-b1 font-bold">
+              리드타임
+            </h3>
+            <p className="text-caption text-muted-foreground">
+              출발 창고별 일수(달력일)입니다. 항목과 창고는 현재 버전과 같고 일수만 바꿀 수
+              있습니다.
+            </p>
+          </div>
           {baseLeadTimes.length === 0 ? (
-            <p className="py-12pxr text-b2 text-muted-foreground">
+            <p className="text-b2 text-muted-foreground">
               저장된 운영 기준이 없어 리드타임을 입력할 수 없습니다. 창고 정보가 있어야 입력할 수
               있습니다.
             </p>
           ) : (
-            baseLeadTimes.map((leadTime, index) => (
-              <SettingRow
-                key={`${leadTime.leadTimeType}-${leadTime.warehouse.warehouseId}-${leadTime.toRegionCode}`}
-                id={`rule-lead-time-${index}`}
-                label={getLeadTimeName(leadTime)}
-                error={errors.leadTimeDays?.[index]}
-              >
-                {(inputProps) => (
-                  <DaysInput
-                    {...inputProps}
-                    value={values.leadTimeDays[index]}
-                    onChange={(event) => updateLeadTimeDays(index, event.target.value)}
-                  />
+            toLeadTimeMatrices(baseLeadTimes).map((matrix) => (
+              <LeadTimeMatrixTable
+                key={matrix.key}
+                matrix={matrix}
+                columnClassName="w-112pxr"
+                // 입력칸과 같은 자리에 막힌 칸으로 두어, 입력할 수 없는 조합임이 바로 보이게 한다
+                renderEmpty={() => (
+                  <div className="flex justify-end">
+                    <span className="flex h-44pxr w-96pxr items-center justify-center rounded-control bg-disabled text-caption text-disabled-foreground">
+                      해당 없음
+                    </span>
+                  </div>
                 )}
-              </SettingRow>
+                renderCell={({ index, leadTime }) => {
+                  const isInvalid = Boolean(errors.leadTimeDays?.[index])
+                  return (
+                    <div className="flex justify-end">
+                      <DaysInput
+                        required
+                        // 표의 머리글만으로는 어느 칸인지 읽히지 않아 칸마다 전체 이름을 붙인다
+                        aria-label={getLeadTimeName(leadTime)}
+                        aria-invalid={isInvalid ? true : undefined}
+                        aria-describedby={isInvalid ? LEAD_TIME_ERROR_ID : undefined}
+                        value={values.leadTimeDays[index]}
+                        onChange={(event) => updateLeadTimeDays(index, event.target.value)}
+                      />
+                    </div>
+                  )
+                }}
+              />
             ))
+          )}
+          <p className="text-caption text-muted-foreground">{SEA_TRANSIT_NOTE}</p>
+          {errors.leadTimeDays && (
+            <FieldError id={LEAD_TIME_ERROR_ID}>
+              {OPERATING_RULE_ERROR.LEAD_TIME_DAYS_INVALID}
+            </FieldError>
           )}
         </section>
       </DrawerBody>

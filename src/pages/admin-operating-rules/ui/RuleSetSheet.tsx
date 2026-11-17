@@ -4,11 +4,12 @@ import type { OperatingRuleSet } from '@/shared/api'
 import { formatYYYYMMDD } from '@/shared/lib/kst-date'
 
 import {
-  getLeadTimeRoute,
-  LEAD_TIME_TYPE_LABEL,
   PARTIAL_POLICY_LABEL,
+  SEA_TRANSIT_NOTE,
+  toLeadTimeMatrices,
   toPartialPolicy,
 } from '../model/operating-rule-text'
+import { LeadTimeMatrixTable } from './LeadTimeMatrixTable'
 
 interface RuleSetSheetProps {
   ruleSet: OperatingRuleSet
@@ -43,36 +44,34 @@ export function RuleSetSheet({ ruleSet, action }: RuleSetSheetProps) {
         />
       </dl>
 
-      <section aria-labelledby="rule-sheet-lead-times">
-        <h3 id="rule-sheet-lead-times" className="pb-8pxr text-b1 font-bold">
+      <section aria-labelledby="rule-sheet-lead-times" className="flex flex-col gap-16pxr">
+        <h3 id="rule-sheet-lead-times" className="text-b1 font-bold">
           리드타임
+          <span className="pl-8pxr text-caption font-normal text-muted-foreground">
+            출발 창고별 일수(달력일)
+          </span>
         </h3>
         {leadTimes.length === 0 ? (
           <p className="text-b2 text-muted-foreground">등록된 리드타임이 없습니다.</p>
         ) : (
-          <table className="w-full text-b1">
-            <tbody>
-              {leadTimes.map((leadTime) => (
-                <tr
-                  key={`${leadTime.leadTimeType}-${leadTime.warehouse.warehouseId}-${leadTime.toRegionCode}`}
-                  className="border-b border-border last:border-b-0"
-                >
-                  <th
-                    scope="row"
-                    className="w-120pxr py-12pxr text-left font-normal text-muted-foreground"
-                  >
-                    {LEAD_TIME_TYPE_LABEL[leadTime.leadTimeType] ?? leadTime.leadTimeType}
-                  </th>
-                  <td className="py-12pxr">{getLeadTimeRoute(leadTime)}</td>
-                  <td className="py-12pxr text-right tabular-nums">
+          // 표를 좁게 나란히 두어 창고 이름과 숫자 사이를 눈이 멀리 오가지 않게 한다
+          <div className="grid items-start gap-x-48pxr gap-y-24pxr md:grid-cols-2 xl:grid-cols-3">
+            {toLeadTimeMatrices(leadTimes).map((matrix) => (
+              <LeadTimeMatrixTable
+                key={matrix.key}
+                matrix={matrix}
+                columnClassName="w-72pxr"
+                renderCell={({ leadTime }) => (
+                  <span className="tabular-nums">
                     {leadTime.days}
                     <span className="pl-2pxr text-b2 text-muted-foreground">일</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </span>
+                )}
+              />
+            ))}
+          </div>
         )}
+        <p className="text-caption text-muted-foreground">{SEA_TRANSIT_NOTE}</p>
       </section>
     </article>
   )

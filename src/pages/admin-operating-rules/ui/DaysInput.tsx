@@ -5,7 +5,7 @@ import { Input } from '@/shared/ui/input'
 /** 일수 입력칸. 숫자를 오른쪽에 붙이고 단위 "일"을 칸 안에 보여 준다 */
 export function DaysInput(props: Omit<ComponentProps<typeof Input>, 'type' | 'className'>) {
   return (
-    <div className="relative w-104pxr">
+    <div className="relative w-96pxr">
       <Input
         {...props}
         inputMode="numeric"
