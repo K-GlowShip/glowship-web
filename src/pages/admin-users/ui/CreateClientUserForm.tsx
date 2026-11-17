@@ -65,6 +65,7 @@ export function CreateClientUserForm({ companyId }: CreateClientUserFormProps) {
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const form = event.currentTarget
     if (isPending) {
       return
     }
@@ -73,6 +74,8 @@ export function CreateClientUserForm({ companyId }: CreateClientUserFormProps) {
     setHasSubmitted(true)
     setErrors(inputErrors)
     if (Object.keys(inputErrors).length > 0) {
+      // 오류 표시가 그려진 뒤 첫 오류 칸으로 포커스를 옮긴다(오류 칸이 화면 밖에 있을 수 있다)
+      setTimeout(() => form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
       return
     }
 

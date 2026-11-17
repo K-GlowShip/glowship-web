@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
 import { CompanyField, useAssignedCompanies } from '@/entities/session'
-import { type AssignedCompany, operatingRuleQueries } from '@/shared/api'
+import { type AssignedCompany, type OperatingRuleSet, operatingRuleQueries } from '@/shared/api'
 import { useDetailDialog } from '@/shared/lib/use-detail-dialog'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -47,7 +47,8 @@ function OperatingRulesContent({
   const [companyId, setCompanyId] = useState('')
   const [versionId, setVersionId] = useState('')
   const company = companies.find((option) => option.companyId === companyId) ?? companies[0]
-  const drawer = useDetailDialog<AssignedCompany>()
+  // 드로어를 여는 순간의 고객사와 기준 버전을 고정한다. 폼을 채운 뒤 목록이 다시 받아져도 칸과 입력값이 어긋나지 않는다
+  const drawer = useDetailDialog<{ company: AssignedCompany; base: OperatingRuleSet | undefined }>()
   const { data, error, isFetching, refetch } = useQuery(
     operatingRuleQueries.list(company.companyId),
   )
@@ -59,7 +60,7 @@ function OperatingRulesContent({
   const selected = ruleSets?.find((item) => item.operatingRuleSetId === versionId) ?? base
 
   const createButton = (
-    <Button disabled={!data} onClick={() => drawer.show(company)}>
+    <Button disabled={!data} onClick={() => drawer.show({ company, base })}>
       <Plus aria-hidden="true" />새 버전 만들기
     </Button>
   )
@@ -99,8 +100,8 @@ function OperatingRulesContent({
 
       {drawer.selected && (
         <CreateRuleSetDrawer
-          company={drawer.selected}
-          base={base}
+          company={drawer.selected.company}
+          base={drawer.selected.base}
           open={drawer.open}
           onOpenChange={drawer.onOpenChange}
           onCloseAutoFocus={drawer.onCloseAutoFocus}
