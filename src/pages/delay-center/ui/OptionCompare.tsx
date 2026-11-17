@@ -12,6 +12,7 @@ import {
   FEASIBILITY_BADGE_VARIANT,
   FEASIBILITY_LABEL,
   type MemberOpinion,
+  OPTION_TYPE,
   OPTION_TYPE_LABEL,
   REASON_LABEL,
 } from '../model/delay-center'
@@ -114,7 +115,7 @@ export function OptionCompare({
             }
           />
           <Condition
-            label="예상 도착"
+            label={option.type === OPTION_TYPE.OTHER_REGION_FULFILL ? '출고 가능일' : '예상 도착'}
             value={option.expectedArrival ? formatMMDD(option.expectedArrival) : EMPTY_VALUE}
           />
           <Condition
