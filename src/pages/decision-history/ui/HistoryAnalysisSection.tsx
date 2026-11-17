@@ -148,7 +148,8 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
               className="flex gap-6pxr rounded-control bg-warning-bg p-12pxr text-caption text-warning"
             >
               <TriangleAlert className="mt-2pxr size-14pxr shrink-0" aria-hidden="true" />
-              {warning.text}
+              {/* 경고 문구에도 근거 표지([E18])가 붙어 온다. 설명 문단과 같게 지운다 */}
+              {formatExplanationText(warning.text)}
             </li>
           ))}
         </ul>
