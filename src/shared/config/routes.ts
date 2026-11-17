@@ -8,6 +8,7 @@ export const ROUTES = {
   SYNC_DATA: '/sync-data',
   ADMIN_HOME: '/admin',
   ADMIN_USERS: '/admin/users',
+  ADMIN_OPERATING_RULES: '/admin/operating-rules',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]

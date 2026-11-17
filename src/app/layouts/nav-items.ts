@@ -1,4 +1,12 @@
-import { AlarmClock, History, LayoutDashboard, Plug, Users, type LucideIcon } from 'lucide-react'
+import {
+  AlarmClock,
+  History,
+  LayoutDashboard,
+  Plug,
+  SlidersHorizontal,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
 
 import { ROUTES } from '@/shared/config'
 
@@ -18,4 +26,5 @@ export const NAV_ITEMS: NavItem[] = [
 /** 관리자(`OWNER`·`ADMIN`) 메뉴. 고객사 화면의 메뉴와 따로 둔다 */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: ROUTES.ADMIN_USERS, label: '고객사 계정 관리', icon: Users },
+  { to: ROUTES.ADMIN_OPERATING_RULES, label: '운영 기준 관리', icon: SlidersHorizontal },
 ]

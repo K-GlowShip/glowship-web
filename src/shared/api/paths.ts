@@ -13,6 +13,7 @@ export const ENDPOINT = {
   ME: '/me',
   ADMIN: {
     USERS: '/admin/users',
+    OPERATING_RULE_SETS: '/admin/operating-rule-sets',
   },
   DATA_SYNC_RUNS: {
     ROOT: '/data-sync-runs',

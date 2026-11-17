@@ -85,6 +85,12 @@ export const router = createBrowserRouter([
                   Component: (await import('@/pages/admin-users')).ClientUsersPage,
                 }),
               },
+              {
+                path: ROUTES.ADMIN_OPERATING_RULES,
+                lazy: async () => ({
+                  Component: (await import('@/pages/admin-operating-rules')).OperatingRulesPage,
+                }),
+              },
             ],
           },
         ],
