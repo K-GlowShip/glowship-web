@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 
 import { formatNumber } from '@/shared/lib/format-number'
+import { getReasonLabel } from '@/entities/delay-event'
 import { formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 
@@ -8,6 +9,10 @@ import { DetailSubsection } from './DetailChapter'
 import {
   ATTRIBUTION_LABEL,
   countRiskOrdersByAttribution,
+  type DelayOption,
+  getOrderResult,
+  ORDER_OUTCOME,
+  OPTION_TYPE_LABEL,
   RISK_ATTRIBUTION,
   type RiskOrder,
   sortRiskOrders,
@@ -15,6 +20,8 @@ import {
 
 interface AtRiskOrdersProps {
   orders: RiskOrder[]
+  /** 주문별 결과를 보여 줄 대응안. 없거나 주문별 결과가 없으면 대응 전 모습(약속 → 예상)만 보여 준다. */
+  option?: DelayOption
 }
 
 /**
@@ -22,7 +29,7 @@ interface AtRiskOrdersProps {
  * 급한 순서(지연 유발 먼저, 약속일 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
  * 영역 높이를 제한해서 주문이 많아도 상세 전체가 길어지지 않는다.
  */
-export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
+export function AtRiskOrders({ orders, option }: AtRiskOrdersProps) {
   if (orders.length === 0) {
     return null
   }
@@ -32,6 +39,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
     delayInduced > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} ${delayInduced}건`,
     preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} ${preExisting}건`,
     '약속일 빠른 순',
+    option && option.outcomes.length > 0 && `${OPTION_TYPE_LABEL[option.type]} 기준 결과`,
   ]
     .filter(Boolean)
     .join(' · ')
@@ -67,9 +75,7 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
                     >
                       {ATTRIBUTION_LABEL[order.attribution]}
                     </Badge>
-                    <span className="ml-auto text-b2 text-muted-foreground">
-                      약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
-                    </span>
+                    <OrderDates order={order} option={option} />
                   </summary>
                   <p className="pr-12pxr pl-40pxr text-b2 text-foreground">{order.riskReason}</p>
                   <div className="flex flex-col gap-4pxr py-12pxr pr-12pxr pl-40pxr">
@@ -96,5 +102,46 @@ export function AtRiskOrders({ orders }: AtRiskOrdersProps) {
         </div>
       </div>
     </DetailSubsection>
+  )
+}
+
+interface OrderDatesProps {
+  order: RiskOrder
+  option?: DelayOption
+}
+
+/**
+ * 주문 줄 오른쪽. 대응안의 결과가 있으면 그 대응안 기준으로 회복(배송일) 또는 남은 위험(사유)을 보여 주고,
+ * 없으면 대응 전 약속 → 예상 날짜를 보여 준다. 회복이면 대응 전 예상일은 오해를 부르니 숨긴다.
+ */
+function OrderDates({ order, option }: OrderDatesProps) {
+  const result = option ? getOrderResult(order, option) : null
+
+  if (result?.kind === ORDER_OUTCOME.RECOVERED) {
+    return (
+      <span className="ml-auto flex items-center gap-8pxr text-b2 text-muted-foreground">
+        <span>약속 {formatMMDD(order.promisedDate)}</span>
+        <Badge variant="success" dot={false}>
+          회복{result.expectedDate && ` · ${formatMMDD(result.expectedDate)} 배송`}
+        </Badge>
+      </span>
+    )
+  }
+  if (result?.kind === ORDER_OUTCOME.NOT_RECOVERED) {
+    return (
+      <span className="ml-auto flex items-center gap-8pxr text-b2 text-muted-foreground">
+        <span>
+          약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
+        </span>
+        <Badge variant="danger" dot={false}>
+          남은 위험{result.reason && ` · ${getReasonLabel(result.reason)}`}
+        </Badge>
+      </span>
+    )
+  }
+  return (
+    <span className="ml-auto text-b2 text-muted-foreground">
+      약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
+    </span>
   )
 }
