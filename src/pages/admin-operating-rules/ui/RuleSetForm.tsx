@@ -147,8 +147,7 @@ export function RuleSetForm({ companyId, base, onSaved }: RuleSetFormProps) {
               리드타임
             </h3>
             <p className="text-caption text-muted-foreground">
-              출발 창고별 일수(달력일)입니다. 항목과 창고는 현재 버전과 같고 일수만 바꿀 수
-              있습니다.
+              달력일 기준입니다. 항목과 창고는 현재 버전과 같고 일수만 바꿀 수 있습니다.
             </p>
           </div>
           {baseLeadTimes.length === 0 ? (

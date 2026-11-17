@@ -48,7 +48,7 @@ export function RuleSetSheet({ ruleSet, action }: RuleSetSheetProps) {
         <h3 id="rule-sheet-lead-times" className="text-b1 font-bold">
           리드타임
           <span className="pl-8pxr text-caption font-normal text-muted-foreground">
-            출발 창고별 일수(달력일)
+            달력일 기준
           </span>
         </h3>
         {leadTimes.length === 0 ? (
@@ -60,7 +60,7 @@ export function RuleSetSheet({ ruleSet, action }: RuleSetSheetProps) {
               <LeadTimeMatrixTable
                 key={matrix.key}
                 matrix={matrix}
-                columnClassName="w-72pxr"
+                columnClassName="w-80pxr"
                 renderCell={({ leadTime }) => (
                   <span className="tabular-nums">
                     {leadTime.days}

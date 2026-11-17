@@ -12,13 +12,27 @@ const REGION_LABEL: Record<string, string> = { KR: '한국', WEST: '서부', EAS
 /** 서버가 새 코드를 추가해도 화면이 깨지지 않게, 라벨이 없으면 코드를 그대로 보여 준다 */
 const getRegionLabel = (regionCode: string) => REGION_LABEL[regionCode] ?? regionCode
 
-/** 리드타임이 가리키는 구간. 예: "WH-KR → 동부", 도착 권역이 없으면 "WH-KR" */
-export const getLeadTimeRoute = ({ warehouse, toRegionCode }: LeadTime) =>
-  toRegionCode
-    ? `${warehouse.warehouseCode} → ${getRegionLabel(toRegionCode)}`
-    : warehouse.warehouseCode
+/**
+ * 창고가 있는 권역 이름. 표에서 코드(`WH-EAST`) 대신 먼저 보여 준다. 예: "동부"
+ * 표의 머리글이 "출발 창고"라서 행마다 "창고"를 다시 붙이지 않는다. 권역을 모르면 `null`이고 화면은 코드만 보여 준다
+ */
+export const getWarehouseRegionLabel = ({ regionCode }: LeadTime['warehouse']) =>
+  REGION_LABEL[regionCode] ?? null
 
-/** 리드타임 하나의 전체 이름. 표의 칸을 스크린리더에 알릴 때 쓴다. 예: "항공 운송 WH-KR → 동부" */
+/** 표 밖에서 창고를 가리킬 때 쓰는 이름. 예: "동부 창고" */
+const getWarehouseName = (warehouse: LeadTime['warehouse']) => {
+  const region = getWarehouseRegionLabel(warehouse)
+  return region ? `${region} 창고` : null
+}
+
+/** 리드타임이 가리키는 구간. 예: "한국 창고(WH-KR) → 동부", 도착 권역이 없으면 "한국 창고(WH-KR)" */
+export const getLeadTimeRoute = ({ warehouse, toRegionCode }: LeadTime) => {
+  const name = getWarehouseName(warehouse)
+  const origin = name ? `${name}(${warehouse.warehouseCode})` : warehouse.warehouseCode
+  return toRegionCode ? `${origin} → ${getRegionLabel(toRegionCode)}` : origin
+}
+
+/** 리드타임 하나의 전체 이름. 표의 칸을 스크린리더에 알릴 때 쓴다. 예: "항공 운송 한국 창고(WH-KR) → 동부" */
 export const getLeadTimeName = (leadTime: LeadTime) =>
   `${LEAD_TIME_TYPE_LABEL[leadTime.leadTimeType] ?? leadTime.leadTimeType} ${getLeadTimeRoute(leadTime)}`
 
@@ -32,6 +46,8 @@ export interface LeadTimeCell {
 export interface LeadTimeMatrix {
   key: string
   title: string
+  /** 첫 열(창고)의 머리글. 구간이 있는 표는 "출발 창고", 처리 표는 "창고" */
+  rowHeader: string
   columns: { key: string; label: string }[]
   rows: { warehouse: LeadTime['warehouse']; cells: (LeadTimeCell | undefined)[] }[]
 }
@@ -50,6 +66,7 @@ type Column = LeadTimeMatrix['columns'][number]
 const buildMatrix = (
   key: string,
   title: string,
+  rowHeader: string,
   cells: LeadTimeCell[],
   toColumn: (leadTime: LeadTime) => Column,
 ): LeadTimeMatrix => {
@@ -73,8 +90,9 @@ const buildMatrix = (
   return {
     key,
     title,
+    rowHeader,
     columns,
-    // 여러 유형을 합친 표("창고 처리")에서도 창고가 코드 순으로 보이게 한다
+    // 여러 유형을 합친 표("입·출고 처리")에서도 창고가 코드 순으로 보이게 한다
     rows: [...rows.values()]
       .sort((a, b) => a.warehouse.warehouseCode.localeCompare(b.warehouse.warehouseCode))
       .map(({ warehouse, byColumn }) => ({
@@ -86,8 +104,8 @@ const buildMatrix = (
 
 /**
  * 리드타임 목록을 읽기 쉬운 표 묶음으로 바꾼다. 한 줄씩 나열하면 유형과 창고 이름이 줄마다 반복되기 때문이다.
- * - 도착 권역이 있는 유형(고객 배송·항공 운송)은 유형마다 표 하나: 행은 창고, 열은 도착 권역
- * - 도착 권역이 없는 유형(입고·출고 처리)은 "창고 처리" 표 하나로 합친다: 행은 창고, 열은 처리 종류
+ * - 도착 권역이 있는 유형(고객 배송·항공 운송)은 유형마다 표 하나: 행은 출발 창고, 열은 도착 권역
+ * - 도착 권역이 없는 유형(입고·출고 처리)은 "입·출고 처리" 표 하나로 합친다: 행은 창고, 열은 처리 종류
  */
 export const toLeadTimeMatrices = (leadTimes: LeadTime[]): LeadTimeMatrix[] => {
   const cells = leadTimes.map((leadTime, index) => ({ index, leadTime }))
@@ -99,16 +117,17 @@ export const toLeadTimeMatrices = (leadTimes: LeadTime[]): LeadTimeMatrix[] => {
     buildMatrix(
       leadTimeType,
       getTypeLabel(leadTimeType),
+      '출발 창고',
       routeCells.filter(({ leadTime }) => leadTime.leadTimeType === leadTimeType),
       ({ toRegionCode }) => ({
         key: toRegionCode ?? '',
-        label: `→ ${getRegionLabel(toRegionCode ?? '')}`,
+        label: `${getRegionLabel(toRegionCode ?? '')} 도착`,
       }),
     ),
   )
   if (handlingCells.length > 0) {
     matrices.push(
-      buildMatrix('HANDLING', '창고 처리', handlingCells, ({ leadTimeType }) => ({
+      buildMatrix('HANDLING', '입·출고 처리', '창고', handlingCells, ({ leadTimeType }) => ({
         key: leadTimeType,
         label: HANDLING_COLUMN_LABEL[leadTimeType] ?? getTypeLabel(leadTimeType),
       })),
