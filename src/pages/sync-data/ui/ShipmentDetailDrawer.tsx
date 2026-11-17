@@ -113,7 +113,8 @@ function ShipmentDetailContent({ shipment }: { shipment: Shipment }) {
       </DrawerBody>
 
       <DrawerFooter className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-2pxr py-12pxr">
-        <p>
+        {/* 로딩 중에는 스켈레톤(div)이 들어가므로 p가 아니라 div다 */}
+        <div>
           데이터 기준 시각{' '}
           {detail ? (
             <span className="ml-4pxr text-b2 font-medium text-foreground tabular-nums">
@@ -125,7 +126,7 @@ function ShipmentDetailContent({ shipment }: { shipment: Shipment }) {
           ) : (
             <Skeleton className="ml-4pxr inline-block h-14pxr w-130pxr align-middle" />
           )}
-        </p>
+        </div>
         <p>이 선적을 마지막으로 바꾼 수집이 끝난 시각</p>
       </DrawerFooter>
     </>
