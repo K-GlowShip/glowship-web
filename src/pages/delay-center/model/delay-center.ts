@@ -252,6 +252,24 @@ const SELECTABLE_FEASIBILITY: Record<ClientRole, Feasibility[]> = {
   [CLIENT_ROLE.MEMBER]: Object.values(FEASIBILITY),
 }
 
+/** 실행 가능 여부 순서. 실행 불가를 맨 뒤로 보낸다. */
+const FEASIBILITY_ORDER: Record<Feasibility, number> = {
+  [FEASIBILITY.FEASIBLE]: 0,
+  [FEASIBILITY.NEEDS_CHECK]: 1,
+  [FEASIBILITY.NOT_FEASIBLE]: 2,
+}
+
+/**
+ * 대응안 카드 순서. 1순위 AI 추천, 2순위 실행 가능 여부(실행 가능 → 확인 필요 → 실행 불가).
+ * 같은 순위끼리는 서버가 준 순서를 그대로 둔다(정렬은 안정 정렬이다).
+ */
+export const sortOptions = (options: DelayOption[]) =>
+  [...options].sort(
+    (a, b) =>
+      Number(b.recommended) - Number(a.recommended) ||
+      FEASIBILITY_ORDER[a.feasibility] - FEASIBILITY_ORDER[b.feasibility],
+  )
+
 export const getSelectableOptions = (role: ClientRole, options: DelayOption[]) =>
   options.filter((option) => SELECTABLE_FEASIBILITY[role].includes(option.feasibility))
 

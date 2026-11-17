@@ -23,6 +23,7 @@ import type {
   TransportMode,
   WarehouseRegion,
 } from './delay-center'
+import { sortOptions } from './delay-center'
 import {
   type Feasibility,
   type OptionType,
@@ -140,7 +141,7 @@ const toAnalysis = (run: AnalysisRunDetail): DelayAnalysis | null => {
     resultClass: run.resultClass,
     impacts: run.inventoryImpacts.map(toImpact),
     riskOrders: run.atRiskOrders.map(toRiskOrder),
-    options: run.responseOptions.map((option) => toOption(option, explanationPassed)),
+    options: sortOptions(run.responseOptions.map((option) => toOption(option, explanationPassed))),
     explanation: toExplanation(run),
   }
 }
