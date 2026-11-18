@@ -16,9 +16,10 @@ export function PasswordInput(props: Omit<ComponentProps<typeof Input>, 'type' |
         autoComplete="new-password"
         className="pr-40pxr"
       />
+      {/* 누르는 영역은 24px 이상이어야 한다(접근성). 아이콘(18px) 자리는 그대로 두고 영역만 28px로 넓힌다 */}
       <button
         type="button"
-        className="absolute top-1/2 right-12pxr -translate-y-1/2 cursor-pointer text-muted-foreground outline-none hover:text-foreground focus-visible:text-primary"
+        className="absolute top-1/2 right-7pxr grid size-28pxr -translate-y-1/2 cursor-pointer place-items-center text-muted-foreground outline-none hover:text-foreground focus-visible:text-primary"
         aria-label={isVisible ? '비밀번호 숨기기' : '비밀번호 보기'}
         onClick={() => setIsVisible((prev) => !prev)}
       >
