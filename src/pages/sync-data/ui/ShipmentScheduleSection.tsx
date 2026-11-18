@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { getRegionLabel } from '@/entities/delay-event'
 import type { ShipmentDetail } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
@@ -26,7 +28,32 @@ export function ShipmentScheduleSection({ detail }: { detail: ShipmentDetail }) 
   return (
     <section className="flex flex-col gap-12pxr">
       <h3 className="text-b1 font-bold">일정</h3>
-      <Table density="compact">
+      {/* 좁은 화면에서는 날짜 열 셋을 한 줄에 담을 수 없어, 구간마다 계획·예상·실제를 세로로 쌓는다 */}
+      <ul className="flex flex-col divide-y divide-border border-y border-border sm:hidden">
+        <LegCard name="출고" place="한국">
+          <LegDate label="계획" value={detail.plannedKrReleaseDate} />
+        </LegCard>
+        <LegCard name={getArrivalLegLabel(detail.transportMode)} place={plannedBasis.usPortName}>
+          <LegDate label="예상" value={detail.expectedPortArrivalDate} />
+        </LegCard>
+        <LegCard
+          name="3PL 입고"
+          place={`${warehouse.warehouseCode} · ${getRegionLabel(warehouse.regionCode)}`}
+        >
+          <LegDate label="계획" value={detail.planned3plInboundDate} />
+          <LegDate
+            label="예상"
+            value={detail.expected3plInboundDate}
+            delayLabel={isReceived ? null : delayLabel}
+          />
+          <LegDate
+            label="실제"
+            value={detail.actual3plInboundDate}
+            delayLabel={isReceived ? delayLabel : null}
+          />
+        </LegCard>
+      </ul>
+      <Table density="compact" className="hidden sm:table">
         <TableHeader>
           <TableRow>
             <TableHead scope="col">구간</TableHead>
@@ -86,6 +113,39 @@ export function ShipmentScheduleSection({ detail }: { detail: ShipmentDetail }) 
 
 /** 행의 좌우·상하 여백. 구간 칸이 두 줄이라 기본보다 조금 줄인다 */
 const CELL_CLASS = 'px-12pxr py-8pxr'
+
+/** 좁은 화면용 구간 카드. 구간 이름·장소 아래에 해당하는 날짜만 라벨과 함께 쌓는다 */
+function LegCard({ name, place, children }: { name: string; place: string; children: ReactNode }) {
+  return (
+    <li className="flex flex-col gap-8pxr py-12pxr">
+      <p className="font-medium">
+        {name}
+        <span className="ml-8pxr text-caption font-normal text-muted-foreground">{place}</span>
+      </p>
+      <dl className="flex flex-col gap-4pxr">{children}</dl>
+    </li>
+  )
+}
+
+function LegDate({
+  label,
+  value,
+  delayLabel,
+}: {
+  label: string
+  value: string | null
+  delayLabel?: string | null
+}) {
+  return (
+    <div className="flex items-baseline gap-12pxr">
+      <dt className="w-32pxr shrink-0 text-caption text-muted-foreground">{label}</dt>
+      <dd className={cn('tabular-nums', delayLabel && 'text-danger')}>
+        {value ?? EMPTY_VALUE}
+        {delayLabel && <span className="ml-6pxr text-caption font-bold">{delayLabel}</span>}
+      </dd>
+    </div>
+  )
+}
 
 /** 구간 이름과 장소. 행 머리글이라 th다 */
 function LegHead({ name, place }: { name: string; place: string }) {
