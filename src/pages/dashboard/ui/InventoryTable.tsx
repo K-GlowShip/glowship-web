@@ -31,6 +31,7 @@ import { InfoTip } from '@/shared/ui/tooltip'
 
 import {
   diffDays,
+  INVENTORY_EMPTY_MESSAGE,
   INVENTORY_PAGE_SIZE,
   INVENTORY_STATUS_BADGE_VARIANT,
   INVENTORY_STATUS_LABEL,
@@ -116,7 +117,7 @@ export function InventoryTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableQueryRows query={query} colSpan={6} emptyMessage="재고 현황이 없습니다.">
+              <TableQueryRows query={query} colSpan={6} emptyMessage={INVENTORY_EMPTY_MESSAGE}>
                 {(items) =>
                   items.map((item) => (
                     // 같은 거점·상품은 한 행이다(명세 4.4)
@@ -188,7 +189,7 @@ function InventoryCardList({
       </div>
     ) : (
       <div className={cn('flex flex-col gap-8pxr', className)}>
-        {Array.from({ length: 3 }, (_, index) => (
+        {Array.from({ length: INVENTORY_PAGE_SIZE }, (_, index) => (
           <Skeleton key={index} className="h-120pxr" />
         ))}
       </div>
@@ -197,7 +198,7 @@ function InventoryCardList({
   if (data.items.length === 0) {
     return (
       <p className={cn('py-48pxr text-center text-muted-foreground', className)}>
-        재고 현황이 없습니다.
+        {INVENTORY_EMPTY_MESSAGE}
       </p>
     )
   }

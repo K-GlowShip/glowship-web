@@ -21,6 +21,9 @@ export const DELAY_PREVIEW_SIZE = 5
 /** 대시보드 재고 현황 표의 페이지 크기. 서버가 위험 순으로 정렬해 주므로 1페이지에 급한 행이 모인다 */
 export const INVENTORY_PAGE_SIZE = 5
 
+/** 재고 현황이 하나도 없을 때의 안내(표와 모바일 카드 목록이 같이 쓴다) */
+export const INVENTORY_EMPTY_MESSAGE = '재고 현황이 없습니다.'
+
 // 명세에 OK·CAUTION·RISK의 표시명이 없다. 시안의 '정상'·'주의'에 맞춰 '위험'을 붙인 제안값
 export const INVENTORY_STATUS_LABEL: Record<InventoryStatus, string> = {
   [INVENTORY_STATUS.OK]: '정상',
