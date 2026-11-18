@@ -45,7 +45,7 @@ export function HeroRouteContent() {
       : null
 
   return (
-    <div className="relative flex min-h-320pxr flex-col justify-between gap-24pxr p-32pxr">
+    <div className="relative flex min-h-320pxr flex-col justify-between gap-24pxr p-20pxr web:p-32pxr">
       <div className="flex max-w-560pxr flex-col gap-16pxr">
         {/* 불러오는 동안(또는 실패했을 때)에는 날짜줄을 비운다. 값이 없는 것과 아직 안 온 것은 다르다 */}
         {summary ? (
@@ -69,7 +69,7 @@ export function HeroRouteContent() {
           </h1>
         ) : (
           // 아무것도 그리지 않되, 한 문장(두 줄)이 들어올 높이만 잡아 데이터가 와도 아래가 밀리지 않게 한다
-          <h1 className="invisible text-hero font-light" aria-hidden="true">
+          <h1 className="invisible text-hero font-bold" aria-hidden="true">
             &nbsp;
             <br />
             &nbsp;
@@ -82,7 +82,7 @@ export function HeroRouteContent() {
        * 배경일 때는 왼쪽 120px을 비워 두어, 요약이 그리 넓지 않을 때 한국 항구와 호의 출발부가 커진 한 문장 카피
        * 밑으로 들어가지 않게 한다(넓으면 지도가 오른쪽에 맞춰져 이 여백은 영향이 없다)
        */}
-      <div className="@3xl:absolute @3xl:inset-y-0 @3xl:right-0 @3xl:left-120pxr @3xl:-z-10">
+      <div className="-mx-20pxr web:-mx-32pxr @3xl:absolute @3xl:inset-y-0 @3xl:right-0 @3xl:left-120pxr @3xl:-z-10 @3xl:mx-0">
         <RouteMap className="h-auto w-full @3xl:h-full" />
       </div>
 

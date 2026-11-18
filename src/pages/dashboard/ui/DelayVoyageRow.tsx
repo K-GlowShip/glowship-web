@@ -23,7 +23,7 @@ import { Badge } from '@/shared/ui/badge'
 
 /** 지연 한 줄의 열 나눔. 넓은 화면에서는 선적 번호 열을 고정하고 남는 폭을 여정 선이 갖는다 */
 const ROW_GRID_CLASS =
-  'grid gap-x-24pxr px-24pxr lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_9rem_4.5rem_8.5rem] xl:gap-x-40pxr 2xl:grid-cols-[17.5rem_minmax(0,1fr)_9rem_4.5rem_8.5rem]'
+  'grid gap-x-24pxr px-24pxr web:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_9rem_4.5rem_8.5rem] xl:gap-x-40pxr 2xl:grid-cols-[17.5rem_minmax(0,1fr)_9rem_4.5rem_8.5rem]'
 
 /** 지연 한 건을 한 줄로 보여 준다. 줄 전체를 누르면 그 지연의 상세로 이동한다 */
 export function DelayVoyageRow({ delay }: { delay: DelayEventListItem }) {

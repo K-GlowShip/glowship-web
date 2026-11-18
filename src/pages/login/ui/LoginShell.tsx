@@ -11,10 +11,10 @@ import { LoginHero } from './LoginHero'
 export function LoginShell({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-linear-to-r from-muted via-[#fcf9fd] to-[#f5e1ed]">
-      <div className="mx-auto flex min-h-screen w-full max-w-1200pxr items-center justify-center px-16pxr py-32pxr lg:gap-300pxr">
+      <div className="mx-auto flex min-h-screen w-full max-w-1200pxr items-center justify-center px-16pxr py-32pxr web:gap-300pxr">
         <LoginHero />
-        <div className="flex w-full flex-col items-center gap-24pxr lg:w-auto">
-          <Logo className="w-96pxr lg:hidden" />
+        <div className="flex w-full flex-col items-center gap-24pxr web:w-auto">
+          <Logo className="w-96pxr web:hidden" />
           <div className="w-420pxr max-w-full rounded-panel bg-card p-32pxr shadow-[0_8px_32px_rgba(37,35,49,0.08)]">
             <header className="mb-24pxr text-center">
               <h1 className="text-h2 font-bold text-foreground">로그인</h1>

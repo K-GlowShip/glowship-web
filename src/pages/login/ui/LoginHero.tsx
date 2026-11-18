@@ -2,7 +2,7 @@ import { Logo } from '@/shared/ui/logo'
 
 export function LoginHero() {
   return (
-    <section className="hidden flex-col gap-24pxr lg:flex">
+    <section className="hidden flex-col gap-24pxr web:flex">
       <Logo className="w-104pxr" />
       <p className="text-display font-bold text-foreground">
         물류의 흐름에,

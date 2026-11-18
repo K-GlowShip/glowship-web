@@ -44,7 +44,7 @@ export function ImpactAxis({ impacts, shipment }: ImpactAxisProps) {
   const summary = buildAxisSummary(rows, shipment)
 
   return (
-    <div className="flex flex-col gap-12pxr [--axis-label:9rem] lg:[--axis-label:14rem]">
+    <div className="flex flex-col gap-12pxr [--axis-label:9rem] web:[--axis-label:14rem]">
       {/* 선적 줄과 상품 줄을 한 판으로 감싼다. 위계는 상자가 아니라 들여쓰기·연결선·굵기로 만든다 */}
       <div
         role="img"

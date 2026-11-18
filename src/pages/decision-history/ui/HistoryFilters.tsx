@@ -79,27 +79,29 @@ export function HistoryFilters({ value, isSearching, onSearch }: HistoryFiltersP
           />
         </div>
 
-        <div className="flex w-full max-w-320pxr flex-col gap-8pxr">
+        {/* 검색어 입력과 조회 버튼은 다른 화면처럼 한 줄에 8px 간격으로 둔다 */}
+        <div className="flex w-full max-w-420pxr flex-col gap-8pxr">
           <Label id="history-keyword-label">선적 / 상품</Label>
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute top-1/2 left-12pxr size-18pxr -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              aria-labelledby="history-keyword-label"
-              className="pl-40pxr"
-              placeholder="선적 번호 또는 상품 검색"
-              maxLength={SEARCH_MAX_LENGTH}
-              value={draft.keyword}
-              onChange={(event) => setDraft({ ...draft, keyword: event.target.value })}
-            />
+          <div className="flex items-center gap-8pxr">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-12pxr size-18pxr -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                aria-labelledby="history-keyword-label"
+                className="pl-40pxr"
+                placeholder="선적 번호 또는 상품 검색"
+                maxLength={SEARCH_MAX_LENGTH}
+                value={draft.keyword}
+                onChange={(event) => setDraft({ ...draft, keyword: event.target.value })}
+              />
+            </div>
+            <Button type="submit" size="lg" loading={isSearching} className="h-44pxr shrink-0">
+              조회
+            </Button>
           </div>
         </div>
-
-        <Button type="submit" size="lg" loading={isSearching} className="h-44pxr">
-          조회
-        </Button>
       </form>
     </div>
   )

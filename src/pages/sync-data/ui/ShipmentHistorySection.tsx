@@ -62,52 +62,96 @@ export function ShipmentHistorySection({
         </p>
       ) : (
         <>
-          <Table id={tableId} density="compact">
-            <TableHeader>
-              <TableRow>
-                <TableHead scope="col" className="w-150pxr py-10pxr">
-                  관측 시각
-                </TableHead>
-                <TableHead scope="col" className="py-10pxr">
-                  단계
-                </TableHead>
-                <TableHead scope="col" className="w-140pxr py-10pxr">
-                  예상 {getArrivalLegLabel(transportMode)}
-                </TableHead>
-                <TableHead scope="col" className="w-140pxr py-10pxr">
-                  예상 3PL 입고
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {/* 더 보기 버튼이 가리키는 대상. 모바일에서는 표가 숨겨지므로, 보이는 쪽(카드 목록 또는 표)을 함께 감싸는 곳에 id를 둔다 */}
+          <div id={tableId}>
+            {/* 좁은 화면에서는 네 열을 한 줄에 담을 수 없어, 관측마다 카드로 쌓는다. 구분선 없이 간격으로만 나눈다 */}
+            <ul className="flex flex-col gap-20pxr sm:hidden">
               {visibleChanges.map(
                 ({ observation, portArrivalShiftDays, inboundShiftDays }, index) => (
-                  <TableRow key={`${observation.observedAt}-${index}`}>
-                    <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
-                      <time dateTime={observation.observedAt}>
+                  <li key={`${observation.observedAt}-${index}`} className="flex flex-col gap-8pxr">
+                    <p className="flex flex-wrap items-baseline gap-x-8pxr">
+                      <time dateTime={observation.observedAt} className="font-medium tabular-nums">
                         {formatYYYYMMDDHHmm(observation.observedAt)}
                       </time>
-                    </TableCell>
-                    <TableCell className={CELL_CLASS}>
-                      {getShipmentStageLabel(observation.stage, transportMode)}
-                    </TableCell>
-                    <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
-                      <ShiftedDate
-                        date={observation.expectedPortArrivalDate}
-                        shift={portArrivalShiftDays}
-                      />
-                    </TableCell>
-                    <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
-                      <ShiftedDate
-                        date={observation.expected3plInboundDate}
-                        shift={inboundShiftDays}
-                      />
-                    </TableCell>
-                  </TableRow>
+                      <span className="text-caption text-muted-foreground">
+                        {getShipmentStageLabel(observation.stage, transportMode)}
+                      </span>
+                    </p>
+                    <dl className="flex flex-col gap-4pxr tabular-nums">
+                      <div className="flex items-baseline gap-12pxr">
+                        <dt className="w-96pxr shrink-0 text-caption text-muted-foreground">
+                          예상 {getArrivalLegLabel(transportMode)}
+                        </dt>
+                        <dd>
+                          <ShiftedDate
+                            date={observation.expectedPortArrivalDate}
+                            shift={portArrivalShiftDays}
+                          />
+                        </dd>
+                      </div>
+                      <div className="flex items-baseline gap-12pxr">
+                        <dt className="w-96pxr shrink-0 text-caption text-muted-foreground">
+                          예상 3PL 입고
+                        </dt>
+                        <dd>
+                          <ShiftedDate
+                            date={observation.expected3plInboundDate}
+                            shift={inboundShiftDays}
+                          />
+                        </dd>
+                      </div>
+                    </dl>
+                  </li>
                 ),
               )}
-            </TableBody>
-          </Table>
+            </ul>
+            <Table density="compact" className="hidden sm:table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead scope="col" className="w-150pxr py-10pxr">
+                    관측 시각
+                  </TableHead>
+                  <TableHead scope="col" className="py-10pxr">
+                    단계
+                  </TableHead>
+                  <TableHead scope="col" className="w-140pxr py-10pxr">
+                    예상 {getArrivalLegLabel(transportMode)}
+                  </TableHead>
+                  <TableHead scope="col" className="w-140pxr py-10pxr">
+                    예상 3PL 입고
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleChanges.map(
+                  ({ observation, portArrivalShiftDays, inboundShiftDays }, index) => (
+                    <TableRow key={`${observation.observedAt}-${index}`}>
+                      <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
+                        <time dateTime={observation.observedAt}>
+                          {formatYYYYMMDDHHmm(observation.observedAt)}
+                        </time>
+                      </TableCell>
+                      <TableCell className={CELL_CLASS}>
+                        {getShipmentStageLabel(observation.stage, transportMode)}
+                      </TableCell>
+                      <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
+                        <ShiftedDate
+                          date={observation.expectedPortArrivalDate}
+                          shift={portArrivalShiftDays}
+                        />
+                      </TableCell>
+                      <TableCell className={cn(CELL_CLASS, 'tabular-nums')}>
+                        <ShiftedDate
+                          date={observation.expected3plInboundDate}
+                          shift={inboundShiftDays}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )}
+              </TableBody>
+            </Table>
+          </div>
           {hiddenCount > 0 && (
             <Button
               variant="link"

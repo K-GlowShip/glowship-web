@@ -70,9 +70,21 @@ export function InboundTrendChart({ bars, isAnimationActive }: InboundTrendChart
   )
   const yMax = yTicks[yTicks.length - 1]
 
+  // 그래프는 바깥 래퍼가 role="img"와 설명으로 읽어 주므로, recharts가 만드는 포커스 대상(tabindex)과 클릭 때의 테두리는 끈다
   return (
-    <ResponsiveContainer width="100%" height="100%" onResize={(width) => setChartWidth(width)}>
-      <BarChart data={bars} margin={CHART_MARGIN} barCategoryGap="24%" barGap={3}>
+    <ResponsiveContainer
+      className="[&_*]:outline-none"
+      width="100%"
+      height="100%"
+      onResize={(width) => setChartWidth(width)}
+    >
+      <BarChart
+        accessibilityLayer={false}
+        data={bars}
+        margin={CHART_MARGIN}
+        barCategoryGap="16%"
+        barGap={3}
+      >
         <CartesianGrid vertical={false} stroke={GRID_COLOR} strokeDasharray="3 3" />
         <XAxis
           dataKey="tick"

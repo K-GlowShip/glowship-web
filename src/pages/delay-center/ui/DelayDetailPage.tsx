@@ -8,6 +8,7 @@ import { analysisRunQueries, delayEventQueries, isApiError, isRunInProgress } fr
 import { DELAY_EVENT_ID_PARAM, ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { QueryError } from '@/shared/ui/query-error'
+import { DetailPageSkeleton } from '@/shared/ui/skeleton'
 
 import { getListSearch, toClientRole } from '../model/delay-center'
 import { getAnalysisPollInterval } from '../model/analysis-poll-interval'
@@ -15,7 +16,6 @@ import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 import { toDelayCase } from '../model/to-delay-case'
 import { useAnalysisPollLimit } from '../model/use-analysis-poll-limit'
 import { DelayDetail } from './DelayDetail'
-import { DelayDetailSkeleton } from './DelayDetailSkeleton'
 
 const DELAY_EVENT_NOT_FOUND = 'DELAY_EVENT_NOT_FOUND'
 
@@ -73,13 +73,16 @@ export function DelayDetailPage() {
 
   return (
     <div className="flex flex-col gap-16pxr">
-      <Link
-        to={{ pathname: ROUTES.DELAY_CENTER, search: listSearch }}
-        className="flex w-fit items-center gap-4pxr rounded-card text-b1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
-      >
-        <ChevronLeft className="size-18pxr" aria-hidden="true" />
-        목록으로
-      </Link>
+      {/* 모바일에서는 스크롤을 내려도 목록으로 돌아갈 수 있게 위에 붙여 둔다(스크롤 영역의 안쪽 여백 16px만큼 위로 올려 맨 위에 맞닿게 한다). 웹은 내용 위에 그대로 둔다. 날짜 축의 점(z-10)보다 위에 오도록 z-20이다 */}
+      <div className="sticky -top-16pxr z-20 -mx-16pxr -mt-16pxr bg-background px-16pxr pt-16pxr pb-8pxr web:static web:m-0 web:bg-transparent web:p-0">
+        <Link
+          to={{ pathname: ROUTES.DELAY_CENTER, search: listSearch }}
+          className="flex w-fit items-center gap-4pxr rounded-card text-b1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-primary/30"
+        >
+          <ChevronLeft className="size-18pxr" aria-hidden="true" />
+          목록으로
+        </Link>
+      </div>
 
       {delayCase && pollLimit.isTimedOut && <SlowAnalysisNotice onRetry={retryPolling} />}
 
@@ -101,7 +104,7 @@ export function DelayDetailPage() {
         // 분석 실행이 없거나 서버가 모르는 상태를 주면 화면 상태를 정할 수 없다
         <Notice>분석 상태를 확인할 수 없습니다.</Notice>
       ) : (
-        <DelayDetailSkeleton />
+        <DetailPageSkeleton />
       )}
     </div>
   )

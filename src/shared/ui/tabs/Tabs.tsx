@@ -2,6 +2,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { type ComponentProps, useLayoutEffect, useRef, useState } from 'react'
 
 import { cn } from '@/shared/lib/cn'
+import { prefersReducedMotion } from '@/shared/lib/reduced-motion'
 
 export function Tabs({ className, ...props }: ComponentProps<typeof TabsPrimitive.Root>) {
   return (
@@ -50,12 +51,37 @@ export function TabsList({
       )
     }
 
+    // 활성 탭이 바뀌면 그 탭이 목록 가운데 오도록 스르륵 밀어 준다. 좁은 화면에서 잘려 있던 탭이 보이게 한다.
+    // 처음 그릴 때는 효과 없이 바로 맞춘다
+    let lastActive: Element | null = null
+    const centerActive = (smooth: boolean) => {
+      const active = list.querySelector<HTMLElement>('[data-state="active"]')
+      if (!active || active === lastActive) {
+        return
+      }
+
+      lastActive = active
+
+      const max = list.scrollWidth - list.clientWidth
+      if (max <= 0) {
+        return
+      }
+
+      const target = active.offsetLeft + active.offsetWidth / 2 - list.clientWidth / 2
+      list.scrollTo({
+        left: Math.min(Math.max(target, 0), max),
+        behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto',
+      })
+    }
+
     observeTabs()
     measure()
+    centerActive(false)
     const frame = requestAnimationFrame(() => setIsAnimated(true))
     const mutationObserver = new MutationObserver(() => {
       observeTabs()
       measure()
+      centerActive(true)
     })
     mutationObserver.observe(list, {
       attributes: true,
@@ -77,9 +103,9 @@ export function TabsList({
       ref={listRef}
       data-slot="tabs-list"
       className={cn(
-        // 좁은 화면에서는 가로로 밀 수 있게 한다. 밑줄 막대가 아래로 삐져나가면 세로 스크롤이 생기므로,
+        // 좁은 화면에서는 가로로 밀 수 있게 하되(드래그·스와이프), 스크롤 막대는 모바일에서만 숨긴다(웹은 넘칠 때 단서가 되도록 둔다). 밑줄 막대가 아래로 삐져나가면 세로 스크롤이 생기므로,
         // 아래 경계선은 border 대신 안쪽 그림자로 그려 막대가 그 위에 겹쳐지게 한다
-        'relative flex items-center gap-24pxr overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-border)]',
+        'relative flex items-center gap-24pxr overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-border)] max-web:scrollbar-none',
         className,
       )}
       {...props}

@@ -47,7 +47,7 @@ export function ShipmentLinesSection({ lines, tableId }: ShipmentLinesSectionPro
             <TableHeader>
               <TableRow>
                 <TableHead scope="col" className="w-48pxr py-10pxr text-right">
-                  줄
+                  No
                 </TableHead>
                 <TableHead scope="col" className="py-10pxr">
                   상품
@@ -65,8 +65,9 @@ export function ShipmentLinesSection({ lines, tableId }: ShipmentLinesSectionPro
                   >
                     {line.lineNo}
                   </TableCell>
-                  <TableCell className={cn(CELL_CLASS, 'truncate')} title={line.sku.productName}>
-                    <span className="mr-8pxr text-b2 text-muted-foreground tabular-nums">
+                  <TableCell className={cn(CELL_CLASS, 'wrap-break-word')}>
+                    {/* 좁은 화면에서는 상품 코드를 윗줄로 올려, 이름이 잘리지 않고 줄바꿈되게 한다 */}
+                    <span className="block text-b2 text-muted-foreground tabular-nums sm:mr-8pxr sm:inline">
                       {line.sku.skuCode}
                     </span>
                     {line.sku.productName}

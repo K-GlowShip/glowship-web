@@ -83,8 +83,8 @@ function OperatingRulesContent({
           </div>
         )}
         {ruleSets && selected && (
-          <div className="grid lg:grid-cols-[15rem_1fr]">
-            <div className="border-b border-border p-16pxr lg:border-r lg:border-b-0">
+          <div className="grid web:grid-cols-[15rem_1fr]">
+            <div className="border-b border-border p-16pxr web:border-r web:border-b-0">
               <VersionList
                 ruleSets={ruleSets}
                 selectedId={selected.operatingRuleSetId}

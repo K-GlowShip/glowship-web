@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery, type UseQueryResult } from '@tanstack/react-query'
+import { type ReactNode, useState } from 'react'
 
 import { getRegionLabel } from '@/entities/delay-event'
 import {
@@ -7,6 +7,7 @@ import {
   inventoryStatusQueries,
   type InventoryStatus,
   type InventoryStatusItem,
+  type InventoryStatusPage,
 } from '@/shared/api'
 import { EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
@@ -15,6 +16,8 @@ import { addDays, formatMMDD } from '@/shared/lib/kst-date'
 import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Pagination } from '@/shared/ui/pagination'
+import { QueryError } from '@/shared/ui/query-error'
+import { Skeleton } from '@/shared/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -28,6 +31,7 @@ import { InfoTip } from '@/shared/ui/tooltip'
 
 import {
   diffDays,
+  INVENTORY_EMPTY_MESSAGE,
   INVENTORY_PAGE_SIZE,
   INVENTORY_STATUS_BADGE_VARIANT,
   INVENTORY_STATUS_LABEL,
@@ -54,16 +58,18 @@ export function InventoryTable() {
 
   return (
     <Card className="border-primary-100">
-      <CardHeader>
+      <CardHeader className="flex-wrap items-start gap-y-8pxr px-16pxr pt-20pxr web:items-center web:px-24pxr web:pt-24pxr">
         <div className="flex items-center gap-8pxr">
-          <CardTitle as="h2">거점별 재고 현황</CardTitle>
+          <CardTitle as="h2" className="break-keep">
+            거점별 재고 현황
+          </CardTitle>
           <InfoTip
             label="거점별 재고 현황"
             // 기준일·판매량 기간·입고 예정 미반영은 오른쪽 줄이 이미 알리므로, 거기 없는 내용(계산 방식과 다른 화면과의 차이)만 적는다
             description={`현재 재고를 평균 판매량으로 소진한다고 가정한 날짜입니다.\n입고를 반영한 날짜는 지연 대응 센터에서 확인하세요.`}
           />
         </div>
-        <dl className="flex flex-wrap justify-end gap-x-16pxr gap-y-2pxr text-caption">
+        <dl className="flex flex-wrap gap-x-16pxr gap-y-2pxr text-caption web:justify-end">
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">기준일</dt>
             <dd>{formatMMDD(baseDate)}</dd>
@@ -79,8 +85,15 @@ export function InventoryTable() {
           </div>
         </dl>
       </CardHeader>
-      <CardContent className="flex flex-col gap-16pxr pt-16pxr">
-        <div className="overflow-x-auto">
+      <CardContent className="flex flex-col gap-16pxr px-16pxr pt-16pxr web:p-24pxr">
+        {/* 모바일은 한 줄에 여섯 칸을 담을 수 없어 상품마다 카드로 쌓고, 넓은 화면에서는 표를 쓴다 */}
+        <InventoryCardList
+          query={query}
+          baseDate={baseDate}
+          safetyStockDays={safetyStockDays}
+          className="web:hidden"
+        />
+        <div className="hidden overflow-x-auto web:block">
           <Table className="min-w-720pxr">
             <TableHeader>
               <TableRow>
@@ -104,7 +117,7 @@ export function InventoryTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableQueryRows query={query} colSpan={6} emptyMessage="재고 현황이 없습니다.">
+              <TableQueryRows query={query} colSpan={6} emptyMessage={INVENTORY_EMPTY_MESSAGE}>
                 {(items) =>
                   items.map((item) => (
                     // 같은 거점·상품은 한 행이다(명세 4.4)
@@ -150,6 +163,91 @@ export function InventoryTable() {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+interface InventoryCardListProps {
+  query: UseQueryResult<InventoryStatusPage>
+  baseDate: string | null
+  safetyStockDays: number | null
+  className?: string
+}
+
+/** 모바일용 목록. 표와 같은 값을 상품·거점 카드 하나에 모아 보여 준다 */
+function InventoryCardList({
+  query,
+  baseDate,
+  safetyStockDays,
+  className,
+}: InventoryCardListProps) {
+  const { data, error, isFetching, refetch } = query
+
+  if (!data) {
+    return error ? (
+      <div className={className}>
+        <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
+      </div>
+    ) : (
+      <div className={cn('flex flex-col gap-8pxr', className)}>
+        {Array.from({ length: INVENTORY_PAGE_SIZE }, (_, index) => (
+          <Skeleton key={index} className="h-120pxr" />
+        ))}
+      </div>
+    )
+  }
+  if (data.items.length === 0) {
+    return (
+      <p className={cn('py-48pxr text-center text-muted-foreground', className)}>
+        {INVENTORY_EMPTY_MESSAGE}
+      </p>
+    )
+  }
+  return (
+    <ul className={cn('flex flex-col divide-y divide-border border-y', className)}>
+      {data.items.map((item) => (
+        <li
+          key={`${item.warehouse.warehouseId}-${item.sku.skuId}`}
+          className="flex flex-col gap-12pxr py-16pxr"
+        >
+          <div className="flex items-start justify-between gap-12pxr">
+            <div className="min-w-0">
+              <p className="font-bold break-keep">{item.sku.productName}</p>
+              <p className="text-caption text-muted-foreground">
+                {getRegionLabel(item.warehouse.regionCode)}
+              </p>
+            </div>
+            <Badge
+              variant={INVENTORY_STATUS_BADGE_VARIANT[item.status]}
+              pulse={item.status === INVENTORY_STATUS.RISK}
+              className="shrink-0"
+            >
+              {INVENTORY_STATUS_LABEL[item.status]}
+            </Badge>
+          </div>
+          <dl className="grid grid-cols-2 gap-x-16pxr gap-y-12pxr text-b2">
+            <CardStat label="가용 재고(개)">{formatNumber(item.availableQuantity)}</CardStat>
+            <CardStat label="평균 일 판매량(개)">{formatNumber(item.averageDailySales)}</CardStat>
+            <CardStat
+              label={`안전재고${safetyStockDays === null ? '' : `(${safetyStockDays}일분)`} 하회`}
+            >
+              {formatMMDD(item.safetyStockBreachDate)}
+            </CardStat>
+            <CardStat label="소진 예상">
+              <StockoutCell item={item} baseDate={baseDate} safetyStockDays={safetyStockDays} />
+            </CardStat>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function CardStat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2pxr">
+      <dt className="text-caption text-muted-foreground">{label}</dt>
+      <dd className="tabular-nums">{children}</dd>
+    </div>
   )
 }
 

@@ -23,10 +23,10 @@ const RADIO_NAME = 'decision-option'
 
 /** 대응안 수에 맞춰 넓은 화면에서 한 줄에 나란히 놓는다 */
 const GRID_COLUMNS: Record<number, string> = {
-  1: 'lg:grid-cols-1',
-  2: 'lg:grid-cols-2',
-  3: 'lg:grid-cols-3',
-  4: 'lg:grid-cols-4',
+  1: 'web:grid-cols-1',
+  2: 'web:grid-cols-2',
+  3: 'web:grid-cols-3',
+  4: 'web:grid-cols-4',
 }
 
 interface OptionSelection {
