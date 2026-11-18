@@ -28,12 +28,19 @@ export function DelayVoyageCard() {
   return (
     // 맨 아래 줄의 호버 배경이 카드의 둥근 모서리를 넘지 않게 잘라 낸다
     <Card className="overflow-hidden border-primary-100">
-      <CardHeader>
-        <div className="flex items-center gap-12pxr">
-          <CardTitle as="h2">대응이 필요한 지연</CardTitle>
-          <p className="text-caption text-muted-foreground">최근 {DELAY_PREVIEW_SIZE}건만 표시</p>
+      <CardHeader className="flex-wrap gap-x-16pxr gap-y-4pxr">
+        <div className="flex flex-wrap items-baseline gap-x-12pxr gap-y-2pxr">
+          <CardTitle as="h2" className="break-keep">
+            대응이 필요한 지연
+          </CardTitle>
+          <p className="text-caption whitespace-nowrap text-muted-foreground">
+            최근 {DELAY_PREVIEW_SIZE}건만 표시
+          </p>
         </div>
-        <Link to={ROUTES.DELAY_CENTER} className="text-b2 text-primary hover:underline">
+        <Link
+          to={ROUTES.DELAY_CENTER}
+          className="text-b2 whitespace-nowrap text-primary hover:underline"
+        >
           지연 대응 센터에서 보기 →
         </Link>
       </CardHeader>

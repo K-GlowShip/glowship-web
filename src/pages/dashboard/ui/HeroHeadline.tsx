@@ -12,15 +12,15 @@ interface HeroHeadlineProps {
   className?: string
 }
 
-/** 오늘의 한 문장. 강조 부분만 색을 달리하고, 건수는 0에서 올라온다 */
+/** 오늘의 한 문장. 문장 전체가 볼드이고 강조 부분만 색을 달리하며, 건수는 0에서 올라온다 */
 export function HeroHeadline({ copy, highlightClassName, className }: HeroHeadlineProps) {
   const { lead, highlightCount, highlightText, trail } = copy
 
   return (
-    <h1 className={cn('font-light break-keep', className)}>
+    <h1 className={cn('font-bold break-keep', className)}>
       {lead}
       <br />
-      <span className={cn('font-medium tabular-nums', highlightClassName)}>
+      <span className={cn('tabular-nums', highlightClassName)}>
         {highlightCount !== null && (
           <CountUp value={highlightCount} format={(value) => formatNumber(Math.round(value))} />
         )}

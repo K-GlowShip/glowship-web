@@ -26,7 +26,7 @@ export function DashboardHero() {
         />
       </div>
       <HeroRouteContent />
-      <div className="px-32pxr pb-32pxr">
+      <div className="px-20pxr pb-24pxr lg:px-32pxr lg:pb-32pxr">
         <KpiCards />
       </div>
     </section>
