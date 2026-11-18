@@ -19,7 +19,8 @@ export function SyncDataTabs() {
     <Card className="rounded-panel">
       <CardContent className="p-32pxr">
         <Tabs defaultValue={TAB.ORDER}>
-          <TabsList>
+          {/* 모바일에서는 아래로 스크롤해도 탭이 위에 붙어 있게 한다. 스크롤 영역의 안쪽 여백 16px만큼 올려 맨 위에 맞닿게 하고, 웹은 그대로 둔다 */}
+          <TabsList className="sticky -top-16pxr z-10 bg-card lg:static">
             <TabsTrigger value={TAB.ORDER}>주문</TabsTrigger>
             <TabsTrigger value={TAB.INVENTORY}>재고</TabsTrigger>
             <TabsTrigger value={TAB.SHIPMENT}>선적</TabsTrigger>
