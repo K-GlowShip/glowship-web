@@ -71,3 +71,11 @@ export const DETAIL_SECTION = {
 } as const
 
 export type DetailSection = (typeof DETAIL_SECTION)[keyof typeof DETAIL_SECTION]
+
+/** 대응안 기준 위험 주문 하나의 결과(`outcomes[].outcome`) */
+export const ORDER_OUTCOME = {
+  RECOVERED: 'RECOVERED',
+  NOT_RECOVERED: 'NOT_RECOVERED',
+} as const
+
+export type OrderOutcomeCode = (typeof ORDER_OUTCOME)[keyof typeof ORDER_OUTCOME]

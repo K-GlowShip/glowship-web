@@ -9,23 +9,25 @@ import {
 } from '@/shared/api'
 import { formatYYYYMMDD } from '@/shared/lib/kst-date'
 
-import type {
-  AiExplanation,
-  AnalysisRunSummary,
-  DelayAnalysis,
-  DelayCase,
-  DelayOption,
-  FinalDecision,
-  MemberOpinion,
-  RiskOrder,
-  SkuImpact,
-  StageCode,
-  TransportMode,
-  WarehouseRegion,
+import {
+  type AiExplanation,
+  type AnalysisRunSummary,
+  type DelayAnalysis,
+  type DelayCase,
+  type DelayOption,
+  type FinalDecision,
+  type MemberOpinion,
+  type RiskOrder,
+  type SkuImpact,
+  sortOptions,
+  type StageCode,
+  type TransportMode,
+  type WarehouseRegion,
 } from './delay-center'
 import {
   type Feasibility,
   type OptionType,
+  type OrderOutcomeCode,
   type ReasonCode,
   RESULT_CLASS,
   type ResultClass,
@@ -73,6 +75,7 @@ const toRiskOrder = (order: AnalysisRunDetail['atRiskOrders'][number]): RiskOrde
   promisedDate: formatYYYYMMDD(order.promisedDeliveryAt),
   expectedDate: formatYYYYMMDD(order.expectedDeliveryAt),
   lines: order.lines.map((line) => ({
+    riskLineId: line.atRiskOrderId,
     lineNo: line.lineNo,
     skuCode: line.sku.skuCode,
     productName: line.sku.productName,
@@ -95,6 +98,12 @@ const toOption = (
   itemSecuredBlockedOrders: option.itemSecuredBlockedOrders,
   // 설명 검증을 통과하지 못한 실행은 서버가 추천을 주어도 추천으로 보여 주지 않는다(명세 4.5)
   recommended: explanationPassed && option.isRecommended,
+  outcomes: option.outcomes.map((outcome) => ({
+    riskLineId: outcome.atRiskOrderId,
+    outcome: outcome.outcome as OrderOutcomeCode,
+    notRecoveredReason: outcome.notRecoveredReason,
+    expectedDate: outcome.expectedDeliveryAt ? formatYYYYMMDD(outcome.expectedDeliveryAt) : null,
+  })),
 })
 
 /** 설명 검증을 통과하지 못했으면 설명이 없다(`explanation`이 null) */
@@ -132,7 +141,7 @@ const toAnalysis = (run: AnalysisRunDetail): DelayAnalysis | null => {
     resultClass: run.resultClass,
     impacts: run.inventoryImpacts.map(toImpact),
     riskOrders: run.atRiskOrders.map(toRiskOrder),
-    options: run.responseOptions.map((option) => toOption(option, explanationPassed)),
+    options: sortOptions(run.responseOptions.map((option) => toOption(option, explanationPassed))),
     explanation: toExplanation(run),
   }
 }

@@ -40,6 +40,7 @@ const option = (id: string, isRecommended: boolean) => ({
   notRecoveredOrders: 0,
   itemSecuredBlockedOrders: 0,
   isRecommended,
+  outcomes: [],
 })
 
 const run = (explanationValidationStatus: string | null) =>

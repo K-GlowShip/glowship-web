@@ -66,6 +66,10 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
       ? (selectable.find((option) => option.recommended)?.id ?? NO_OPTION)
       : NO_OPTION,
   )
+  // 위험 주문의 대응안별 결과는 고른 대응안 기준이다. 고르지 않았거나 고를 수 없는 사용자는 추천 대응안 기준으로 본다.
+  const viewedOption =
+    analysis?.options.find((option) => option.id === optionId) ??
+    analysis?.options.find((option) => option.recommended)
   const showsDecision = sections.includes(DETAIL_SECTION.DECISION)
 
   return (
@@ -104,7 +108,7 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
           <ImpactSection analysis={analysis} delayCase={delayCase} />
         )}
         {analysis && sections.includes(DETAIL_SECTION.RISK_ORDERS) && (
-          <AtRiskOrders orders={analysis.riskOrders} />
+          <AtRiskOrders orders={analysis.riskOrders} option={viewedOption} />
         )}
       </DetailChapter>
 

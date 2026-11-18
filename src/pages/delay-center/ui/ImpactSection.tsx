@@ -37,7 +37,9 @@ export function ImpactSection({ analysis, delayCase }: ImpactSectionProps) {
       }
     >
       <ImpactAxis impacts={impacts} shipment={delayCase} />
-      <ImpactTable impacts={impacts} />
+      <div className="pt-16pxr">
+        <ImpactTable impacts={impacts} />
+      </div>
     </DetailSubsection>
   )
 }

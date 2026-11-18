@@ -13,7 +13,7 @@ interface DetailChapterProps {
 
 /**
  * 지연 상세의 큰 영역 하나(현재 상황 → 대응안 → 선택). 번호와 제목으로 읽는 순서를 드러내고,
- * 안쪽 내용은 상자를 더 만들지 않고 가는 선과 여백으로만 나눈다.
+ * 안쪽 내용은 상자를 더 만들지 않고 여백으로 나눈다.
  */
 export function DetailChapter({ id, step, title, description, children }: DetailChapterProps) {
   return (
@@ -44,12 +44,12 @@ interface DetailSubsectionProps {
   children: ReactNode
 }
 
-/** 영역 안의 한 묶음. 제목 크기를 통일하고 묶음 사이를 가는 선으로 나눠서, 영역 → 묶음 → 내용의 단계가 보이게 한다. */
+/** 영역 안의 한 묶음. 제목 크기를 통일하고 묶음 사이를 선 대신 넉넉한 여백으로 나눠서, 영역 → 묶음 → 내용의 단계가 보이게 한다. */
 export function DetailSubsection({ id, title, aside, children }: DetailSubsectionProps) {
   return (
     <section
       aria-labelledby={id}
-      className="flex min-w-0 flex-col gap-16pxr border-t border-border pt-24pxr first-of-type:border-t-0 first-of-type:pt-0"
+      className="flex min-w-0 flex-col gap-16pxr pt-32pxr first-of-type:pt-0"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-16pxr gap-y-4pxr">
         <h4 id={id} className="text-h3 font-bold">
