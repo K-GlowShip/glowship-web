@@ -8,6 +8,7 @@ import { analysisRunQueries, delayEventQueries, isApiError, isRunInProgress } fr
 import { DELAY_EVENT_ID_PARAM, ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { QueryError } from '@/shared/ui/query-error'
+import { DetailPageSkeleton } from '@/shared/ui/skeleton'
 
 import { getListSearch, toClientRole } from '../model/delay-center'
 import { getAnalysisPollInterval } from '../model/analysis-poll-interval'
@@ -15,7 +16,6 @@ import { ANALYSIS_NOTICE } from '../model/delay-center-text'
 import { toDelayCase } from '../model/to-delay-case'
 import { useAnalysisPollLimit } from '../model/use-analysis-poll-limit'
 import { DelayDetail } from './DelayDetail'
-import { DelayDetailSkeleton } from './DelayDetailSkeleton'
 
 const DELAY_EVENT_NOT_FOUND = 'DELAY_EVENT_NOT_FOUND'
 
@@ -104,7 +104,7 @@ export function DelayDetailPage() {
         // 분석 실행이 없거나 서버가 모르는 상태를 주면 화면 상태를 정할 수 없다
         <Notice>분석 상태를 확인할 수 없습니다.</Notice>
       ) : (
-        <DelayDetailSkeleton />
+        <DetailPageSkeleton />
       )}
     </div>
   )

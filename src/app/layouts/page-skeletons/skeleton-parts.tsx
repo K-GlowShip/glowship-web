@@ -14,10 +14,11 @@ export function SkeletonFrame({ children }: { children: ReactNode }) {
 
 /** 화면 제목(h1)과 설명 한 줄 */
 export function HeaderSkeleton() {
+  // 실제 제목(text-h1, 40px)과 설명 한 줄(22px)의 높이에 맞춘다
   return (
-    <div className="flex flex-col gap-8pxr">
-      <Skeleton className="h-32pxr w-200pxr max-w-full" />
-      <Skeleton className="h-16pxr w-320pxr max-w-full" />
+    <div className="flex flex-col gap-0">
+      <Skeleton className="h-40pxr w-200pxr max-w-full" />
+      <Skeleton className="mt-4pxr h-18pxr w-320pxr max-w-full" />
     </div>
   )
 }
@@ -37,4 +38,34 @@ export function TableCardSkeleton() {
       ))}
     </div>
   )
+}
+
+/** 탭 줄: 탭 이름 몇 개와 아래 경계선. 실제 탭 목록(42px)과 같은 높이다 */
+export function TabsRowSkeleton({ count }: { count: number }) {
+  return (
+    <div className="flex h-42pxr items-center gap-24pxr border-b border-border">
+      {Array.from({ length: count }, (_, index) => (
+        <Skeleton key={index} className="h-18pxr w-48pxr" />
+      ))}
+    </div>
+  )
+}
+
+/** 표 한 장: 머리글 줄과 같은 높이의 행들. 목록이 길어도 처음 보이는 만큼만 그린다 */
+export function TableSkeleton({ rows, rowClassName }: { rows: number; rowClassName: string }) {
+  return (
+    <div className="flex flex-col">
+      <Skeleton className="h-40pxr rounded-none" />
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className={`flex items-center border-b border-border ${rowClassName}`}>
+          <Skeleton className="h-20pxr w-full max-w-360pxr" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** 표 아래 페이지 이동 */
+export function PaginationSkeleton() {
+  return <Skeleton className="mx-auto h-36pxr w-240pxr max-w-full" />
 }

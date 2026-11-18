@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { SYNC_CARDS } from '@/entities/data-sync-run'
 import { useSyncData, useSyncProgress } from '@/features/sync-data'
 import { dashboardQueries } from '@/shared/api'
 import { QueryError } from '@/shared/ui/query-error'
-import { Skeleton } from '@/shared/ui/skeleton'
+import { StatusPanelSkeleton } from '@/shared/ui/skeleton'
 
 import { SyncDataTabs } from './SyncDataTabs'
 import { SyncStatusPanel } from './SyncStatusPanel'
@@ -28,13 +27,7 @@ export function SyncDataPage() {
             모든 데이터는 {overview.syncIntervalMinutes}분마다 자동으로 수집됩니다
           </p>
         )}
-        {isPending && (
-          <div className="grid gap-12pxr md:grid-cols-3" aria-hidden="true">
-            {SYNC_CARDS.map(({ system }) => (
-              <Skeleton key={system} className="h-96pxr rounded-card" />
-            ))}
-          </div>
-        )}
+        {isPending && <StatusPanelSkeleton />}
         {error && !data && (
           <QueryError message={error.message} loading={isFetching} onRetry={() => void refetch()} />
         )}

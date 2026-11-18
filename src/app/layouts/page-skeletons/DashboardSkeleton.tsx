@@ -2,24 +2,21 @@ import { Skeleton } from '@/shared/ui/skeleton'
 
 import { SkeletonFrame } from './skeleton-parts'
 
-/** 대시보드: 요약(지표 4개) → 지연 항로 → 입고 추이·수집 현황 → 재고 표 */
+/**
+ * 대시보드: 실제 화면의 구획(요약 → 지연 목록 → 입고 추이·수집 현황 → 재고)을 같은 순서와 비슷한 높이의 덩어리로 둔다.
+ * 요약은 안의 내용까지 흉내 내지 않고 배경 덩어리 하나만 둔다. 높이는 데이터가 찬 실제 화면의 대략 값이다
+ * (입고 추이·수집 현황은 xl부터 나란히, 그 아래 폭에서는 위아래로 쌓인다).
+ */
 export function DashboardSkeleton() {
   return (
     <SkeletonFrame>
-      <div className="flex flex-col gap-24pxr rounded-panel bg-muted/60 p-24pxr lg:p-32pxr">
-        <Skeleton className="h-40pxr w-320pxr max-w-full" />
-        <div className="grid grid-cols-2 gap-16pxr lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-96pxr rounded-card bg-card" />
-          ))}
-        </div>
+      <Skeleton className="h-640pxr rounded-panel xl:h-540pxr" />
+      <Skeleton className="h-560pxr rounded-card lg:h-520pxr" />
+      <div className="grid gap-24pxr xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <Skeleton className="h-480pxr rounded-card" />
+        <Skeleton className="h-300pxr rounded-card xl:h-full" />
       </div>
-      <Skeleton className="h-200pxr rounded-panel" />
-      <div className="grid gap-24pxr lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <Skeleton className="h-320pxr rounded-panel" />
-        <Skeleton className="h-320pxr rounded-panel" />
-      </div>
-      <Skeleton className="h-280pxr rounded-panel" />
+      <Skeleton className="h-760pxr rounded-card lg:h-560pxr" />
     </SkeletonFrame>
   )
 }
