@@ -48,7 +48,8 @@ export function TableTemplate({
           {Controls && <div className="flex shrink-0 items-center gap-8pxr">{Controls}</div>}
         </div>
       )}
-      <div className="overflow-x-auto">{children}</div>
+      {/* relative: 표 안의 sr-only(absolute)가 이 영역 밖으로 나가 화면 전체에 가로 스크롤을 만들지 않게 한다 */}
+      <div className="relative overflow-x-auto">{children}</div>
       {pageCount !== undefined && (
         <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
       )}
