@@ -13,7 +13,7 @@ export function DelayDetailSkeleton() {
         <div className="flex items-start justify-between gap-16pxr">
           <div className="flex flex-col gap-8pxr">
             <Skeleton className="h-16pxr w-56pxr" />
-            <div className="flex items-end gap-12pxr">
+            <div className="flex flex-wrap items-end gap-12pxr">
               <Skeleton className="h-44pxr w-280pxr max-w-full" />
               <Skeleton className="mb-8pxr h-24pxr w-72pxr rounded-full" />
             </div>

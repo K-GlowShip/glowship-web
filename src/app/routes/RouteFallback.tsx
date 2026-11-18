@@ -1,12 +1,16 @@
 import { LnbBrand } from '@/app/layouts/LnbBrand'
-import { PageSkeleton } from '@/app/layouts/PageSkeleton'
+import { useLocation } from 'react-router'
+
+import { PageSkeleton } from '@/app/layouts/page-skeletons'
 import { Skeleton } from '@/shared/ui/skeleton'
 
 /** 처음 들어올 때 화면 코드를 내려받는 동안 보여 주는, 레이아웃 모양의 대기 화면 */
 export function RouteFallback() {
+  const { pathname } = useLocation()
+
   return (
-    <div className="flex h-screen">
-      <aside className="flex w-200pxr shrink-0 flex-col border-r border-border bg-card">
+    <div className="flex h-dvh">
+      <aside className="hidden w-200pxr shrink-0 flex-col border-r border-border bg-card lg:flex">
         {/* 실제 사이드바(AppLnb)처럼 맨 위에 로고 줄을 두고 메뉴 뼈대는 그 아래에 둔다 */}
         <div className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr">
           <LnbBrand />
@@ -19,9 +23,10 @@ export function RouteFallback() {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="h-64pxr shrink-0 border-b border-border bg-card" />
-        <main className="min-h-0 flex-1 overflow-y-auto p-28pxr">
-          <PageSkeleton />
+        <main className="min-h-0 flex-1 overflow-y-auto p-16pxr lg:p-28pxr">
+          <PageSkeleton pathname={pathname} />
         </main>
+        <div className="h-56pxr shrink-0 border-t border-border bg-card lg:hidden" />
       </div>
     </div>
   )
