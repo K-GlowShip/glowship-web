@@ -45,7 +45,7 @@ export function AppLayout({ navItems, homePath, showNotification = true }: AppLa
         />
         <main
           ref={mainRef}
-          className="relative min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto p-16pxr lg:p-28pxr"
+          className="relative min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto p-16pxr web:p-28pxr"
           onScroll={(event) =>
             setIsTitleHidden(event.currentTarget.scrollTop > TITLE_HIDDEN_SCROLL_TOP)
           }

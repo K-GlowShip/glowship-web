@@ -105,7 +105,7 @@ export function TabsList({
       className={cn(
         // 좁은 화면에서는 가로로 밀 수 있게 하되(드래그·스와이프), 스크롤 막대는 모바일에서만 숨긴다(웹은 넘칠 때 단서가 되도록 둔다). 밑줄 막대가 아래로 삐져나가면 세로 스크롤이 생기므로,
         // 아래 경계선은 border 대신 안쪽 그림자로 그려 막대가 그 위에 겹쳐지게 한다
-        'relative flex items-center gap-24pxr overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-border)] max-lg:scrollbar-none',
+        'relative flex items-center gap-24pxr overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-border)] max-web:scrollbar-none',
         className,
       )}
       {...props}

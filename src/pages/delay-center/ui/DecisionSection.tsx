@@ -22,10 +22,10 @@ export function DecisionSection({ delayCase, analysis, children }: DecisionSecti
   const finalOption = analysis.options.find((option) => option.id === finalDecision?.optionId)
 
   return (
-    <div className="grid gap-32pxr lg:grid-cols-2">
+    <div className="grid gap-32pxr web:grid-cols-2">
       <MemberOpinions opinions={delayCase.opinions} options={analysis.options} />
 
-      <div className="lg:border-l lg:border-border lg:pl-32pxr">
+      <div className="web:border-l web:border-border web:pl-32pxr">
         {finalDecision ? (
           <div className="flex flex-col gap-12pxr">
             <div className="flex flex-col gap-4pxr">

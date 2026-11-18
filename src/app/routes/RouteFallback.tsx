@@ -10,7 +10,7 @@ export function RouteFallback() {
 
   return (
     <div className="flex h-dvh">
-      <aside className="hidden w-200pxr shrink-0 flex-col border-r border-border bg-card lg:flex">
+      <aside className="hidden w-200pxr shrink-0 flex-col border-r border-border bg-card web:flex">
         {/* 실제 사이드바(AppLnb)처럼 맨 위에 로고 줄을 두고 메뉴 뼈대는 그 아래에 둔다 */}
         <div className="flex h-64pxr shrink-0 items-center gap-8pxr px-26pxr">
           <LnbBrand />
@@ -23,10 +23,10 @@ export function RouteFallback() {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="h-64pxr shrink-0 border-b border-border bg-card" />
-        <main className="min-h-0 flex-1 overflow-y-auto p-16pxr lg:p-28pxr">
+        <main className="min-h-0 flex-1 overflow-y-auto p-16pxr web:p-28pxr">
           <PageSkeleton pathname={pathname} />
         </main>
-        <div className="h-56pxr shrink-0 border-t border-border bg-card lg:hidden" />
+        <div className="h-56pxr shrink-0 border-t border-border bg-card web:hidden" />
       </div>
     </div>
   )

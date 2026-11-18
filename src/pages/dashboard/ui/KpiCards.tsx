@@ -34,12 +34,12 @@ const TREND_ICON: Record<KpiTrend, LucideIcon | null> = {
 
 // 지표를 상자에 담지 않고 요약 영역 위에 바로 놓는다. 가는 선으로만 나눠서 숫자가 주인공이 되게 한다
 const GRID_CLASS =
-  'grid grid-cols-2 gap-x-16pxr gap-y-20pxr border-t border-primary-900/10 pt-20pxr lg:grid-cols-4 lg:gap-y-24pxr lg:pt-24pxr'
+  'grid grid-cols-2 gap-x-16pxr gap-y-20pxr border-t border-primary-900/10 pt-20pxr web:grid-cols-4 web:gap-y-24pxr web:pt-24pxr'
 
 // 지표 한 칸. 넓은 화면에서는 지표 사이를 세로선으로 나눈다. 모바일은 2×2로 두고 선 없이 간격만 둔다.
 // 로딩 중 자리 표시도 같은 칸을 써서 지표가 도착해도 높이와 선이 달라지지 않는다
 const ITEM_CLASS =
-  'flex flex-col items-center gap-8pxr border-primary-900/10 text-center lg:items-start lg:pr-16pxr lg:text-left lg:border-l lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0'
+  'flex flex-col items-center gap-8pxr border-primary-900/10 text-center web:items-start web:pr-16pxr web:text-left web:border-l web:pl-24pxr web:first:border-l-0 web:first:pl-0'
 
 export function KpiCards() {
   // 헤더의 기준 시각과 같은 요약 query다. 같은 키라서 요청은 한 번만 나간다
@@ -91,7 +91,7 @@ function KpiItem({ kpi }: { kpi: Kpi }) {
       {/* 숫자는 크고 가늘게, 단위는 화장품 용량 표기처럼 숫자 머리 높이에 작게 올린다 */}
       <p
         className={cn(
-          'flex items-start justify-center text-kpi font-light tracking-[-0.03em] tabular-nums lg:justify-start',
+          'flex items-start justify-center text-kpi font-light tracking-[-0.03em] tabular-nums web:justify-start',
           isAlert && 'text-danger',
         )}
       >
@@ -111,7 +111,7 @@ function KpiItem({ kpi }: { kpi: Kpi }) {
       </p>
       <p
         className={cn(
-          'flex items-center justify-center gap-4pxr text-caption lg:justify-start',
+          'flex items-center justify-center gap-4pxr text-caption web:justify-start',
           TONE_CLASS[tone],
         )}
       >

@@ -24,11 +24,11 @@ export function DetailPageSkeleton() {
           <Skeleton className="h-40pxr w-96pxr shrink-0" />
         </div>
 
-        <div className="grid grid-cols-2 gap-y-20pxr border-y border-primary-900/10 py-20pxr lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-y-20pxr border-y border-primary-900/10 py-20pxr web:grid-cols-4">
           {Array.from({ length: 4 }, (_, index) => (
             <div
               key={index}
-              className="flex flex-col gap-8pxr lg:border-l lg:border-primary-900/10 lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0"
+              className="flex flex-col gap-8pxr web:border-l web:border-primary-900/10 web:pl-24pxr web:first:border-l-0 web:first:pl-0"
             >
               <Skeleton className="h-18pxr w-56pxr" />
               <Skeleton className="h-44pxr w-120pxr" />

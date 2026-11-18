@@ -7,7 +7,7 @@ import { DetailPageSkeleton, Skeleton } from '@/shared/ui/skeleton'
 export function DelayDetailRouteSkeleton() {
   return (
     <div className="flex flex-col gap-16pxr">
-      <div className="-mx-16pxr -mt-16pxr px-16pxr pt-16pxr pb-8pxr lg:m-0 lg:p-0">
+      <div className="-mx-16pxr -mt-16pxr px-16pxr pt-16pxr pb-8pxr web:m-0 web:p-0">
         <Skeleton className="h-22pxr w-80pxr" />
       </div>
       <DetailPageSkeleton />

@@ -28,7 +28,7 @@ export function TableCardSkeleton() {
   return (
     <div className="flex flex-col gap-16pxr rounded-panel border border-border bg-card p-24pxr">
       <div className="flex flex-wrap gap-8pxr">
-        <Skeleton className="h-40pxr w-full lg:w-280pxr" />
+        <Skeleton className="h-40pxr w-full web:w-280pxr" />
         <Skeleton className="h-40pxr w-96pxr" />
         <Skeleton className="h-40pxr w-96pxr" />
       </div>

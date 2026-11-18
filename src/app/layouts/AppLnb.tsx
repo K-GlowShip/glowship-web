@@ -11,10 +11,10 @@ interface AppLnbProps {
   homePath: string
 }
 
-/** 웹(lg 이상)의 고정 사이드바. 모바일에서는 숨기고 하단 탭바(BottomTabBar)를 쓴다 */
+/** 웹(web, 1024px 이상)의 고정 사이드바. 모바일에서는 숨기고 하단 탭바(BottomTabBar)를 쓴다 */
 export function AppLnb({ items, homePath }: AppLnbProps) {
   return (
-    <aside className="hidden w-200pxr shrink-0 flex-col border-r border-border bg-card lg:flex">
+    <aside className="hidden w-200pxr shrink-0 flex-col border-r border-border bg-card web:flex">
       {/* 높이를 오른쪽 헤더(AppGnb)와 맞춘다 */}
       <Link
         to={homePath}

@@ -3,6 +3,9 @@
 @import './pxr.css';
 
 @theme {
+  /* 모바일과 웹을 가르는 경계. 접두어 없는 클래스는 모바일, `web:`은 이 폭(1024px) 이상(웹)에만 적용된다 */
+  --breakpoint-web: 64rem;
+
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;

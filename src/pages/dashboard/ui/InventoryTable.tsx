@@ -58,7 +58,7 @@ export function InventoryTable() {
 
   return (
     <Card className="border-primary-100">
-      <CardHeader className="flex-wrap items-start gap-y-8pxr px-16pxr pt-20pxr lg:items-center lg:px-24pxr lg:pt-24pxr">
+      <CardHeader className="flex-wrap items-start gap-y-8pxr px-16pxr pt-20pxr web:items-center web:px-24pxr web:pt-24pxr">
         <div className="flex items-center gap-8pxr">
           <CardTitle as="h2" className="break-keep">
             거점별 재고 현황
@@ -69,7 +69,7 @@ export function InventoryTable() {
             description={`현재 재고를 평균 판매량으로 소진한다고 가정한 날짜입니다.\n입고를 반영한 날짜는 지연 대응 센터에서 확인하세요.`}
           />
         </div>
-        <dl className="flex flex-wrap gap-x-16pxr gap-y-2pxr text-caption lg:justify-end">
+        <dl className="flex flex-wrap gap-x-16pxr gap-y-2pxr text-caption web:justify-end">
           <div className="flex gap-6pxr">
             <dt className="text-muted-foreground">기준일</dt>
             <dd>{formatMMDD(baseDate)}</dd>
@@ -85,15 +85,15 @@ export function InventoryTable() {
           </div>
         </dl>
       </CardHeader>
-      <CardContent className="flex flex-col gap-16pxr px-16pxr pt-16pxr lg:p-24pxr">
+      <CardContent className="flex flex-col gap-16pxr px-16pxr pt-16pxr web:p-24pxr">
         {/* 모바일은 한 줄에 여섯 칸을 담을 수 없어 상품마다 카드로 쌓고, 넓은 화면에서는 표를 쓴다 */}
         <InventoryCardList
           query={query}
           baseDate={baseDate}
           safetyStockDays={safetyStockDays}
-          className="lg:hidden"
+          className="web:hidden"
         />
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden overflow-x-auto web:block">
           <Table className="min-w-720pxr">
             <TableHeader>
               <TableRow>

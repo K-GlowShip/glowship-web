@@ -31,7 +31,7 @@ export function InboundTrendCard() {
 
   return (
     <Card className="flex flex-col border-primary-100">
-      <CardHeader className="flex-wrap gap-y-12pxr px-16pxr pt-20pxr lg:px-24pxr lg:pt-24pxr">
+      <CardHeader className="flex-wrap gap-y-12pxr px-16pxr pt-20pxr web:px-24pxr web:pt-24pxr">
         <CardTitle as="h2" className="break-keep">
           최근 {days}일 3PL 입고 추이
         </CardTitle>
@@ -64,7 +64,7 @@ export function InboundTrendCard() {
           ))}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-16pxr px-16pxr pt-16pxr pb-16pxr lg:p-24pxr">
+      <CardContent className="flex flex-col gap-16pxr px-16pxr pt-16pxr pb-16pxr web:p-24pxr">
         {/* 범례이면서 기간 합계다 */}
         <ul className="flex flex-wrap items-center gap-x-24pxr gap-y-4pxr text-b2 text-muted-foreground">
           <li className="flex items-center gap-6pxr">
@@ -110,7 +110,7 @@ export function InboundTrendCard() {
             <div
               // 기간을 바꾸는 동안 이전 그래프를 흐리게 두어 틀이 흔들리지 않게 한다
               className={cn(
-                '-mx-8pxr h-280pxr transition-opacity motion-reduce:transition-none lg:mx-0',
+                '-mx-8pxr h-280pxr transition-opacity motion-reduce:transition-none web:mx-0',
                 isPlaceholderData && 'opacity-50',
               )}
               role="img"

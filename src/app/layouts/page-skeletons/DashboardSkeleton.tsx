@@ -11,12 +11,12 @@ export function DashboardSkeleton() {
   return (
     <SkeletonFrame>
       <Skeleton className="h-640pxr rounded-panel xl:h-540pxr" />
-      <Skeleton className="h-560pxr rounded-card lg:h-520pxr" />
+      <Skeleton className="h-560pxr rounded-card web:h-520pxr" />
       <div className="grid gap-24pxr xl:grid-cols-[minmax(0,1fr)_22rem]">
         <Skeleton className="h-480pxr rounded-card" />
         <Skeleton className="h-300pxr rounded-card xl:h-full" />
       </div>
-      <Skeleton className="h-760pxr rounded-card lg:h-560pxr" />
+      <Skeleton className="h-760pxr rounded-card web:h-560pxr" />
     </SkeletonFrame>
   )
 }

@@ -20,7 +20,7 @@ export function SyncDataTabs() {
       <CardContent className="p-32pxr">
         <Tabs defaultValue={TAB.ORDER}>
           {/* 모바일에서는 아래로 스크롤해도 탭이 위에 붙어 있게 한다. 스크롤 영역의 안쪽 여백 16px만큼 올려 맨 위에 맞닿게 하고, 웹은 고정하지 않는다. 밑줄 막대가 이 목록 기준(absolute)으로 놓이므로 static이 아니라 relative로 되돌린다 */}
-          <TabsList className="sticky -top-16pxr z-10 bg-card lg:relative lg:top-0">
+          <TabsList className="sticky -top-16pxr z-10 bg-card web:relative web:top-0">
             <TabsTrigger value={TAB.ORDER}>주문</TabsTrigger>
             <TabsTrigger value={TAB.INVENTORY}>재고</TabsTrigger>
             <TabsTrigger value={TAB.SHIPMENT}>선적</TabsTrigger>

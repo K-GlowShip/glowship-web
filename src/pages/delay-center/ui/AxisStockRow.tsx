@@ -42,8 +42,8 @@ export function AxisStockRow({
         title={`${productName} (${skuCode})`}
       >
         <span className="min-w-0 truncate text-b2">
-          <span className="lg:hidden">{skuCode}</span>
-          <span className="max-lg:hidden">{productName}</span>
+          <span className="web:hidden">{skuCode}</span>
+          <span className="max-web:hidden">{productName}</span>
         </span>
       </span>
       <div className="relative h-full flex-1">

@@ -116,7 +116,7 @@ export function DelayDetailHeader({ delayCase }: DelayDetailHeaderProps) {
         </DialogContent>
       </Dialog>
 
-      <dl className="grid grid-cols-2 gap-y-20pxr border-y border-primary-900/10 py-20pxr lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-y-20pxr border-y border-primary-900/10 py-20pxr web:grid-cols-4">
         <Figure
           label="지연"
           value={delayDays > 0 ? `+${delayDays}` : '0'}
@@ -166,7 +166,7 @@ interface FigureProps {
 /** 큰 숫자 하나. 숫자는 가늘고 크게, 단위는 숫자 어깨에 작게 올린다 */
 function Figure({ label, value, unit, caption, isAlert }: FigureProps) {
   return (
-    <div className="flex flex-col gap-2pxr lg:border-l lg:border-primary-900/10 lg:pl-24pxr lg:first:border-l-0 lg:first:pl-0">
+    <div className="flex flex-col gap-2pxr web:border-l web:border-primary-900/10 web:pl-24pxr web:first:border-l-0 web:first:pl-0">
       <dt className="text-b2 text-muted-foreground">{label}</dt>
       <dd
         className={cn(

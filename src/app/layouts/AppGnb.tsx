@@ -26,11 +26,11 @@ export function AppGnb({ homePath, title, showNotification = true }: AppGnbProps
   const userName = me?.displayName ?? DEMO_USER_NAME
 
   return (
-    <header className="flex h-64pxr shrink-0 items-center gap-12pxr border-b border-border bg-card px-16pxr lg:px-28pxr">
+    <header className="flex h-64pxr shrink-0 items-center gap-12pxr border-b border-border bg-card px-16pxr web:px-28pxr">
       {/* 웹은 사이드바 맨 위에 로고가 있으니, 사이드바가 없는 모바일에서만 헤더에 둔다 */}
       <Link
         to={homePath}
-        className="flex items-center gap-8pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 lg:hidden"
+        className="flex items-center gap-8pxr outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 web:hidden"
       >
         <LnbBrand />
       </Link>
@@ -38,7 +38,7 @@ export function AppGnb({ homePath, title, showNotification = true }: AppGnbProps
       <p
         aria-hidden="true"
         className={cn(
-          'mr-auto hidden min-w-0 items-center gap-8pxr text-b1 transition-opacity duration-200 lg:flex',
+          'mr-auto hidden min-w-0 items-center gap-8pxr text-b1 transition-opacity duration-200 web:flex',
           title ? 'opacity-100' : 'opacity-0',
         )}
       >
@@ -46,14 +46,14 @@ export function AppGnb({ homePath, title, showNotification = true }: AppGnbProps
         <span className="shrink-0 text-muted-foreground">/</span>
         <span className="truncate font-bold text-foreground">{title}</span>
       </p>
-      <div className="flex-1 lg:hidden" />
+      <div className="flex-1 web:hidden" />
       {showNotification && <NotificationBell />}
       <Avatar aria-hidden="true">{Array.from(userName)[0]}</Avatar>
-      <span className="hidden text-b2 text-foreground lg:inline">
+      <span className="hidden text-b2 text-foreground web:inline">
         {me ? `${userName} · ${getRoleLabel(me.roleCode)}` : userName}
       </span>
       {me?.companyName && (
-        <span className="hidden text-b2 text-muted-foreground lg:inline">{me.companyName}</span>
+        <span className="hidden text-b2 text-muted-foreground web:inline">{me.companyName}</span>
       )}
       <Button variant="ghost" size="sm" loading={isPending} onClick={() => submitLogout()}>
         로그아웃

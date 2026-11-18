@@ -9,7 +9,7 @@ interface BottomTabBarProps {
 }
 
 /**
- * 모바일(lg 미만)의 하단 메뉴. 웹의 사이드바(AppLnb) 자리를 대신한다.
+ * 모바일(web 미만, 1024px 미만)의 하단 메뉴. 웹의 사이드바(AppLnb) 자리를 대신한다.
  * 메뉴 수가 몇 개든 칸을 똑같이 나눠 가로를 채운다(2개면 반반).
  * 화면 아래에 겹쳐 띄우지 않고 본문 아래에 이어 붙여서, 키보드가 올라와도 입력칸을 가리지 않는다.
  */
@@ -17,7 +17,7 @@ export function BottomTabBar({ items }: BottomTabBarProps) {
   return (
     <nav
       aria-label="주 메뉴"
-      className="flex shrink-0 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="flex shrink-0 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] web:hidden"
     >
       {items.map(({ to, label, icon: Icon }) => (
         <NavLink

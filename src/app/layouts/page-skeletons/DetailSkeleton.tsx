@@ -11,7 +11,7 @@ export function DetailSkeleton() {
         <Skeleton className="h-44pxr w-280pxr max-w-full" />
         <Skeleton className="h-20pxr w-320pxr max-w-full" />
       </div>
-      <div className="grid grid-cols-2 gap-16pxr lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-16pxr web:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
           <Skeleton key={index} className="h-96pxr rounded-card" />
         ))}
