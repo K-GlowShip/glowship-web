@@ -82,7 +82,7 @@ export function HeroRouteContent() {
        * 배경일 때는 왼쪽 120px을 비워 두어, 요약이 그리 넓지 않을 때 한국 항구와 호의 출발부가 커진 한 문장 카피
        * 밑으로 들어가지 않게 한다(넓으면 지도가 오른쪽에 맞춰져 이 여백은 영향이 없다)
        */}
-      <div className="-mx-20pxr lg:-mx-32pxr @3xl:absolute @3xl:inset-y-0 @3xl:right-0 @3xl:left-120pxr @3xl:-z-10">
+      <div className="-mx-20pxr lg:-mx-32pxr @3xl:absolute @3xl:inset-y-0 @3xl:right-0 @3xl:left-120pxr @3xl:-z-10 @3xl:mx-0">
         <RouteMap className="h-auto w-full @3xl:h-full" />
       </div>
 
