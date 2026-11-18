@@ -62,14 +62,11 @@ export function ShipmentHistorySection({
         </p>
       ) : (
         <>
-          {/* 좁은 화면에서는 네 열을 한 줄에 담을 수 없어, 관측마다 카드로 쌓는다 */}
-          <ul className="flex flex-col divide-y divide-border border-y border-border sm:hidden">
+          {/* 좁은 화면에서는 네 열을 한 줄에 담을 수 없어, 관측마다 카드로 쌓는다. 구분선 없이 간격으로만 나눈다 */}
+          <ul className="flex flex-col gap-20pxr sm:hidden">
             {visibleChanges.map(
               ({ observation, portArrivalShiftDays, inboundShiftDays }, index) => (
-                <li
-                  key={`${observation.observedAt}-${index}`}
-                  className="flex flex-col gap-8pxr py-12pxr"
-                >
+                <li key={`${observation.observedAt}-${index}`} className="flex flex-col gap-8pxr">
                   <p className="flex flex-wrap items-baseline gap-x-8pxr">
                     <time dateTime={observation.observedAt} className="font-medium tabular-nums">
                       {formatYYYYMMDDHHmm(observation.observedAt)}
