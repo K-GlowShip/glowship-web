@@ -57,7 +57,9 @@ export const PLAIN_TEXT = {
     `${sameRecovered ? '위험 주문 회복 수는 같지만, ' : ''}실행할 수 있는 대응안 중 재고 부족을 가장 많이 줄일 수 있어서(${count}개) 추천 순위 1위예요.`,
   recommendedKeepPlan: '실행할 수 있는 다른 대응안이 없어서 현재 계획 유지를 추천해요.',
 
-  warningBaselineShortage: (count: string) => `지연이 없어도 원래 부족한 SKU가 ${count}개 있어요.`,
+  /** SKU 코드 뒤에는 조사를 붙이지 않으려고 '재고는'을 붙여 쓴다 */
+  warningBaselineShortage: (skuList: string) =>
+    `${skuList} 재고는 지연이 없어도 부족할 것으로 예상돼요.`,
   warningForecastEventOverlap:
     '판매 기준 기간에 행사 기간이 겹쳐 예상 판매량이 평소와 다를 수 있어요.',
   warningOptionNeedsCheck: (count: string) => `확인이 필요한 대응안이 ${count}개 있어요.`,

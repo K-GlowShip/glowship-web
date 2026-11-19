@@ -199,15 +199,33 @@ export const plainRecommendation = (options: DelayOption[]) => {
   return PLAIN_TEXT.recommendedRank
 }
 
+/** 지연이 없어도 부족할 것으로 예상되는 SKU: 원래 부족이 큰 순으로 3개까지 코드를 적고 나머지는 '외 N개'로 줄인다 */
+const plainBaselineShortage = (impacts: SkuImpact[]) => {
+  const skus = impacts
+    .filter(({ baselineShortage }) => (baselineShortage ?? 0) > 0)
+    .sort(
+      (a, b) =>
+        (b.baselineShortage ?? 0) - (a.baselineShortage ?? 0) || a.skuCode.localeCompare(b.skuCode),
+    )
+    .map(({ skuCode }) => skuCode)
+
+  if (skus.length === 0) {
+    return null
+  }
+  const listed = skus.slice(0, MAX_LISTED_SKU).join(', ')
+  const rest = skus.length - MAX_LISTED_SKU
+  return PLAIN_TEXT.warningBaselineShortage(
+    rest > 0 ? `${listed} ${PLAIN_TEXT.impactListMore(count(rest))}` : listed,
+  )
+}
+
 /** 경고 문장. 코드를 아는 경고는 쉬운 문장으로, 모르는 코드는 AI 원문 그대로 둔다 */
 export const plainWarnings = ({ warnings, impacts, options }: PlainSource) =>
   warnings.map(({ code, text }) => {
     switch (code) {
       case WARNING_CODE.BASELINE_SHORTAGE_EXISTS:
-        // 영향 SKU만이 아니라 모든 행에서 센다(IMPACTED만 세면 AI 원문 숫자와 달라진다)
-        return PLAIN_TEXT.warningBaselineShortage(
-          count(impacts.filter(({ baselineShortage }) => (baselineShortage ?? 0) > 0).length),
-        )
+        // 영향 SKU만이 아니라 모든 행에서 찾는다(IMPACTED만 보면 AI 원문의 SKU 수와 달라진다)
+        return plainBaselineShortage(impacts) ?? text
       case WARNING_CODE.FORECAST_EVENT_OVERLAP:
         return PLAIN_TEXT.warningForecastEventOverlap
       case WARNING_CODE.OPTION_NEEDS_CHECK:
