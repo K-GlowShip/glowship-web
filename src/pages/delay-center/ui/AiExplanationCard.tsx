@@ -3,6 +3,7 @@ import { Sparkles, TriangleAlert } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 
 import type { AiExplanation } from '../model/delay-center'
+import { AiOriginalText } from './AiOriginalText'
 
 interface AiExplanationCardProps {
   explanation: AiExplanation
@@ -15,6 +16,15 @@ interface AiExplanationCardProps {
 
 /** AI 설명. 분석 전체를 풀어 쓴 참고 정보이며, 숫자는 위 대응안과 같은 값이다. 대응안별 설명은 각 대응안 카드에 있다. */
 export function AiExplanationCard({ explanation, showRecommendation }: AiExplanationCardProps) {
+  // 서버 값으로 만든 쉬운 문장을 먼저 보여 주고, 만들 수 없는 칸은 AI 원문으로 대신한다. AI 원문은 아래에 접어 둔다
+  const { plain } = explanation
+  const warnings = plain.warnings.length > 0 ? plain.warnings : explanation.warnings
+  const originals = [
+    ...(plain.runSummary ? [{ label: '분석 요약', text: explanation.runSummary }] : []),
+    ...(plain.impactSummary ? [{ label: '영향 요약', text: explanation.riskSummary }] : []),
+    ...explanation.warnings.map((text) => ({ label: '경고', text })),
+  ]
+
   return (
     <section aria-labelledby="ai-explanation-title" className="flex flex-col gap-12pxr pt-20pxr">
       <h4 id="ai-explanation-title" className="flex items-center gap-6pxr text-b1 font-bold">
@@ -29,16 +39,16 @@ export function AiExplanationCard({ explanation, showRecommendation }: AiExplana
           showRecommendation ? 'md:grid-cols-3' : 'md:grid-cols-2',
         )}
       >
-        <ExplanationItem label="분석 요약" text={explanation.runSummary} />
-        <ExplanationItem label="영향 요약" text={explanation.riskSummary} />
+        <ExplanationItem label="분석 요약" text={plain.runSummary ?? explanation.runSummary} />
+        <ExplanationItem label="영향 요약" text={plain.impactSummary ?? explanation.riskSummary} />
         {showRecommendation && (
           <ExplanationItem label="추천 근거" text={explanation.recommendation} />
         )}
       </dl>
 
-      {explanation.warnings.length > 0 && (
+      {warnings.length > 0 && (
         <ul className="flex flex-col gap-4pxr">
-          {explanation.warnings.map((warning, index) => (
+          {warnings.map((warning, index) => (
             // 같은 문구의 경고가 여러 번 올 수 있어서 순서를 key에 섞는다
             <li
               key={`${index}-${warning}`}
@@ -50,6 +60,8 @@ export function AiExplanationCard({ explanation, showRecommendation }: AiExplana
           ))}
         </ul>
       )}
+
+      <AiOriginalText items={originals} />
     </section>
   )
 }
