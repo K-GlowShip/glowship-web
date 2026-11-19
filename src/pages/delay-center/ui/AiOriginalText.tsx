@@ -22,7 +22,8 @@ export function AiOriginalText({ items }: AiOriginalTextProps) {
           aria-hidden="true"
         />
       </summary>
-      <div className="mt-6pxr flex flex-col gap-4pxr">
+      {/* 넓은 화면에서 한 줄이 너무 길어지지 않게 읽기 폭을 제한한다. 좁은 카드 안에서는 영향이 없다 */}
+      <div className="mt-8pxr flex max-w-800pxr flex-col gap-6pxr break-keep">
         {items.map(({ label, text }, index) => (
           // 같은 문장이 여러 번 올 수 있어서 순서를 key에 섞는다
           <p key={`${index}-${text}`}>

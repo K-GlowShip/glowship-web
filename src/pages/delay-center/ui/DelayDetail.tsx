@@ -110,6 +110,13 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
         {analysis && sections.includes(DETAIL_SECTION.RISK_ORDERS) && (
           <AtRiskOrders orders={analysis.riskOrders} option={viewedOption} />
         )}
+        {/* 글이 많은 설명은 표와 그림(운송 단계·재고 영향·위험 주문)을 먼저 보여 준 뒤 맨 끝에 둔다 */}
+        {sections.includes(DETAIL_SECTION.EXPLANATION) && analysis?.explanation && (
+          <AiExplanationCard
+            explanation={analysis.explanation}
+            showRecommendation={!analysis.options.some((option) => option.recommended)}
+          />
+        )}
       </DetailChapter>
 
       {analysis && sections.includes(DETAIL_SECTION.OPTIONS) && (
@@ -139,12 +146,6 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
             }
             finalOptionId={delayCase.finalDecision?.optionId}
           />
-          {sections.includes(DETAIL_SECTION.EXPLANATION) && analysis.explanation && (
-            <AiExplanationCard
-              explanation={analysis.explanation}
-              showRecommendation={!analysis.options.some((option) => option.recommended)}
-            />
-          )}
         </DetailChapter>
       )}
 
