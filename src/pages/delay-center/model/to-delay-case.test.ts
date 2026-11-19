@@ -49,6 +49,12 @@ const run = (explanationValidationStatus: string | null) =>
     runCode: 'AN-260107-001',
     status: 'READY_FOR_REVIEW',
     resultClass: 'READY_ORDER_RISK',
+    target: {
+      shipment: { shipmentCode: 'OCN-1' },
+      delayDays: 2,
+      planned3plInboundDate: '2026-01-13',
+      expected3plInboundDate: '2026-01-15',
+    },
     inputBasis: { dataBasisAt: '2026-01-07T00:00:00Z', dataWarnings: [] },
     inventoryImpacts: [],
     atRiskOrders: [],

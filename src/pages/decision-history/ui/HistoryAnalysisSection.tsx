@@ -32,7 +32,7 @@ export function HistoryAnalysisSection({ run, selectedOptionType }: HistoryAnaly
   // 지연 대응 센터와 같은 쉬운 문장. 만들 수 없으면 서버 원문을 그대로 보여 준다
   const plain = toHistoryPlain(run)
   const rows = explanation ? toExplanationRows(explanation, plain) : []
-  const originals = explanation ? toOriginalItems(explanation) : []
+  const originals = explanation ? toOriginalItems(explanation, plain) : []
 
   return (
     <section className="flex flex-col gap-24pxr border-t border-border pt-32pxr">
@@ -210,11 +210,15 @@ const toExplanationRows = (explanation: Explanation, plain: PlainExplanation | n
   return candidates.flatMap(([label, text]) => (text ? [{ label, text }] : []))
 }
 
-const toOriginalItems = (explanation: Explanation) =>
+/** 쉬운 문장으로 대체한 칸의 서버 원문만 접어 둔다(대체하지 않은 칸은 이미 원문이 보인다). 지연 대응 센터와 같은 규칙 */
+const toOriginalItems = (explanation: Explanation, plain: PlainExplanation | null) =>
   [
-    { label: '분석 요약', text: explanation.run_summary },
-    { label: '영향 요약', text: explanation.risk_summary },
-    { label: '추천 설명', text: explanation.recommendation_explanation },
+    { label: '분석 요약', text: plain?.runSummary ? explanation.run_summary : null },
+    { label: '영향 요약', text: plain?.impactSummary ? explanation.risk_summary : null },
+    {
+      label: '추천 설명',
+      text: plain?.recommendation ? explanation.recommendation_explanation : null,
+    },
     ...explanation.warnings.map((warning) => ({ label: '경고', text: warning.text })),
   ]
     .filter((item): item is { label: string; text: string } => Boolean(item.text))

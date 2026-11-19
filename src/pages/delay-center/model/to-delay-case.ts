@@ -266,11 +266,13 @@ export const toDelayCase = (
       run.status === ANALYSIS_RUN_STATUS.STALE && run.stalePrimaryReason
         ? (STALE_REASON_LABEL[run.stalePrimaryReason] ?? null)
         : null,
+    // 분석 요약은 그 실행의 결과를 설명하는 문장이라, 지연 상세의 현재 값이 아니라 실행 당시 값(run.target)으로 만든다.
+    // 분석 뒤에 지연 일수가 바뀌어도(STALE) 의사결정 이력과 같은 문장이 된다
     analysis: toAnalysis(run, {
-      shipmentCode: detail.shipment.shipmentCode,
-      delayDays: detail.delayDays,
-      plannedInbound: detail.planned3plInboundDate,
-      expectedInbound: detail.expected3plInboundDate,
+      shipmentCode: run.target.shipment.shipmentCode,
+      delayDays: run.target.delayDays,
+      plannedInbound: run.target.planned3plInboundDate,
+      expectedInbound: run.target.expected3plInboundDate,
     }),
     runs: toRunSummaries(detail.runs),
     opinions: toOpinions(run.drafts),

@@ -123,8 +123,9 @@ export interface SkuImpact {
 }
 
 export interface AiExplanation {
-  /** 서버(AI)가 쓴 원문. 쉬운 문장 아래에 접어서 보여 준다 */
+  /** 서버 값으로 화면이 만든 쉬운 문장. 먼저 보여 준다 */
   plain: PlainExplanation
+  /** 아래 네 필드는 서버(AI)가 쓴 원문. 쉬운 문장 아래에 접어서 보여 주고, 쉬운 문장을 만들 수 없는 칸에서는 대신 보여 준다 */
   runSummary: string
   riskSummary: string
   recommendation: string

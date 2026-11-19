@@ -3,8 +3,8 @@ import { formatNumber } from '@/shared/lib/format-number'
 import { formatMMDD } from '@/shared/lib/kst-date'
 
 import { RISK_ATTRIBUTION, type ResultClass } from './analysis-codes'
-import { type Feasibility, FEASIBILITY, REASON_LABEL, type ReasonCode } from './option-result'
-import { OPTION_TYPE, OPTION_TYPE_LABEL, type OptionType } from './option-type'
+import { type Feasibility, FEASIBILITY, getReasonLabel, type ReasonCode } from './option-result'
+import { getOptionTypeLabel, OPTION_TYPE, type OptionType } from './option-type'
 import { PLAIN_TEXT, RESULT_CLASS_SENTENCE, WARNING_CODE } from './plain-explanation-text'
 
 /** 쉬운 문장이 읽는 대응안 값. 지연 대응 센터의 화면 모델(`DelayOption`)이 이 모양을 그대로 만족한다 */
@@ -159,8 +159,9 @@ export const plainImpactSummary = ({ impacts, riskOrders }: PlainSource) => {
 
 /** 대응안 한 줄: 실행 가능 여부와, 회복되는 위험 주문·남는 커버 수량 */
 export const plainOption = (option: PlainOption) => {
-  const name = withTopic(OPTION_TYPE_LABEL[option.type])
-  const reason = option.reasonCode ? ` ${REASON_LABEL[option.reasonCode]}.` : ''
+  // 서버가 새 유형·사유 코드를 추가해도 깨지지 않도록, 모르는 코드는 코드 그대로 보여 주는 함수를 쓴다
+  const name = withTopic(getOptionTypeLabel(option.type))
+  const reason = option.reasonCode ? ` ${getReasonLabel(option.reasonCode)}.` : ''
 
   if (option.feasibility === FEASIBILITY.NOT_FEASIBLE) {
     return `${PLAIN_TEXT.optionCannot(name)}${reason}`
