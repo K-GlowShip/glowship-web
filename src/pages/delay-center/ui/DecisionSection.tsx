@@ -14,8 +14,8 @@ interface DecisionSectionProps {
 }
 
 /**
- * 판단을 남기는 자리. 왼쪽에 팀원 의견을 두고, 오른쪽에 최종 선택 결과를 둔다.
- * 최종 선택 전이면 오른쪽에 `children`(입력 폼이나 선택할 수 없는 이유)을 보여 준다.
+ * 판단을 남기는 자리. 왼쪽에 최종 선택 결과를, 오른쪽에 팀원 의견을 둔다. 대응안을 고른 직후 바로 쓰는 쪽(입력 폼)이 먼저 보이게 하려는 순서다.
+ * 최종 선택 전이면 왼쪽에 `children`(입력 폼이나 선택할 수 없는 이유)을 보여 준다.
  */
 export function DecisionSection({ delayCase, analysis, children }: DecisionSectionProps) {
   const { finalDecision } = delayCase
@@ -23,9 +23,7 @@ export function DecisionSection({ delayCase, analysis, children }: DecisionSecti
 
   return (
     <div className="grid gap-32pxr web:grid-cols-2">
-      <MemberOpinions opinions={delayCase.opinions} options={analysis.options} />
-
-      <div className="web:border-l web:border-border web:pl-32pxr">
+      <div>
         {finalDecision ? (
           <div className="flex flex-col gap-12pxr">
             <div className="flex flex-col gap-4pxr">
@@ -51,6 +49,10 @@ export function DecisionSection({ delayCase, analysis, children }: DecisionSecti
         ) : (
           children
         )}
+      </div>
+
+      <div className="web:border-l web:border-border web:pl-32pxr">
+        <MemberOpinions opinions={delayCase.opinions} options={analysis.options} />
       </div>
     </div>
   )

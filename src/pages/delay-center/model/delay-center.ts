@@ -5,6 +5,7 @@ import {
   REGION_LABEL,
   STAGE_LABEL,
   type RegionCode,
+  type PlainExplanation,
 } from '@/entities/delay-event'
 import {
   DELAY_LIST_FROM_PARAM,
@@ -68,6 +69,8 @@ export interface DelayOption {
   notRecoveredOrders: number | null
   /** 남는 위험 주문 중 일부 품목만 확보되어 납기를 못 맞추는 주문 수. 화면에서는 "일부 품목만 확보"로 쓴다(부분 회복이라고 쓰지 않는다). */
   itemSecuredBlockedOrders: number | null
+  /** 서버의 감축 확정 수량(`reductionCommittedTotal`). 화면에서는 "주문 회복 후 남는 커버 수량"로 쓴다. */
+  reductionCommittedTotal: number | null
   recommended: boolean
   /** 위험 주문 품목별 결과. 서버가 주지 않으면 빈 배열이다. */
   outcomes: OptionLineOutcome[]
@@ -107,6 +110,10 @@ export interface SkuImpact {
   estimable: boolean
   /** 지연으로 인한 부족 증가분(지연 반영 부족 − 계획 기준 부족) */
   increasedShortage: number | null
+  /** 지연을 반영한 부족(예상 입고일 기준) */
+  shortage: number | null
+  /** 지연이 없어도 있었을 부족(계획 입고일 기준) */
+  baselineShortage: number | null
   /** 'YYYY-MM-DD'. 안전재고 아래로 내려가는 날 */
   safetyStockBreachDate: string | null
   /** 'YYYY-MM-DD'. 재고가 바닥나는 날 */
@@ -116,6 +123,9 @@ export interface SkuImpact {
 }
 
 export interface AiExplanation {
+  /** 서버 값으로 화면이 만든 쉬운 문장. 먼저 보여 준다 */
+  plain: PlainExplanation
+  /** 아래 네 필드는 서버(AI)가 쓴 원문. 쉬운 문장 아래에 접어서 보여 주고, 쉬운 문장을 만들 수 없는 칸에서는 대신 보여 준다 */
   runSummary: string
   riskSummary: string
   recommendation: string
@@ -274,8 +284,8 @@ export const getSelectableOptions = (role: ClientRole, options: DelayOption[]) =
   options.filter((option) => SELECTABLE_FEASIBILITY[role].includes(option.feasibility))
 
 /**
- * 급한 위험 주문이 위로 오게 정렬한다. 지연 유발 위험을 먼저 두고(대응안으로 회복할 수 있는 대상),
- * 약속일이 빠른 순, 같으면 예상 배송일이 더 늦은 순, 그래도 같으면 주문 코드순이다.
+ * 급한 위험 주문이 위로 오게 정렬한다. 지연 영향 위험을 먼저 두고(대응안으로 회복할 수 있는 대상),
+ * 납기가 빠른 순, 같으면 예상 배송일이 더 늦은 순, 그래도 같으면 주문 코드순이다.
  * 정렬 기준은 API 명세에 없는 화면 규칙이다.
  */
 export const sortRiskOrders = (orders: RiskOrder[]) =>
@@ -338,7 +348,7 @@ export const countRiskOrdersByAttribution = (orders: RiskOrder[]) => ({
 })
 
 export const ATTRIBUTION_LABEL = {
-  [RISK_ATTRIBUTION.DELAY_INDUCED]: '지연 유발',
+  [RISK_ATTRIBUTION.DELAY_INDUCED]: '지연 영향',
   [RISK_ATTRIBUTION.PRE_EXISTING]: '기존 위험',
 } as const satisfies Record<RiskOrder['attribution'], string>
 

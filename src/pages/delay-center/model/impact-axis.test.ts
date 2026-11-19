@@ -21,6 +21,8 @@ const impact = (patch: Partial<SkuImpact> & Pick<SkuImpact, 'skuCode'>): SkuImpa
   scope: SKU_SCOPE.IMPACTED,
   estimable: true,
   increasedShortage: 0,
+  shortage: null,
+  baselineShortage: null,
   safetyStockBreachDate: null,
   stockoutDate: null,
   stockoutDays: null,

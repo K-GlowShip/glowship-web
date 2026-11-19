@@ -20,13 +20,13 @@ import {
 
 interface AtRiskOrdersProps {
   orders: RiskOrder[]
-  /** 주문별 결과를 보여 줄 대응안. 없거나 주문별 결과가 없으면 대응 전 모습(약속 → 예상)만 보여 준다. */
+  /** 주문별 결과를 보여 줄 대응안. 없거나 주문별 결과가 없으면 대응 전 모습(납기 → 예상)만 보여 준다. */
   option?: DelayOption
 }
 
 /**
  * 위험 주문은 하나도 숨기지 않고 모두 보여 준다. 주문 단위로 묶고, 품목(상세)은 펼쳐서 본다.
- * 급한 순서(지연 유발 먼저, 약속일 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
+ * 급한 순서(지연 영향 먼저, 납기 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
  * 영역 높이를 제한해서 주문이 많아도 상세 전체가 길어지지 않는다.
  */
 export function AtRiskOrders({ orders, option }: AtRiskOrdersProps) {
@@ -36,9 +36,10 @@ export function AtRiskOrders({ orders, option }: AtRiskOrdersProps) {
 
   const { delayInduced, preExisting } = countRiskOrdersByAttribution(orders)
   const summary = [
-    delayInduced > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} ${delayInduced}건`,
-    preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} ${preExisting}건`,
-    '약속일 빠른 순',
+    delayInduced > 0 &&
+      `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} 주문 ${delayInduced}건`,
+    preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} 주문 ${preExisting}건`,
+    '납기 빠른 순',
     option && option.outcomes.length > 0 && `${OPTION_TYPE_LABEL[option.type]} 기준 결과`,
   ]
     .filter(Boolean)
@@ -112,7 +113,7 @@ interface OrderDatesProps {
 
 /**
  * 주문 줄 오른쪽. 대응안의 결과가 있으면 그 대응안 기준으로 회복(배송일) 또는 남은 위험(사유)을 보여 주고,
- * 없으면 대응 전 약속 → 예상 날짜를 보여 준다. 회복이면 대응 전 예상일은 오해를 부르니 숨긴다.
+ * 없으면 대응 전 납기 → 예상 날짜를 보여 준다. 회복이면 대응 전 예상일은 오해를 부르니 숨긴다.
  */
 function OrderDates({ order, option }: OrderDatesProps) {
   const result = option ? getOrderResult(order, option) : null
@@ -120,7 +121,7 @@ function OrderDates({ order, option }: OrderDatesProps) {
   if (result?.kind === ORDER_OUTCOME.RECOVERED) {
     return (
       <span className="ml-auto flex items-center gap-8pxr text-b2 text-muted-foreground">
-        <span>약속 {formatMMDD(order.promisedDate)}</span>
+        <span>납기 {formatMMDD(order.promisedDate)}</span>
         <Badge variant="success" dot={false}>
           회복{result.expectedDate && ` · ${formatMMDD(result.expectedDate)} 배송`}
         </Badge>
@@ -131,7 +132,7 @@ function OrderDates({ order, option }: OrderDatesProps) {
     return (
       <span className="ml-auto flex items-center gap-8pxr text-b2 text-muted-foreground">
         <span>
-          약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
+          납기 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
         </span>
         <Badge variant="danger" dot={false}>
           남은 위험{result.reason && ` · ${getReasonLabel(result.reason)}`}
@@ -141,7 +142,7 @@ function OrderDates({ order, option }: OrderDatesProps) {
   }
   return (
     <span className="ml-auto text-b2 text-muted-foreground">
-      약속 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
+      납기 {formatMMDD(order.promisedDate)} → 예상 {formatMMDD(order.expectedDate)}
     </span>
   )
 }

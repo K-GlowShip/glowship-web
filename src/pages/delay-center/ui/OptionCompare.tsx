@@ -4,6 +4,7 @@ import { DECISION_TEXT, EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
 import { formatMMDD } from '@/shared/lib/kst-date'
+import { AiOriginalText } from '@/shared/ui/ai-original-text'
 import { Badge } from '@/shared/ui/badge'
 
 import {
@@ -66,13 +67,28 @@ export function OptionCompare({
     const isSelectable = selection?.selectableIds.has(option.id) ?? false
     const isFinal = option.id === finalOptionId
     const opinionCount = opinions.filter(({ optionId }) => optionId === option.id).length
+    // 서버 값으로 만든 쉬운 문장이 있으면 그것을 보여 주고, AI 원문은 접어 둔다. 쉬운 문장(불가·확인 필요)에는 사유가 들어 있다
+    const optionPlain = explanation?.plain.options[option.id] ?? null
+    const optionOriginal = explanation?.optionExplanations[option.type] ?? null
+    const recommendationPlain = option.recommended
+      ? (explanation?.plain.recommendation ?? null)
+      : null
+    const recommendationOriginal = option.recommended ? (explanation?.recommendation ?? null) : null
     const reason = option.reasonCode
-      ? REASON_LABEL[option.reasonCode]
+      ? optionPlain
+        ? null
+        : REASON_LABEL[option.reasonCode]
       : selection && !isSelectable
         ? OPTION_NOT_SELECTABLE
         : null
-    const optionExplanation = explanation?.optionExplanations[option.type] ?? null
-    const recommendation = option.recommended ? (explanation?.recommendation ?? null) : null
+    const optionExplanation = optionPlain ?? optionOriginal
+    const recommendation = recommendationPlain ?? recommendationOriginal
+    const originals = [
+      ...(optionPlain && optionOriginal ? [{ text: optionOriginal }] : []),
+      ...(recommendationPlain && recommendationOriginal
+        ? [{ label: '추천 근거', text: recommendationOriginal }]
+        : []),
+    ]
 
     const body = (
       <>
@@ -119,7 +135,7 @@ export function OptionCompare({
             value={option.expectedArrival ? formatMMDD(option.expectedArrival) : EMPTY_VALUE}
           />
           <Condition
-            label="커버 수량"
+            label="커버 수량 (SKU 합계)"
             value={
               option.securableQuantity === null
                 ? EMPTY_VALUE
@@ -137,6 +153,7 @@ export function OptionCompare({
                 <span className="font-bold text-foreground">추천 근거</span> {recommendation}
               </p>
             )}
+            <AiOriginalText items={originals} />
           </div>
         )}
 

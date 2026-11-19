@@ -28,6 +28,7 @@ const option: DelayOption = {
   delayInducedRecoveredOrders: null,
   notRecoveredOrders: null,
   itemSecuredBlockedOrders: null,
+  reductionCommittedTotal: null,
   recommended: true,
   outcomes: [],
 }

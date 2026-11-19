@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { TRANSPORT_MODE, TRANSPORT_MODE_LABEL, type TransportMode } from '@/entities/delay-event'
 import { cn } from '@/shared/lib/cn'
@@ -13,6 +13,42 @@ const STEPS = ANALYSIS_VOYAGE.STEPS
 const STOP_COUNT = STEPS.length
 /** 단계가 바뀌고 탈것이 정거장에 자리를 잡는 데 걸리는 시간(스프링 이동 1.1초)보다 조금 길게 기다린 뒤 나아가기 시작한다 */
 const SETTLE_MS = 1_200
+
+/** 탈것이 정거장 하나를 지나는 데 걸리는 시간. 스프링 이동(1.1초)이 끝날 무렵 다음 정거장으로 출발한다 */
+const HOP_MS = 1_100
+
+/**
+ * 화면에 보이는 단계. 서버는 일정 간격으로 읽어 오기 때문에 그 사이에 단계가 두세 개 넘어가 있을 수 있다.
+ * 그대로 따르면 탈것이 첫 정거장에서 마지막 정거장으로 갑자기 날아가므로, 정거장을 하나씩 지나서 따라잡는다.
+ * 단계가 줄어들면(재분석으로 처음부터 다시) 바로 맞추고, '동작 줄이기'면 따라잡지 않고 바로 맞춘다.
+ */
+const useCatchUpStep = (target: number) => {
+  const [shown, setShown] = useState(target)
+  // 이미 따라잡는 중이면 다음 정거장까지 간격을 두고, 막 시작할 때는 바로 출발한다
+  const isHoppingRef = useRef(false)
+
+  // 렌더 중에 맞춘다: 단계가 줄었거나 '동작 줄이기'면 따라잡을 필요 없이 바로 보이는 단계를 바꾼다
+  if (shown !== target && (target < shown || prefersReducedMotion())) {
+    setShown(target)
+  }
+
+  useEffect(() => {
+    if (shown >= target) {
+      isHoppingRef.current = false
+      return
+    }
+    const timer = setTimeout(
+      () => {
+        isHoppingRef.current = true
+        setShown((previous) => previous + 1)
+      },
+      isHoppingRef.current ? HOP_MS : 0,
+    )
+    return () => clearTimeout(timer)
+  }, [shown, target])
+
+  return shown
+}
 
 /** 자리를 잡은 뒤 다음 정거장 쪽으로 천천히 나아가야 하는지. 마지막 정거장이거나 '동작 줄이기'면 움직이지 않는다 */
 const useCreeping = (step: number) => {
@@ -42,13 +78,15 @@ interface AnalysisVoyageProps {
  * 다음 정거장으로 간다. 정거장 이름에 마우스를 올리거나 포커스하면 그 단계가 하는 일이 뜬다.
  */
 export function AnalysisVoyage({ transportMode, step, hasPreviousRun }: AnalysisVoyageProps) {
-  const current = Math.min(Math.max(step ?? 0, 0), STOP_COUNT - 1)
-  const isCreeping = useCreeping(current)
+  const target = Math.min(Math.max(step ?? 0, 0), STOP_COUNT - 1)
+  const current = useCatchUpStep(target)
+  // 따라잡는 동안에는 다음 정거장 쪽으로 천천히 나아가지 않고, 서버가 알려 준 단계에 닿은 뒤에 나아간다
+  const isCreeping = useCreeping(current) && current === target
 
   return (
     <section role="status" className="flex flex-col gap-24pxr py-16pxr">
       <p className="sr-only">
-        {STOP_COUNT}단계 중 {current + 1}단계 · {STEPS[current].label}
+        {STOP_COUNT}단계 중 {target + 1}단계 · {STEPS[target].label}
       </p>
 
       <div className="flex flex-col items-center gap-6pxr text-center">

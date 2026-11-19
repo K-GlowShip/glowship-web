@@ -35,16 +35,17 @@ export const REASON_CODE = {
 
 export type ReasonCode = (typeof REASON_CODE)[keyof typeof REASON_CODE]
 
+// 사유 코드(API 명세 2절)를 사람이 바로 이해하는 말로 풀어 쓴다. 코드 값은 그대로이고 화면 문구만 바꾼다.
 export const REASON_LABEL: Record<ReasonCode, string> = {
-  [REASON_CODE.ARRIVES_AFTER_DELAYED_SHIPMENT]: '지연 선적보다 늦게 도착',
-  [REASON_CODE.NO_KR_ELIGIBLE_STOCK]: '한국 창고에 보충할 재고 없음',
-  [REASON_CODE.NO_TRANSFERABLE_STOCK]: '공여 창고에 넘길 재고 없음',
-  [REASON_CODE.PROMISE_UNREACHABLE_LEADTIME]: '배송 기간 안에 약속일을 맞출 수 없음',
-  [REASON_CODE.DONOR_NO_NEXT_INBOUND]: '공여 창고의 다음 입고 없음',
-  [REASON_CODE.FORECAST_EFFECT_BELOW_ONE_UNIT]: '효과가 1개 미만',
-  [REASON_CODE.NO_RECOVERY_EFFECT]: '회복 효과 없음',
-  [REASON_CODE.MISSING_OPERATING_RULE]: '운영 기준 없음',
-  [REASON_CODE.MISSING_REQUIRED_DATA]: '필수 자료 없음',
+  [REASON_CODE.ARRIVES_AFTER_DELAYED_SHIPMENT]: '지연된 선적보다도 늦게 도착해요',
+  [REASON_CODE.NO_KR_ELIGIBLE_STOCK]: '한국 창고에 보낼 재고가 없어요',
+  [REASON_CODE.NO_TRANSFERABLE_STOCK]: '다른 창고에서 넘겨줄 재고가 없어요',
+  [REASON_CODE.PROMISE_UNREACHABLE_LEADTIME]: '배송 기간 때문에 납기를 맞출 수 없어요',
+  [REASON_CODE.DONOR_NO_NEXT_INBOUND]: '재고를 넘겨줄 창고에 다음 입고가 없어요',
+  [REASON_CODE.FORECAST_EFFECT_BELOW_ONE_UNIT]: '부족을 줄이는 효과가 1개도 되지 않아요',
+  [REASON_CODE.NO_RECOVERY_EFFECT]: '납기를 맞출 수 있게 되는 주문이 없어요',
+  [REASON_CODE.MISSING_OPERATING_RULE]: '운영 기준이 없어 판단할 수 없어요',
+  [REASON_CODE.MISSING_REQUIRED_DATA]: '필요한 자료가 없어 판단할 수 없어요',
 }
 
 /** 서버가 새 값을 추가해도 화면이 깨지지 않게, 라벨이 없으면 코드를 그대로 보여 준다. */

@@ -42,6 +42,21 @@ export {
   VOYAGE_IN_TRANSIT_STEP_INDEX,
   VOYAGE_STEPS,
 } from './model/voyage'
+export {
+  RESULT_CLASS,
+  type ResultClass,
+  RISK_ATTRIBUTION,
+  type RiskAttribution,
+} from './model/analysis-codes'
+export {
+  type PlainCaseInfo,
+  type PlainExplanation,
+  type PlainImpact,
+  type PlainOption,
+  type PlainRiskOrder,
+  type PlainSource,
+  toPlainExplanation,
+} from './model/plain-explanation'
 export { TransportChip } from './ui/TransportChip'
 export { VoyageProgress } from './ui/VoyageProgress'
 export { getVoyageStyle } from './ui/voyage-style'

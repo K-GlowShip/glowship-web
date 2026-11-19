@@ -42,16 +42,17 @@ interface DelayDetailProps {
   role: ClientRole | null
 }
 
-/** 선택 영역의 안내. 팀장은 최종 선택을, 팀원은 의견·초안을 남긴다 */
-const DECISION_DESCRIPTION = {
-  [CLIENT_ROLE.LEAD]: '이유를 남기고 최종 대응안을 기록합니다',
-  [CLIENT_ROLE.MEMBER]: '팀장이 참고할 의견과 초안을 남깁니다',
+/** 대응안 영역의 안내. 선택할 수 있는 역할은 카드를 눌러 고르고 바로 아래에서 남긴다: 팀장은 최종 선택을, 팀원은 의견·초안을 */
+const OPTIONS_DESCRIPTION = {
+  [CLIENT_ROLE.LEAD]: '카드를 눌러 대응안을 고르고, 이유를 남겨 최종 선택합니다',
+  [CLIENT_ROLE.MEMBER]: '카드를 눌러 대응안을 고르고, 팀장이 참고할 의견과 초안을 남깁니다',
 } as const
+const VIEW_ONLY_DESCRIPTION = '대응안별 결과와 근거를 비교합니다'
 
 /**
- * 지연 상세. 머리(어떤 건이고 얼마나 큰가)와 상태 안내 아래에 세 영역을 순서대로 둔다:
- * 01 현재 상황(무엇이 위험한가) → 02 대응안 비교(무엇을 할 수 있는가) → 03 대응안 선택 및 의견(누가 무엇을 골랐는가). 맨 아래는 이전 분석 이력이다.
- * 대응안은 02의 카드에서 고르고, 03에서 이유·의견을 적어 저장한다. 상태마다 보여 줄 섹션은 `getDetailSections`가 정한다.
+ * 지연 상세. 머리(어떤 건이고 얼마나 큰가)와 상태 안내 아래에 두 영역을 순서대로 둔다:
+ * 01 현재 상황(무엇이 위험한가) → 02 대응안 비교 및 선택(무엇을 하고, 누가 무엇을 골랐는가). 맨 아래는 이전 분석 이력이다.
+ * 대응안은 02의 카드에서 고르고 바로 아래에서 이유·의견을 적어 저장한다. 상태마다 보여 줄 섹션은 `getDetailSections`가 정한다.
  */
 export function DelayDetail({ delayCase, role }: DelayDetailProps) {
   const { analysis, transportMode, stage } = delayCase
@@ -110,69 +111,69 @@ export function DelayDetail({ delayCase, role }: DelayDetailProps) {
         {analysis && sections.includes(DETAIL_SECTION.RISK_ORDERS) && (
           <AtRiskOrders orders={analysis.riskOrders} option={viewedOption} />
         )}
+        {/* 글이 많은 설명은 표와 그림(운송 단계·재고 영향·위험 주문)을 먼저 보여 준 뒤 맨 끝에 둔다 */}
+        {sections.includes(DETAIL_SECTION.EXPLANATION) && analysis?.explanation && (
+          <AiExplanationCard
+            explanation={analysis.explanation}
+            showRecommendation={!analysis.options.some((option) => option.recommended)}
+          />
+        )}
       </DetailChapter>
 
-      {analysis && sections.includes(DETAIL_SECTION.OPTIONS) && (
+      {analysis && (sections.includes(DETAIL_SECTION.OPTIONS) || showsDecision) && (
         <DetailChapter
           id="options-title"
           step="02"
-          title="대응안 비교"
-          description={
-            decisionRole
-              ? '결과를 비교하고 카드를 눌러 대응안을 고릅니다'
-              : '대응안별 결과와 근거를 비교합니다'
-          }
+          title={decisionRole ? '대응안 비교 및 선택' : '대응안 비교'}
+          description={decisionRole ? OPTIONS_DESCRIPTION[decisionRole] : VIEW_ONLY_DESCRIPTION}
         >
-          <OptionNotices options={analysis.options} />
-          <OptionCompare
-            options={analysis.options}
-            explanation={analysis.explanation}
-            opinions={delayCase.opinions}
-            selection={
-              decisionRole
-                ? {
-                    value: optionId,
-                    selectableIds: new Set(selectable.map((option) => option.id)),
-                    onChange: setOptionId,
-                  }
-                : undefined
-            }
-            finalOptionId={delayCase.finalDecision?.optionId}
-          />
-          {sections.includes(DETAIL_SECTION.EXPLANATION) && analysis.explanation && (
-            <AiExplanationCard
-              explanation={analysis.explanation}
-              showRecommendation={!analysis.options.some((option) => option.recommended)}
-            />
-          )}
-        </DetailChapter>
-      )}
-
-      {analysis && showsDecision && (
-        <DetailChapter
-          id="decision-title"
-          step="03"
-          title="대응안 선택 및 의견"
-          description={decisionRole ? DECISION_DESCRIPTION[decisionRole] : undefined}
-        >
-          <DecisionSection delayCase={delayCase} analysis={analysis}>
-            {decisionRole ? (
-              <DecisionForm
-                runId={delayCase.runId}
-                role={decisionRole}
-                selectedOption={selectable.find((option) => option.id === optionId)}
-                onlyKeepPlan={
-                  decisionRole === CLIENT_ROLE.LEAD &&
-                  selectable.every((option) => option.type === OPTION_TYPE.KEEP_PLAN)
+          {sections.includes(DETAIL_SECTION.OPTIONS) && (
+            <>
+              <OptionNotices options={analysis.options} />
+              <OptionCompare
+                options={analysis.options}
+                explanation={analysis.explanation}
+                opinions={delayCase.opinions}
+                selection={
+                  decisionRole
+                    ? {
+                        value: optionId,
+                        selectableIds: new Set(selectable.map((option) => option.id)),
+                        onChange: setOptionId,
+                      }
+                    : undefined
                 }
-                onClearOption={() => setOptionId(NO_OPTION)}
+                finalOptionId={delayCase.finalDecision?.optionId}
               />
-            ) : (
-              <p className="text-b2 text-muted-foreground">
-                {role ? ANALYSIS_NOTICE.CANNOT_DECIDE : ANALYSIS_NOTICE.NO_DECIDE_ROLE}
-              </p>
-            )}
-          </DecisionSection>
+            </>
+          )}
+          {showsDecision && (
+            // 고른 대응안의 이유·의견을 카드 바로 아래에서 남긴다
+            <div
+              role="group"
+              aria-label="대응안 선택과 팀원 의견"
+              className="border-t border-border pt-24pxr"
+            >
+              <DecisionSection delayCase={delayCase} analysis={analysis}>
+                {decisionRole ? (
+                  <DecisionForm
+                    runId={delayCase.runId}
+                    role={decisionRole}
+                    selectedOption={selectable.find((option) => option.id === optionId)}
+                    onlyKeepPlan={
+                      decisionRole === CLIENT_ROLE.LEAD &&
+                      selectable.every((option) => option.type === OPTION_TYPE.KEEP_PLAN)
+                    }
+                    onClearOption={() => setOptionId(NO_OPTION)}
+                  />
+                ) : (
+                  <p className="text-b2 text-muted-foreground">
+                    {role ? ANALYSIS_NOTICE.CANNOT_DECIDE : ANALYSIS_NOTICE.NO_DECIDE_ROLE}
+                  </p>
+                )}
+              </DecisionSection>
+            </div>
+          )}
         </DetailChapter>
       )}
 

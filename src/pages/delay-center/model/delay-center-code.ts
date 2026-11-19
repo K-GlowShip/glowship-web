@@ -43,21 +43,13 @@ export { OPTION_TYPE, type OptionType } from '@/entities/delay-event'
 
 export { FEASIBILITY, type Feasibility, REASON_CODE, type ReasonCode } from '@/entities/delay-event'
 
-export const RESULT_CLASS = {
-  READY_ORDER_RISK: 'READY_ORDER_RISK',
-  FORECAST_ONLY_READY: 'FORECAST_ONLY_READY',
-  PURE_NO_RISK: 'PURE_NO_RISK',
-  WARNING_NO_RISK: 'WARNING_NO_RISK',
-} as const
-
-export type ResultClass = (typeof RESULT_CLASS)[keyof typeof RESULT_CLASS]
-
-export const RISK_ATTRIBUTION = {
-  DELAY_INDUCED: 'DELAY_INDUCED',
-  PRE_EXISTING: 'PRE_EXISTING',
-} as const
-
-export type RiskAttribution = (typeof RISK_ATTRIBUTION)[keyof typeof RISK_ATTRIBUTION]
+// 결과 분류와 위험 귀속은 의사결정 이력도 쓰는 값이라 entities/delay-event에 있다
+export {
+  RESULT_CLASS,
+  type ResultClass,
+  RISK_ATTRIBUTION,
+  type RiskAttribution,
+} from '@/entities/delay-event'
 
 export { SKU_SCOPE, type SkuScope } from '@/shared/api'
 

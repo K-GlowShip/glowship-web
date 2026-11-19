@@ -41,7 +41,7 @@ export function OrderTable({ query }: { query: ListQuery<Order> }) {
           <TableHead className="min-w-220pxr">주문 번호</TableHead>
           <TableHead className="w-100pxr">채널</TableHead>
           <TableHead className="w-160pxr">주문 일시</TableHead>
-          <TableHead className="w-130pxr">약속 배송일</TableHead>
+          <TableHead className="w-130pxr">납기일</TableHead>
           <TableHead className="w-130pxr">출고 창고</TableHead>
           <TableHead className="w-110pxr">고객 권역</TableHead>
           <TableHead className="w-110pxr">상태</TableHead>
