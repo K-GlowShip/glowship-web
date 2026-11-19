@@ -119,7 +119,7 @@ export function OptionCompare({
             value={option.expectedArrival ? formatMMDD(option.expectedArrival) : EMPTY_VALUE}
           />
           <Condition
-            label="커버 수량"
+            label="커버 수량 (SKU 합계)"
             value={
               option.securableQuantity === null
                 ? EMPTY_VALUE
