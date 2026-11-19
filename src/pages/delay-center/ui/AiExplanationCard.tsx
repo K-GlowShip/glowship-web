@@ -1,9 +1,9 @@
 import { Sparkles, TriangleAlert } from 'lucide-react'
 
 import { cn } from '@/shared/lib/cn'
+import { AiOriginalText } from '@/shared/ui/ai-original-text'
 
 import type { AiExplanation } from '../model/delay-center'
-import { AiOriginalText } from './AiOriginalText'
 
 interface AiExplanationCardProps {
   explanation: AiExplanation

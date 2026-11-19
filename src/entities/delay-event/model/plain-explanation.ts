@@ -1,20 +1,60 @@
-import { formatMMDD } from '@/shared/lib/kst-date'
+import { SKU_SCOPE } from '@/shared/api'
 import { formatNumber } from '@/shared/lib/format-number'
+import { formatMMDD } from '@/shared/lib/kst-date'
 
-import {
-  countRiskOrdersByAttribution,
-  type DelayOption,
-  FEASIBILITY,
-  OPTION_TYPE,
-  OPTION_TYPE_LABEL,
-  type PlainExplanation,
-  REASON_LABEL,
-  type ResultClass,
-  type RiskOrder,
-  SKU_SCOPE,
-  type SkuImpact,
-} from './delay-center'
+import { RISK_ATTRIBUTION, type ResultClass } from './analysis-codes'
+import { type Feasibility, FEASIBILITY, REASON_LABEL, type ReasonCode } from './option-result'
+import { OPTION_TYPE, OPTION_TYPE_LABEL, type OptionType } from './option-type'
 import { PLAIN_TEXT, RESULT_CLASS_SENTENCE, WARNING_CODE } from './plain-explanation-text'
+
+/** 쉬운 문장이 읽는 대응안 값. 지연 대응 센터의 화면 모델(`DelayOption`)이 이 모양을 그대로 만족한다 */
+export interface PlainOption {
+  id: string
+  type: OptionType
+  feasibility: Feasibility
+  reasonCode: ReasonCode | null
+  delayInducedRecoveredOrders: number | null
+  notRecoveredOrders: number | null
+  /** 서버의 감축 확정 수량 */
+  reductionCommittedTotal: number | null
+  recommended: boolean
+}
+
+/** 쉬운 문장이 읽는 SKU 재고 영향 값(`SkuImpact`가 만족하는 모양) */
+export interface PlainImpact {
+  skuCode: string
+  scope: string
+  /** 판정할 수 없는 SKU면 false */
+  estimable: boolean
+  increasedShortage: number | null
+  shortage: number | null
+  baselineShortage: number | null
+}
+
+/** 쉬운 문장이 읽는 위험 주문 값(`RiskOrder`가 만족하는 모양) */
+export interface PlainRiskOrder {
+  attribution: string
+}
+
+/** 서버 값으로 화면이 직접 만든 쉬운 문장. 만들 수 없는 칸은 null이라 그때는 AI 원문을 보여 준다. */
+export interface PlainExplanation {
+  runSummary: string | null
+  impactSummary: string | null
+  /** 경고 문장. 모르는 코드의 경고는 AI 원문 문장이다 */
+  warnings: string[]
+  /** 대응안 id → 그 대응안의 쉬운 문장 */
+  options: Record<string, string>
+  /** 추천 대응안 카드의 추천 근거. 추천 대응안이 없으면 null */
+  recommendation: string | null
+}
+
+/** 귀속별 위험 주문 수 */
+const countRiskOrders = (orders: PlainRiskOrder[]) => ({
+  delayInduced: orders.filter(({ attribution }) => attribution === RISK_ATTRIBUTION.DELAY_INDUCED)
+    .length,
+  preExisting: orders.filter(({ attribution }) => attribution === RISK_ATTRIBUTION.PRE_EXISTING)
+    .length,
+})
 
 /** 위 문장이 보여 줄 SKU 목록의 최대 개수. 넘으면 '외 N개'로 줄인다 */
 const MAX_LISTED_SKU = 3
@@ -44,9 +84,9 @@ export interface PlainCaseInfo {
 
 export interface PlainSource {
   resultClass: ResultClass
-  impacts: SkuImpact[]
-  riskOrders: RiskOrder[]
-  options: DelayOption[]
+  impacts: PlainImpact[]
+  riskOrders: PlainRiskOrder[]
+  options: PlainOption[]
   /** 서버 경고: 코드와 AI 원문 문장 */
   warnings: { code: string; text: string }[]
 }
@@ -106,7 +146,7 @@ export const plainImpactSummary = ({ impacts, riskOrders }: PlainSource) => {
     sentences.push(PLAIN_TEXT.impactMany(count(increased.length), list))
   }
 
-  const { delayInduced, preExisting } = countRiskOrdersByAttribution(riskOrders)
+  const { delayInduced, preExisting } = countRiskOrders(riskOrders)
   if (delayInduced > 0) {
     sentences.push(PLAIN_TEXT.delayInducedOrders(count(delayInduced)))
   }
@@ -118,7 +158,7 @@ export const plainImpactSummary = ({ impacts, riskOrders }: PlainSource) => {
 }
 
 /** 대응안 한 줄: 실행 가능 여부와, 회복되는 위험 주문·남는 커버 수량 */
-export const plainOption = (option: DelayOption) => {
+export const plainOption = (option: PlainOption) => {
   const name = withTopic(OPTION_TYPE_LABEL[option.type])
   const reason = option.reasonCode ? ` ${REASON_LABEL[option.reasonCode]}.` : ''
 
@@ -167,7 +207,7 @@ export const plainOption = (option: DelayOption) => {
  * 서버 추천 순위는 ① 회복하는 위험 주문 수 ② 감축 확정 수량 ③ 도착일 순이라서, 같은 분석의 다른 실행 가능 대응안과
  * 숫자를 견줘 사실인 것만 근거로 쓴다. 둘 다 같아 가려지지 않으면 순위만 말한다.
  */
-export const plainRecommendation = (options: DelayOption[]) => {
+export const plainRecommendation = (options: PlainOption[]) => {
   const recommended = options.find(({ recommended: isRecommended }) => isRecommended)
 
   if (!recommended) {
@@ -180,7 +220,7 @@ export const plainRecommendation = (options: DelayOption[]) => {
   const others = options.filter(
     ({ id, feasibility }) => id !== recommended.id && feasibility === FEASIBILITY.FEASIBLE,
   )
-  const maxOf = (pick: (option: DelayOption) => number | null) =>
+  const maxOf = (pick: (option: PlainOption) => number | null) =>
     Math.max(0, ...others.map((option) => pick(option) ?? 0))
 
   const recovered = recommended.delayInducedRecoveredOrders ?? 0
@@ -200,7 +240,7 @@ export const plainRecommendation = (options: DelayOption[]) => {
 }
 
 /** 지연이 없어도 부족할 것으로 예상되는 SKU: 원래 부족이 큰 순으로 3개까지 코드를 적고 나머지는 '외 N개'로 줄인다 */
-const plainBaselineShortage = (impacts: SkuImpact[]) => {
+const plainBaselineShortage = (impacts: PlainImpact[]) => {
   const skus = impacts
     .filter(({ baselineShortage }) => (baselineShortage ?? 0) > 0)
     .sort(

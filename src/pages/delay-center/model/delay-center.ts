@@ -5,6 +5,7 @@ import {
   REGION_LABEL,
   STAGE_LABEL,
   type RegionCode,
+  type PlainExplanation,
 } from '@/entities/delay-event'
 import {
   DELAY_LIST_FROM_PARAM,
@@ -119,18 +120,6 @@ export interface SkuImpact {
   stockoutDate: string | null
   /** 품절 일수. 품절 구간은 `stockoutDate`부터 이 일수만큼이다. */
   stockoutDays: number | null
-}
-
-/** 서버 값으로 화면이 직접 만든 쉬운 문장. 만들 수 없는 칸은 null이라 그때는 AI 원문을 보여 준다. */
-export interface PlainExplanation {
-  runSummary: string | null
-  impactSummary: string | null
-  /** 경고 문장. 모르는 코드의 경고는 AI 원문 문장이다 */
-  warnings: string[]
-  /** 대응안 id → 그 대응안의 쉬운 문장 */
-  options: Record<string, string>
-  /** 추천 대응안 카드의 추천 근거. 추천 대응안이 없으면 null */
-  recommendation: string | null
 }
 
 export interface AiExplanation {

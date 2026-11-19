@@ -4,6 +4,7 @@ import { DECISION_TEXT, EMPTY_VALUE } from '@/shared/config'
 import { cn } from '@/shared/lib/cn'
 import { formatNumber } from '@/shared/lib/format-number'
 import { formatMMDD } from '@/shared/lib/kst-date'
+import { AiOriginalText } from '@/shared/ui/ai-original-text'
 import { Badge } from '@/shared/ui/badge'
 
 import {
@@ -17,7 +18,6 @@ import {
   REASON_LABEL,
 } from '../model/delay-center'
 import { OPTION_NOT_SELECTABLE } from '../model/delay-center-text'
-import { AiOriginalText } from './AiOriginalText'
 import { RecommendedBadge } from './RecommendedBadge'
 
 const RADIO_NAME = 'decision-option'

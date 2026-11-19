@@ -1,4 +1,4 @@
-import { RESULT_CLASS, type ResultClass } from './delay-center-code'
+import { RESULT_CLASS, type ResultClass } from './analysis-codes'
 
 // AI 설명 카드의 쉬운 문장에 쓰는 말. 말이 어색하면 이 파일만 고친다. 문장 속 숫자는 모두 서버 값이다.
 // 말투는 "~해요"체이고, 선적·SKU 코드 뒤에는 읽는 법에 따라 달라지는 조사(이/가, 은/는)를 붙이지 않는다.

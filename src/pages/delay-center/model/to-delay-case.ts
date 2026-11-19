@@ -1,5 +1,10 @@
 import { SYNC_SOURCE_LABEL } from '@/entities/data-sync-run'
-import { toDelayStatus } from '@/entities/delay-event'
+import {
+  type PlainCaseInfo,
+  type PlainSource,
+  toDelayStatus,
+  toPlainExplanation,
+} from '@/entities/delay-event'
 import {
   ANALYSIS_RUN_STATUS,
   type AnalysisRunDetail,
@@ -35,7 +40,6 @@ import {
   type SkuScope,
 } from './delay-center-code'
 import { DATA_WARNING_TEXT, STALE_REASON_LABEL } from './delay-center-text'
-import { type PlainCaseInfo, type PlainSource, toPlainExplanation } from './plain-explanation'
 
 /** 수집 원천 코드. 라벨 사전의 키와 같다 */
 type SourceDomain = keyof typeof SYNC_SOURCE_LABEL
