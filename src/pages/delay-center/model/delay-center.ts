@@ -68,6 +68,8 @@ export interface DelayOption {
   notRecoveredOrders: number | null
   /** 남는 위험 주문 중 일부 품목만 확보되어 납기를 못 맞추는 주문 수. 화면에서는 "일부 품목만 확보"로 쓴다(부분 회복이라고 쓰지 않는다). */
   itemSecuredBlockedOrders: number | null
+  /** 서버의 감축 확정 수량(`reductionCommittedTotal`). 화면에서는 "주문 회복 후 남는 커버 수량"로 쓴다. */
+  reductionCommittedTotal: number | null
   recommended: boolean
   /** 위험 주문 품목별 결과. 서버가 주지 않으면 빈 배열이다. */
   outcomes: OptionLineOutcome[]
@@ -107,6 +109,10 @@ export interface SkuImpact {
   estimable: boolean
   /** 지연으로 인한 부족 증가분(지연 반영 부족 − 계획 기준 부족) */
   increasedShortage: number | null
+  /** 지연을 반영한 부족(예상 입고일 기준) */
+  shortage: number | null
+  /** 지연이 없어도 있었을 부족(계획 입고일 기준) */
+  baselineShortage: number | null
   /** 'YYYY-MM-DD'. 안전재고 아래로 내려가는 날 */
   safetyStockBreachDate: string | null
   /** 'YYYY-MM-DD'. 재고가 바닥나는 날 */
@@ -115,7 +121,21 @@ export interface SkuImpact {
   stockoutDays: number | null
 }
 
+/** 서버 값으로 화면이 직접 만든 쉬운 문장. 만들 수 없는 칸은 null이라 그때는 AI 원문을 보여 준다. */
+export interface PlainExplanation {
+  runSummary: string | null
+  impactSummary: string | null
+  /** 경고 문장. 모르는 코드의 경고는 AI 원문 문장이다 */
+  warnings: string[]
+  /** 대응안 id → 그 대응안의 쉬운 문장 */
+  options: Record<string, string>
+  /** 추천 대응안 카드의 추천 근거. 추천 대응안이 없으면 null */
+  recommendation: string | null
+}
+
 export interface AiExplanation {
+  /** 서버(AI)가 쓴 원문. 쉬운 문장 아래에 접어서 보여 준다 */
+  plain: PlainExplanation
   runSummary: string
   riskSummary: string
   recommendation: string

@@ -35,6 +35,7 @@ import {
   type SkuScope,
 } from './delay-center-code'
 import { DATA_WARNING_TEXT, STALE_REASON_LABEL } from './delay-center-text'
+import { type PlainCaseInfo, type PlainSource, toPlainExplanation } from './plain-explanation'
 
 /** 수집 원천 코드. 라벨 사전의 키와 같다 */
 type SourceDomain = keyof typeof SYNC_SOURCE_LABEL
@@ -62,6 +63,8 @@ const toImpact = (impact: AnalysisRunDetail['inventoryImpacts'][number]): SkuImp
       estimable && shortageQuantity !== null && baselineShortageQuantity !== null
         ? Math.max(0, shortageQuantity - baselineShortageQuantity)
         : null,
+    shortage: estimable ? shortageQuantity : null,
+    baselineShortage: estimable ? baselineShortageQuantity : null,
     safetyStockBreachDate: estimable ? impact.safetyStockBreachDate : null,
     stockoutDate: estimable ? impact.stockoutDate : null,
     stockoutDays: estimable ? impact.stockoutDays : null,
@@ -96,6 +99,7 @@ const toOption = (
   delayInducedRecoveredOrders: option.delayInducedRecoveredOrders,
   notRecoveredOrders: option.notRecoveredOrders,
   itemSecuredBlockedOrders: option.itemSecuredBlockedOrders,
+  reductionCommittedTotal: option.reductionCommittedTotal,
   // 설명 검증을 통과하지 못한 실행은 서버가 추천을 주어도 추천으로 보여 주지 않는다(명세 4.5)
   recommended: explanationPassed && option.isRecommended,
   outcomes: option.outcomes.map((outcome) => ({
@@ -107,13 +111,18 @@ const toOption = (
 })
 
 /** 설명 검증을 통과하지 못했으면 설명이 없다(`explanation`이 null) */
-const toExplanation = (run: AnalysisRunDetail): AiExplanation | null => {
+const toExplanation = (
+  run: AnalysisRunDetail,
+  caseInfo: PlainCaseInfo,
+  source: Omit<PlainSource, 'warnings'>,
+): AiExplanation | null => {
   const { explanation } = run
 
   if (!explanation || !isExplanationPassed(run)) {
     return null
   }
   return {
+    plain: toPlainExplanation(caseInfo, { ...source, warnings: explanation.warnings }),
     runSummary: stripEvidenceMarks(explanation.run_summary),
     riskSummary: stripEvidenceMarks(explanation.risk_summary),
     recommendation: stripEvidenceMarks(explanation.recommendation_explanation),
@@ -128,7 +137,7 @@ const toExplanation = (run: AnalysisRunDetail): AiExplanation | null => {
 }
 
 /** 계산 결과가 하나도 없으면(분석 중·보류·실패·지연 해소) 결과 없음이다 */
-const toAnalysis = (run: AnalysisRunDetail): DelayAnalysis | null => {
+const toAnalysis = (run: AnalysisRunDetail, caseInfo: PlainCaseInfo): DelayAnalysis | null => {
   const hasResult =
     run.inventoryImpacts.length > 0 || run.atRiskOrders.length > 0 || run.responseOptions.length > 0
 
@@ -137,12 +146,23 @@ const toAnalysis = (run: AnalysisRunDetail): DelayAnalysis | null => {
   }
   const explanationPassed = isExplanationPassed(run)
 
+  const impacts = run.inventoryImpacts.map(toImpact)
+  const riskOrders = run.atRiskOrders.map(toRiskOrder)
+  const options = sortOptions(
+    run.responseOptions.map((option) => toOption(option, explanationPassed)),
+  )
+
   return {
     resultClass: run.resultClass,
-    impacts: run.inventoryImpacts.map(toImpact),
-    riskOrders: run.atRiskOrders.map(toRiskOrder),
-    options: sortOptions(run.responseOptions.map((option) => toOption(option, explanationPassed))),
-    explanation: toExplanation(run),
+    impacts,
+    riskOrders,
+    options,
+    explanation: toExplanation(run, caseInfo, {
+      resultClass: run.resultClass,
+      impacts,
+      riskOrders,
+      options,
+    }),
   }
 }
 
@@ -242,7 +262,12 @@ export const toDelayCase = (
       run.status === ANALYSIS_RUN_STATUS.STALE && run.stalePrimaryReason
         ? (STALE_REASON_LABEL[run.stalePrimaryReason] ?? null)
         : null,
-    analysis: toAnalysis(run),
+    analysis: toAnalysis(run, {
+      shipmentCode: detail.shipment.shipmentCode,
+      delayDays: detail.delayDays,
+      plannedInbound: detail.planned3plInboundDate,
+      expectedInbound: detail.expected3plInboundDate,
+    }),
     runs: toRunSummaries(detail.runs),
     opinions: toOpinions(run.drafts),
     finalDecision: toFinalDecision(run.finalDecision),
