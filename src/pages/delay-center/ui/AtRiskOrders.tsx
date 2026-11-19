@@ -26,7 +26,7 @@ interface AtRiskOrdersProps {
 
 /**
  * 위험 주문은 하나도 숨기지 않고 모두 보여 준다. 주문 단위로 묶고, 품목(상세)은 펼쳐서 본다.
- * 급한 순서(지연 유발 먼저, 납기 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
+ * 급한 순서(지연 영향 먼저, 납기 빠른 순)로 정렬하고, 위에 귀속별 건수를 요약한다.
  * 영역 높이를 제한해서 주문이 많아도 상세 전체가 길어지지 않는다.
  */
 export function AtRiskOrders({ orders, option }: AtRiskOrdersProps) {
@@ -36,8 +36,9 @@ export function AtRiskOrders({ orders, option }: AtRiskOrdersProps) {
 
   const { delayInduced, preExisting } = countRiskOrdersByAttribution(orders)
   const summary = [
-    delayInduced > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} ${delayInduced}건`,
-    preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} ${preExisting}건`,
+    delayInduced > 0 &&
+      `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.DELAY_INDUCED]} 주문 ${delayInduced}건`,
+    preExisting > 0 && `${ATTRIBUTION_LABEL[RISK_ATTRIBUTION.PRE_EXISTING]} 주문 ${preExisting}건`,
     '납기 빠른 순',
     option && option.outcomes.length > 0 && `${OPTION_TYPE_LABEL[option.type]} 기준 결과`,
   ]
