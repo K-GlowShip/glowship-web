@@ -275,7 +275,7 @@ export const getSelectableOptions = (role: ClientRole, options: DelayOption[]) =
 
 /**
  * 급한 위험 주문이 위로 오게 정렬한다. 지연 유발 위험을 먼저 두고(대응안으로 회복할 수 있는 대상),
- * 약속일이 빠른 순, 같으면 예상 배송일이 더 늦은 순, 그래도 같으면 주문 코드순이다.
+ * 납기가 빠른 순, 같으면 예상 배송일이 더 늦은 순, 그래도 같으면 주문 코드순이다.
  * 정렬 기준은 API 명세에 없는 화면 규칙이다.
  */
 export const sortRiskOrders = (orders: RiskOrder[]) =>

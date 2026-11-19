@@ -39,7 +39,7 @@ export const REASON_LABEL: Record<ReasonCode, string> = {
   [REASON_CODE.ARRIVES_AFTER_DELAYED_SHIPMENT]: '지연 선적보다 늦게 도착',
   [REASON_CODE.NO_KR_ELIGIBLE_STOCK]: '한국 창고에 보충할 재고 없음',
   [REASON_CODE.NO_TRANSFERABLE_STOCK]: '공여 창고에 넘길 재고 없음',
-  [REASON_CODE.PROMISE_UNREACHABLE_LEADTIME]: '배송 기간 안에 약속일을 맞출 수 없음',
+  [REASON_CODE.PROMISE_UNREACHABLE_LEADTIME]: '배송 기간 안에 납기를 맞출 수 없음',
   [REASON_CODE.DONOR_NO_NEXT_INBOUND]: '공여 창고의 다음 입고 없음',
   [REASON_CODE.FORECAST_EFFECT_BELOW_ONE_UNIT]: '효과가 1개 미만',
   [REASON_CODE.NO_RECOVERY_EFFECT]: '회복 효과 없음',
